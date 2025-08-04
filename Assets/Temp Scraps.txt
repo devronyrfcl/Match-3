@@ -452,7 +452,26 @@ public class Piece : MonoBehaviour
 
 
 
+//create grid and place pieces position based on piecePrefabs attactched script Piece.SetPosition(x, y)
+    /*public void CreateGrid()
+    {
+        for (int x = 0; x < gridWidth; x++)
+        {
+            for (int y = 0; y < gridHeight; y++)
+            {
+                int randomIndex = Random.Range(0, piecePrefabs.Length);
+                GameObject piece = Instantiate(piecePrefabs[randomIndex], new Vector2(x, y), Quaternion.identity);
+                piece.GetComponent<Piece>().SetPosition(x, y); // Set the position of the piece in the grid
+                grid[x, y] = piece; // Store the piece in the grid array
 
+                piece.transform.SetParent(transform);
+                
+                piece.name = piece.GetComponent<Piece>().pieceType.ToString() + " (" + x + ", " + y + ")";
+            }
+        }
+
+        
+    }*/
 
 
 

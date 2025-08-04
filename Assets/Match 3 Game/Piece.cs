@@ -12,12 +12,16 @@ public enum PieceType
     Smiling_Face_With_Heart_Eyes,
     Sleeping_Face,
     Surprised_Face,
-    Crying_Face
+    Crying_Face,
+}
 
-
-
-
-
+public enum SpecialPieceType
+{
+    //Special Pieces
+    Bomb,
+    Coloumn_Clear,
+    Row_Clear,
+    Colour_Clear
 }
 
 
@@ -40,12 +44,18 @@ public class Piece : MonoBehaviour
 
     public PieceType pieceType; // Type of the piece
 
+    public SpecialPieceType specialPieceType; // Type of the special piece
+
+    public bool IsSpecialPiece = false;
+
     public GridManager gridManager; // Reference to the PieceMatch script for matching logic
 
     public bool isMatched = false; // Flag to check if the piece is matched
 
     private Vector2 originalWorldPosition;
     private int originalX, originalY;
+
+    private LevelData levelData;
 
 
     public void SetPosition(int x, int y)
@@ -71,7 +81,15 @@ public class Piece : MonoBehaviour
 
         Invoke(nameof(FindMatches), 0.5f); // Call the method to find matches after a short delay
 
-
+        //take levelData from the gridManager
+        if (gridManager != null)
+        {
+            levelData = gridManager.levelData; // Get the LevelData from the GridManager
+        }
+        else
+        {
+            Debug.LogError("GridManager not found in the scene.");
+        }
 
     }
 
@@ -330,7 +348,7 @@ public class Piece : MonoBehaviour
         }
 
         // Check Right
-        for (int i = 1; X + i < gridManager.gridWidth; i++)
+        for (int i = 1; X + i < levelData.gridWidth; i++)
         {
             Piece next = gridManager.grid[X + i, Y]?.GetComponent<Piece>();
             if (next != null && next.pieceType == pieceType)
@@ -371,7 +389,7 @@ public class Piece : MonoBehaviour
         }
 
         // Check Up
-        for (int i = 1; Y + i < gridManager.gridHeight; i++)
+        for (int i = 1; Y + i < levelData.gridHeight; i++)
         {
             Piece next = gridManager.grid[X, Y + i]?.GetComponent<Piece>();
             if (next != null && next.pieceType == pieceType)
@@ -490,5 +508,6 @@ public class Piece : MonoBehaviour
 
 
     }
+
 
 }
