@@ -57,6 +57,8 @@ public class Piece : MonoBehaviour
 
     private LevelData levelData;
 
+    public bool stickToGrid = true; // Whether the piece should stick to the grid
+
 
     public void SetPosition(int x, int y)
     {
@@ -137,7 +139,7 @@ public class Piece : MonoBehaviour
     }*/
 
 
-    void UpdateTargetPosition()
+    /*void UpdateTargetPosition()
     {
         if (finalTouchPosition != Vector2.zero)
         {
@@ -233,7 +235,7 @@ public class Piece : MonoBehaviour
 
         
 
-    }
+    }*/
 
     /*void UpdateTargetPosition()
     {
@@ -287,9 +289,72 @@ public class Piece : MonoBehaviour
         finalTouchPosition = Vector2.zero;
     }*/
 
+    void UpdateTargetPosition()
+    {
+        if (finalTouchPosition != Vector2.zero)
+        {
+            RaycastHit2D hit = Physics2D.Raycast(finalTouchPosition, Vector2.zero);
+            if (hit.collider != null && hit.collider.gameObject != gameObject)
+            {
+                otherPiece = hit.collider.gameObject;
+                Piece other = otherPiece.GetComponent<Piece>();
 
+                Vector2Int currentGridPos = Vector2Int.RoundToInt(transform.position);
+                Vector2Int otherGridPos = Vector2Int.RoundToInt(otherPiece.transform.position);
+                Vector2Int difference = otherGridPos - currentGridPos;
 
+                if ((Mathf.Abs(difference.x) == 1 && difference.y == 0) ||
+                    (Mathf.Abs(difference.y) == 1 && difference.x == 0))
+                {
+                    Debug.Log("Swiped to: " + otherPiece.name + " from: " + gameObject.name);
 
+                    Vector2 myTarget = otherPiece.transform.position;
+                    Vector2 otherTarget = transform.position;
+
+                    float swipeTime = 0.3f;
+
+                    originalWorldPosition = transform.position;
+                    originalX = X;
+                    originalY = Y;
+
+                    other.originalWorldPosition = otherPiece.transform.position;
+                    other.originalX = other.X;
+                    other.originalY = other.Y;
+
+                    // Only update grid and logical positions if sticking to grid
+                    if (stickToGrid)
+                    {
+                        // Animate movement
+                        transform.DOMove(myTarget, swipeTime);
+                        otherPiece.transform.DOMove(otherTarget, swipeTime);
+
+                        // Swap in grid
+                        gridManager.grid[X, Y] = otherPiece;
+                        gridManager.grid[other.X, other.Y] = this.gameObject;
+
+                        // Swap logical coordinates
+                        int tempX = X;
+                        int tempY = Y;
+                        X = other.X;
+                        Y = other.Y;
+                        other.X = tempX;
+                        other.Y = tempY;
+
+                        // Trigger match check
+                        Invoke(nameof(FindMatches), 0.5f);
+                    }
+                    else
+                    {
+                        // If not sticking to grid, just animate freely
+                        transform.DOMove(myTarget, swipeTime);
+                        otherPiece.transform.DOMove(otherTarget, swipeTime);
+                    }
+
+                    finalTouchPosition = Vector2.zero;
+                }
+            }
+        }
+    }
 
 
     void CalculateAngle()
@@ -319,10 +384,6 @@ public class Piece : MonoBehaviour
         //Debug.Log(finalTouchPosition);
         CalculateAngle();
     }
-
-
-
-
 
 
     public void FindMatches()
@@ -375,6 +436,29 @@ public class Piece : MonoBehaviour
             //Debug.Log($"Horizontal match of {horizontalMatches.Count} at ({X},{Y})");
         }
 
+        //if horizontalMatches count 4 or more , then call Bomb(int x, int y)
+        if (horizontalMatches.Count >= 4)
+        {
+            //Debug.Log("Horizontal match of 4 or more found, triggering bomb effect.");
+            Bomb(X, Y); // Trigger bomb effect at the current piece's position
+        }
+
+        //if horizontalMatches count 5 or more , then call ClearRow
+        if (horizontalMatches.Count >= 5)
+        {
+            //Debug.Log("Horizontal match of 5 or more found, clearing entire row.");
+            ClearRow(Y); // Clear the entire row where the match was found
+        }
+
+        //if horizontalMatches count 6 or more , then call ClearColour
+        if (horizontalMatches.Count >= 6 || verticalMatches.Count >= 6)
+        {
+            //Debug.Log("Match of 6 or more found, clearing all pieces of the same colour.");
+            ClearColour(pieceType); // Clear all pieces of the same colour
+        }
+
+
+
         // 🔹 Vertical Match Check
         verticalMatches.Add(this);
 
@@ -422,6 +506,26 @@ public class Piece : MonoBehaviour
 
 
 
+        }
+        //if verticalMatches count 4 or more , then call Bomb(int x, int y)
+        if (verticalMatches.Count >= 4)
+        {
+            //Debug.Log("Vertical match of 4 or more found, triggering bomb effect.");
+            Bomb(X, Y); // Trigger bomb effect at the current piece's position
+        }
+
+        //if verticalMatches count 4 or more , then call ClearColoumn
+        if (verticalMatches.Count >= 5)
+        {
+            //Debug.Log("Vertical match of 5 or more found, clearing entire column.");
+            ClearColoumn(X); // Clear the entire column where the match was found
+        }
+
+        //if horizontalMatches count 6 or more , then call ClearColour
+        if (horizontalMatches.Count >= 6 || verticalMatches.Count >= 6)
+        {
+            //Debug.Log("Match of 6 or more found, clearing all pieces of the same colour.");
+            ClearColour(pieceType); // Clear all pieces of the same colour
         }
     }
 
@@ -508,6 +612,78 @@ public class Piece : MonoBehaviour
 
 
     }
+
+
+
+
+    void ClearColoumn(int coloumnIndex)
+    {
+        for (int y = 0; y < levelData.gridHeight; y++)
+        {
+            Piece piece = gridManager.grid[coloumnIndex, y]?.GetComponent<Piece>();
+            if (piece != null && !piece.isMatched)
+            {
+                piece.isMatched = true;
+                MarkAsMatched(piece);
+            }
+        }
+    }
+
+    void ClearRow(int rowIndex)
+    {
+        for (int x = 0; x < levelData.gridWidth; x++)
+        {
+            Piece piece = gridManager.grid[x, rowIndex]?.GetComponent<Piece>();
+            if (piece != null && !piece.isMatched)
+            {
+                piece.isMatched = true;
+                MarkAsMatched(piece);
+            }
+        }
+    }
+
+    void ClearColour(PieceType type)
+    {
+        for (int x = 0; x < levelData.gridWidth; x++)
+        {
+            for (int y = 0; y < levelData.gridHeight; y++)
+            {
+                Piece piece = gridManager.grid[x, y]?.GetComponent<Piece>();
+                if (piece != null && piece.pieceType == type && !piece.isMatched)
+                {
+                    piece.isMatched = true;
+                    MarkAsMatched(piece);
+                }
+            }
+        }
+    }
+
+    void Bomb(int x, int y)
+    {
+        // Clear surrounding pieces in a 3x3 area
+        for (int i = -1; i <= 1; i++)
+        {
+            for (int j = -1; j <= 1; j++)
+            {
+                int targetX = x + i;
+                int targetY = y + j;
+                if (targetX >= 0 && targetX < levelData.gridWidth && targetY >= 0 && targetY < levelData.gridHeight)
+                {
+                    Piece piece = gridManager.grid[targetX, targetY]?.GetComponent<Piece>();
+                    if (piece != null && !piece.isMatched)
+                    {
+                        piece.isMatched = true;
+                        MarkAsMatched(piece);
+                    }
+                }
+            }
+        }
+    }
+
+
+
+
+
 
 
 }

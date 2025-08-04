@@ -397,6 +397,58 @@ PrefabInstance:
     m_AddedGameObjects: []
     m_AddedComponents: []
   m_SourcePrefab: {fileID: 100100000, guid: 474ce74a21ed8bb4c83386b716db42b0, type: 3}
+--- !u!1 &649155340
+GameObject:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  serializedVersion: 6
+  m_Component:
+  - component: {fileID: 649155342}
+  - component: {fileID: 649155341}
+  m_Layer: 0
+  m_Name: Grid Manager (1)
+  m_TagString: Untagged
+  m_Icon: {fileID: 0}
+  m_NavMeshLayer: 0
+  m_StaticEditorFlags: 0
+  m_IsActive: 1
+--- !u!114 &649155341
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 649155340}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 52cf891585c0591439d23b158f9f8e2a, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
+  piecePrefabs:
+  - {fileID: 8502751441075322089, guid: 8f56843240e03fb40a9255f8e2841df9, type: 3}
+  - {fileID: 2213740410953808157, guid: f37ab09247ed76d4ebdc2817976cf9fb, type: 3}
+  - {fileID: 6382024892613143254, guid: 88d36026813ecad4395b98838b624026, type: 3}
+  - {fileID: 8252069988943881566, guid: 8b321ead8f49de1469401f5f2e0564b7, type: 3}
+  - {fileID: 7079316263224728815, guid: f60385ac0407f244b856f8be99eb5514, type: 3}
+  levelData: {fileID: 11400000, guid: 93f1df55424d4f241ab64b60d8c20915, type: 2}
+  brickPrefab: {fileID: 6046599830507250486, guid: 5e3e234aaf2af6e408e7933609fa5e94, type: 3}
+--- !u!4 &649155342
+Transform:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 649155340}
+  serializedVersion: 2
+  m_LocalRotation: {x: 0, y: 0, z: 0, w: 1}
+  m_LocalPosition: {x: -1.5960848, y: -1.9789103, z: 0.0029947748}
+  m_LocalScale: {x: 1, y: 1, z: 1}
+  m_ConstrainProportionsScale: 0
+  m_Children: []
+  m_Father: {fileID: 0}
+  m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
 --- !u!1 &1672323531
 GameObject:
   m_ObjectHideFlags: 0
@@ -413,7 +465,7 @@ GameObject:
   m_Icon: {fileID: 0}
   m_NavMeshLayer: 0
   m_StaticEditorFlags: 0
-  m_IsActive: 1
+  m_IsActive: 0
 --- !u!114 &1672323532
 MonoBehaviour:
   m_ObjectHideFlags: 0
@@ -435,7 +487,7 @@ MonoBehaviour:
   - {fileID: 6382024892613143254, guid: 88d36026813ecad4395b98838b624026, type: 3}
   - {fileID: 8252069988943881566, guid: 8b321ead8f49de1469401f5f2e0564b7, type: 3}
   - {fileID: 7079316263224728815, guid: f60385ac0407f244b856f8be99eb5514, type: 3}
-  levelData: {fileID: 11400000, guid: 8c5df71e49e601045abce2afe66696c8, type: 2}
+  levelData: {fileID: 11400000, guid: 93f1df55424d4f241ab64b60d8c20915, type: 2}
   brickPrefab: {fileID: 6046599830507250486, guid: 5e3e234aaf2af6e408e7933609fa5e94, type: 3}
 --- !u!4 &1672323533
 Transform:
@@ -519,6 +571,7 @@ SceneRoots:
   m_Roots:
   - {fileID: 519420032}
   - {fileID: 1672323533}
+  - {fileID: 649155342}
   - {fileID: 173433969}
   - {fileID: 8249878993119203673}
   - {fileID: 528283149}
