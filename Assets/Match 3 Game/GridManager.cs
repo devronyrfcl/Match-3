@@ -16,6 +16,8 @@ public class GridManager : MonoBehaviour
 
     public GameObject particlePrefab; // Prefab for the particle effect
 
+    public GameObject GridBackgroundBlock; // Array of background block prefabs for the grid
+
 
 
 
@@ -32,6 +34,7 @@ public class GridManager : MonoBehaviour
     void Start()
     {
         grid = new GameObject[levelData.gridWidth, levelData.gridHeight];
+        SpawnGridBackgroundBlock(); // Call the method to spawn background blocks
         CreateGrid(); // Call the method to create the grid and place pieces
 
         
@@ -99,6 +102,21 @@ public class GridManager : MonoBehaviour
         }
 
         Debug.Log("Grid created with seed: " + levelData.GridSeed);
+    }
+
+    void SpawnGridBackgroundBlock()
+    {
+        //spawn background block prefabs in the grid and it will be used to fill the grid background
+        for (int x = 0; x < levelData.gridWidth; x++)
+        {
+            for (int y = 0; y < levelData.gridHeight; y++)
+            {
+                GameObject block = Instantiate(GridBackgroundBlock, new Vector2(x, y), Quaternion.identity);
+                block.transform.SetParent(transform);
+                block.name = "Block (" + x + ", " + y + ")";
+                block.transform.localScale = Vector3.one; // Set scale to one for visibility
+            }
+        }
     }
 
 

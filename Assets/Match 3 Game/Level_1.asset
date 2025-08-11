@@ -12,8 +12,8 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 30065b4bc67131b49bb00c6cb5f0e21b, type: 3}
   m_Name: Level_1
   m_EditorClassIdentifier: 
-  gridWidth: 5
-  gridHeight: 10
+  gridWidth: 6
+  gridHeight: 8
   GridSeed: 1
   SpecialPiecesAmount: 2
   blockedCells:
