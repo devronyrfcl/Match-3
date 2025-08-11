@@ -14,6 +14,6 @@ MonoBehaviour:
   m_EditorClassIdentifier: 
   gridWidth: 5
   gridHeight: 10
-  GridSeed: 12
+  GridSeed: 2
   SpecialPiecesAmount: 2
   blockedCells: []

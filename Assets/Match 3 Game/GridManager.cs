@@ -9,10 +9,12 @@ public class GridManager : MonoBehaviour
     //public int gridHeight = 10; // Height of the grid
     public GameObject[] piecePrefabs;// Array of piece prefabs to instantiate
     public GameObject[,] grid; // 2D array to hold the grid pieces
-    //public Piece[] pieces; // Array to hold all pieces in the game
+    public Piece[] pieces; // Array to hold all pieces in the game
     public LevelData levelData; // Reference to the LevelData ScriptableObject
 
     public GameObject brickPrefab; // Prefab for the brick piece
+
+    public GameObject particlePrefab; // Prefab for the particle effect
 
 
 
@@ -32,18 +34,25 @@ public class GridManager : MonoBehaviour
         grid = new GameObject[levelData.gridWidth, levelData.gridHeight];
         CreateGrid(); // Call the method to create the grid and place pieces
 
-        /*//pieces will be the piecePrefabs those are spawned in the grid
-        pieces = new Piece[gridWidth * gridHeight]; // Initialize the pieces array with the total number of pieces
-        for (int x = 0; x < gridWidth; x++)
+        
+
+    }
+
+    private void FixedUpdate()
+    {
+        //pieces objects will be the spawned pieces in the game
+        pieces = new Piece[levelData.gridWidth * levelData.gridHeight];
+        for (int x = 0; x < levelData.gridWidth; x++)
         {
-            for (int y = 0; y < gridHeight; y++)
+            for (int y = 0; y < levelData.gridHeight; y++)
             {
-                pieces[x + y * gridWidth] = grid[x, y].GetComponent<Piece>(); // Store each piece in the pieces array
+                if (grid[x, y] != null)
+                {
+                    Piece pieceScript = grid[x, y].GetComponent<Piece>();
+                    pieces[x + y * levelData.gridWidth] = pieceScript; // Store the piece in the pieces array
+                }
             }
         }
-        CheckForMatches(); // Call the method to check for matches in the grid*/
-
-
     }
 
 
@@ -53,40 +62,6 @@ public class GridManager : MonoBehaviour
     {
         // Use the seed from LevelData to ensure consistent piece placement
         Random.InitState(levelData.GridSeed);
-
-        /*for (int x = 0; x < levelData.gridWidth; x++)
-        {
-            for (int y = 0; y < levelData.gridHeight; y++)
-            {
-                if (IsBlocked(x, y))
-                {
-                    // Skip blocked cells
-                    grid[x, y] = null; // Ensure the grid cell is null
-                    //Debug.Log($"Skipping blocked cell at ({x}, {y})");
-                    continue;
-                }
-
-
-                int randomIndex = Random.Range(0, piecePrefabs.Length);
-                GameObject newPiece = Instantiate(
-                    piecePrefabs[randomIndex],
-                    new Vector2(x, y + 1f), // Slightly above for fall effect
-                    Quaternion.identity
-                );
-                Piece pieceScript = newPiece.GetComponent<Piece>();
-                pieceScript.SetPosition(x, y);
-                newPiece.transform.SetParent(transform);
-                newPiece.name = pieceScript.pieceType.ToString() + " (" + x + ", " + y + ")";
-                // Start with zero scale (invisible)
-                newPiece.transform.localScale = Vector3.zero;
-                // Store in grid before animating
-                grid[x, y] = newPiece;
-                // Animate scale (appear) then move down
-                newPiece.transform.DOScale(Vector3.one, 0.2f).SetEase(Ease.OutBack);
-                newPiece.transform.DOMove(new Vector2(x, y), 0.3f).SetEase(Ease.OutBounce);
-            }
-        }*/
-
 
         for (int x = 0; x < levelData.gridWidth; x++)
         {
@@ -113,7 +88,7 @@ public class GridManager : MonoBehaviour
                 );
 
                 Piece pieceScript = newPiece.GetComponent<Piece>();
-                pieceScript.SetPosition(x, y);
+                pieceScript.SetPosition(x, y); //GameObject.SetPosition(Vector2)
                 newPiece.transform.SetParent(transform);
                 newPiece.name = pieceScript.pieceType.ToString() + " (" + x + ", " + y + ")";
                 newPiece.transform.localScale = Vector3.zero;
@@ -374,6 +349,16 @@ public class GridManager : MonoBehaviour
         }
 
         Debug.Log("Refill complete.");
+
+        yield return new WaitForSeconds(0.1f); // Optional delay before next refill
+        // Call FindMatches of piece after refill is complete
+        foreach (var piece in pieces)
+        {
+            if (piece != null)
+            {
+                piece.FindMatches(); // Call FindMatches on each piece
+            }
+        }
     }
 
     private bool IsBlocked(int x, int y)
@@ -386,6 +371,14 @@ public class GridManager : MonoBehaviour
             }
         }
         return false; // Cell is not blocked
+    }
+
+
+    // Method to spawn a particle effect at a specific position of grid
+    public void SpawnParticleEffect(Vector2 position)
+    {
+        GameObject particle = Instantiate(particlePrefab, position, Quaternion.identity);
+        Destroy(particle, 1f); // Destroy after 1 second to clean up
     }
 
 }

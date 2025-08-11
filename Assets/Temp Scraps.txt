@@ -478,18 +478,44 @@ public class Piece : MonoBehaviour
 
 
 
+    void StickToTheGrid()
+    {
+        if (stickToGrid)
+        {
+            // Snap the piece to the grid position
+            Vector2 snappedPosition = new Vector2(Mathf.Round(transform.position.x), Mathf.Round(transform.position.y));
+            transform.position = snappedPosition;
+
+            /*Vector2Int snapped = Vector2Int.RoundToInt(transform.position);
+            transform.position = new Vector2(snapped.x, snapped.y); // Snap the piece to the grid position
+            */
+        }
+
+    }
+
+
+    //stickToGrid = false; // Disable sticking to grid for this operation
+
+    //stickToGrid will be false for a certain float time. after that it will be true both for this piece and the other piece
+    public void SetStickToGrid(float duration)
+    {
+        stickToGrid = false; // Disable sticking to grid for this operation
+        Invoke(nameof(EnableStickToGrid), duration); // Re-enable after the specified duration
+    }
+    private void EnableStickToGrid()
+    {
+        stickToGrid = false; // Re-enable sticking to grid
+        if (otherPiece != null)
+        {
+            Piece other = otherPiece.GetComponent<Piece>();
+            if (other != null)
+            {
+                other.stickToGrid = false; // Also enable for the other piece
+            }
+        }
+    }
 
 
 
 
 
-
-
-
-
-
-
-
-
-
-     //Detect the matches in the grid based on the pieceType and position of the pieces array. first check the horizontal and vertical matches, if there are matches then destroy the pieces and update the grid.

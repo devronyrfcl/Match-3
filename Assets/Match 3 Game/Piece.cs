@@ -33,7 +33,7 @@ public class Piece : MonoBehaviour
     //Input related variables
     public Vector2 firstTouchPosition; // Position of the first touch
     public Vector2 finalTouchPosition; // Position of the last touch
-    public float touchAngle; // Angle of the touch movement
+    //public float touchAngle; // Angle of the touch movement
 
     public GameObject otherPiece; // The Piece that will be swapped with the current Piece
     private Vector2 tempPosition; // Temporary position for moving the Piece
@@ -93,18 +93,20 @@ public class Piece : MonoBehaviour
             Debug.LogError("GridManager not found in the scene.");
         }
 
+        stickToGrid = true; // Enable sticking to grid by default
+
     }
 
     // Update is called once per frame
     void Update()
     {
         //CalculateAngle();
-        
+
 
         Vector2Int snapped = Vector2Int.RoundToInt(transform.position);
         transform.position = new Vector2(snapped.x, snapped.y); // Snap the piece to the grid position
 
-        
+
 
 
     }
@@ -367,7 +369,7 @@ public class Piece : MonoBehaviour
 
         //FindMatches();
 
-        
+
 
     }
 
@@ -490,14 +492,16 @@ public class Piece : MonoBehaviour
                 {
                     piece.isMatched = true;
                     MarkAsMatched(piece);
-                } else
+                }
+                else
                 {
                     // If the piece is already matched, we need to reset the other piece
                 }
             }
             TriggerGridUpdate();
             //Debug.Log($"Vertical match of {verticalMatches.Count} at ({X},{Y})");
-        } else
+        }
+        else
         {
             //Debug.Log("No matches found.");
             isMatched = false; // Reset the matched state if no matches found
@@ -534,14 +538,7 @@ public class Piece : MonoBehaviour
 
     void MarkAsMatched(Piece piece)
     {
-        //SpriteRenderer sr = piece.GetComponent<SpriteRenderer>();
-        SpriteRenderer sr = piece.GetComponent<SpriteRenderer>();
-
-        //sr.GetComponent<SpriteRenderer>().enabled = false;
-
-        //if (sr != null) sr.color = Color.gray;
-
-        //Disable the collider to prevent further interaction
+        
         Collider2D collider = piece.GetComponent<Collider2D>();
         if (collider != null)
         {
@@ -552,14 +549,14 @@ public class Piece : MonoBehaviour
         /*//destroy the piece after marking it as matched
         if (piece == null || gridManager == null) return;
         Destroy(piece.gameObject); // Destroy the matched piece*/
-        
+
 
 
         // Clear grid reference immediately
         gridManager.grid[piece.X, piece.Y] = null;
 
         // Animate scale down to zero before destroying the piece
-        piece.transform.DOScale(Vector3.zero, 0.3f).SetEase(Ease.InBack).OnComplete(() =>
+        piece.transform.DOScale(Vector2.zero, 0.3f).SetEase(Ease.InBack).OnComplete(() =>
         {
             //FindMatches(); // Call the method to find matches at the start
             Destroy(piece.gameObject);
@@ -567,9 +564,9 @@ public class Piece : MonoBehaviour
     }
 
 
-    
 
-    
+
+
 
     void TriggerGridUpdate()
     {
@@ -580,7 +577,7 @@ public class Piece : MonoBehaviour
     }
 
 
-    
+
 
 
     // Helper method to check if no matches were found after a swap. If no matches found, reverse the swap wait for 1 sec and reset the positions using dotween
@@ -681,9 +678,42 @@ public class Piece : MonoBehaviour
     }
 
 
+    void StickToTheGrid()
+    {
+        if (stickToGrid)
+        {
+            // Snap the piece to the grid position
+            Vector2 snappedPosition = new Vector2(Mathf.Round(transform.position.x), Mathf.Round(transform.position.y));
+            transform.position = snappedPosition;
+
+            /*Vector2Int snapped = Vector2Int.RoundToInt(transform.position);
+            transform.position = new Vector2(snapped.x, snapped.y); // Snap the piece to the grid position
+            */
+        }
+
+    }
 
 
+    //stickToGrid = false; // Disable sticking to grid for this operation
 
+    //stickToGrid will be false for a certain float time. after that it will be true both for this piece and the other piece
+    public void SetStickToGrid(float duration)
+    {
+        stickToGrid = false; // Disable sticking to grid for this operation
+        Invoke(nameof(EnableStickToGrid), duration); // Re-enable after the specified duration
+    }
+    private void EnableStickToGrid()
+    {
+        stickToGrid = false; // Re-enable sticking to grid
+        if (otherPiece != null)
+        {
+            Piece other = otherPiece.GetComponent<Piece>();
+            if (other != null)
+            {
+                other.stickToGrid = false; // Also enable for the other piece
+            }
+        }
+    }
 
 
 }
