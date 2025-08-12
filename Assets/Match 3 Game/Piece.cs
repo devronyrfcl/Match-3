@@ -106,19 +106,54 @@ public class Piece : MonoBehaviour
         Vector2Int snapped = Vector2Int.RoundToInt(transform.position);
         transform.position = new Vector2(snapped.x, snapped.y); // Snap the piece to the grid position
 
-        if(specialPieceType == SpecialPieceType.Bomb && IsSpecialPiece)
+        // Check if the piece is a special piece is bomb and handle double-click on collider for bomb actions
+        if (IsSpecialPiece && specialPieceType == SpecialPieceType.Bomb)
         {
-            //on double click, call Bomb(int x, int y)
-            if (Input.GetMouseButtonDown(0))
+            Collider2D collider = GetComponent<Collider2D>();
+            if (collider != null && collider.enabled && Input.GetMouseButtonDown(0))
             {
-                if (Input.GetMouseButtonDown(0))
+                // Check if the mouse is over the collider
+                Vector2 mousePosition = Camera.main.ScreenToWorldPoint(Input.mousePosition);
+                if (collider.OverlapPoint(mousePosition))
                 {
-                    Bomb(X, Y); // Trigger bomb effect at the current piece's position
+                    // Handle double-click action for bomb
+                    Debug.Log("Bomb piece clicked! Triggering explosion...");
+                    Bomb(X, Y); // Call the Bomb method with the current piece's position
                 }
             }
         }
 
+        if(IsSpecialPiece && specialPieceType == SpecialPieceType.Coloumn_Clear)
+        {
+            Collider2D collider = GetComponent<Collider2D>();
+            if (collider != null && collider.enabled && Input.GetMouseButtonDown(0))
+            {
+                // Check if the mouse is over the collider
+                Vector2 mousePosition = Camera.main.ScreenToWorldPoint(Input.mousePosition);
+                if (collider.OverlapPoint(mousePosition))
+                {
+                    // Handle double-click action for column clear
+                    Debug.Log("Column Clear piece clicked! Clearing column...");
+                    ClearColoumn(X); // Call the ClearColoumn method with the current piece's X position
+                }
+            }
+        }
 
+        if (IsSpecialPiece && specialPieceType == SpecialPieceType.Row_Clear)
+        {
+            Collider2D collider = GetComponent<Collider2D>();
+            if (collider != null && collider.enabled && Input.GetMouseButtonDown(0))
+            {
+                // Check if the mouse is over the collider
+                Vector2 mousePosition = Camera.main.ScreenToWorldPoint(Input.mousePosition);
+                if (collider.OverlapPoint(mousePosition))
+                {
+                    // Handle double-click action for row clear
+                    Debug.Log("Row Clear piece clicked! Clearing row...");
+                    ClearRow(Y); // Call the ClearRow method with the current piece's Y position
+                }
+            }
+        }
 
 
     }
@@ -128,180 +163,6 @@ public class Piece : MonoBehaviour
         UpdateTargetPosition();
         //FindMatches(); // Call the method to find matches at the start
     }
-
-    /*void UpdateTargetPosition()
-    {
-
-        if (finalTouchPosition != Vector2.zero)
-        {
-            RaycastHit2D hit = Physics2D.Raycast(finalTouchPosition, Vector2.zero);
-            if (hit.collider != null && hit.collider.gameObject != gameObject)
-            {
-                otherPiece = hit.collider.gameObject;
-                tempPosition = otherPiece.transform.position;
-                otherPiece.transform.position = transform.position;
-                transform.position = tempPosition;
-                finalTouchPosition = Vector2.zero; // Reset final touch position after swap
-            }
-        }
-
-
-
-
-
-
-    }*/
-
-
-    /*void UpdateTargetPosition()
-    {
-        if (finalTouchPosition != Vector2.zero)
-        {
-            RaycastHit2D hit = Physics2D.Raycast(finalTouchPosition, Vector2.zero);
-            if (hit.collider != null && hit.collider.gameObject != gameObject)
-            {
-                otherPiece = hit.collider.gameObject;
-
-                Piece other = otherPiece.GetComponent<Piece>();
-
-                // Get grid position difference
-                Vector2Int currentGridPos = Vector2Int.RoundToInt(transform.position);
-                Vector2Int otherGridPos = Vector2Int.RoundToInt(otherPiece.transform.position);
-                Vector2Int difference = otherGridPos - currentGridPos;
-
-                // Check if difference is one unit in only one axis (orthogonal move
-                if ((Mathf.Abs(difference.x) == 1 && difference.y == 0) ||
-                    (Mathf.Abs(difference.y) == 1 && difference.x == 0))   
-                {
-
-
-                    if (Mathf.Abs(difference.x) == 1 || Mathf.Abs(difference.y) == 1)
-
-                    {
-                        Debug.Log("Swiped to: " + otherPiece.name + " from: " + gameObject.name);
-
-                    }
-
-
-                    //tempPosition = otherPiece.transform.position;
-                    //otherPiece.transform.position = transform.position;
-                    //transform.position = tempPosition;
-                    Vector2 myTarget = otherPiece.transform.position;
-                    Vector2 otherTarget = transform.position;
-
-                    float swipeTime = 0.3f;
-
-                    originalWorldPosition = transform.position;
-                    originalX = X;
-                    originalY = Y;
-
-                    otherPiece.GetComponent<Piece>().originalWorldPosition = otherPiece.transform.position;
-                    otherPiece.GetComponent<Piece>().originalX = otherPiece.GetComponent<Piece>().X;
-                    otherPiece.GetComponent<Piece>().originalY = otherPiece.GetComponent<Piece>().Y;
-
-
-
-                    Invoke(nameof(FindMatches), swipeTime);
-
-
-                    transform.DOMove(myTarget, swipeTime);
-                    otherPiece.transform.DOMove(otherTarget, swipeTime);
-
-                    // Swap positions in grid and data
-                    gridManager.grid[X, Y] = otherPiece;
-                    gridManager.grid[other.X, other.Y] = this.gameObject;
-
-
-                    int tempX = X;
-                    int tempY = Y;
-                    X = other.X;
-                    Y = other.Y;
-                    other.X = tempX;
-                    other.Y = tempY;
-
-                    //Debug.Log for both horizontal and vertical transformations
-                    if (Mathf.Abs(difference.x) == 1)
-                    {
-                        //gridManager.HorizontalMatch();
-                        // Debug.Log("Horizontal swipe detected.");
-                        Invoke(nameof(FindMatches), 0.5f); // Call the method to find matches after a short delay
-
-
-                    }
-                    else if (Mathf.Abs(difference.y) == 1)
-                    {
-                        //gridManager.VerticalMatch();
-                        //Debug.Log("Vertical swipe detected.");
-                        Invoke(nameof(FindMatches), 0.5f); // Call the method to find matches after a short delay
-
-
-                    }
-
-
-                }
-
-                finalTouchPosition = Vector2.zero; // Reset after checking
-
-                
-            }
-        }
-
-
-        
-
-    }*/
-
-    /*void UpdateTargetPosition()
-    {
-        if (finalTouchPosition == Vector2.zero) return;
-
-        RaycastHit2D hit = Physics2D.Raycast(finalTouchPosition, Vector2.zero);
-        if (hit.collider == null || hit.collider.gameObject == gameObject) return;
-
-        otherPiece = hit.collider.gameObject;
-        Piece other = otherPiece.GetComponent<Piece>();
-
-        Vector2Int currentGridPos = Vector2Int.RoundToInt(transform.position);
-        Vector2Int otherGridPos = Vector2Int.RoundToInt(otherPiece.transform.position);
-        Vector2Int difference = otherGridPos - currentGridPos;
-
-        // Check if it's a valid adjacent move
-        if ((Mathf.Abs(difference.x) == 1 && difference.y == 0) ||
-            (Mathf.Abs(difference.y) == 1 && difference.x == 0))
-        {
-            Debug.Log("Swiped to: " + otherPiece.name + " from: " + gameObject.name);
-
-            Vector2 myTarget = otherPiece.transform.position;
-            Vector2 otherTarget = transform.position;
-            float swipeTime = 0.3f;
-
-            Sequence swapSequence = DOTween.Sequence();
-            swapSequence.Append(transform.DOMove(myTarget, swipeTime));
-            swapSequence.Join(otherPiece.transform.DOMove(otherTarget, swipeTime));
-
-            swapSequence.OnComplete(() =>
-            {
-                // Swap grid references
-                gridManager.grid[X, Y] = otherPiece;
-                gridManager.grid[other.X, other.Y] = this.gameObject;
-
-                // Swap X, Y values
-                int tempX = X;
-                int tempY = Y;
-                X = other.X;
-                Y = other.Y;
-                other.X = tempX;
-                other.Y = tempY;
-
-                // Start checking for matches AFTER movement is complete
-                FindMatches();
-                CheckMoveCoHelper(); // Handles reverse swap if no match
-                StartCoroutine(ResetOtherPieceAfterDelay());
-            });
-        }
-
-        finalTouchPosition = Vector2.zero;
-    }*/
 
     void UpdateTargetPosition()
     {
@@ -453,24 +314,20 @@ public class Piece : MonoBehaviour
         //if horizontalMatches count 4 or more , then call Bomb(int x, int y)
         if (horizontalMatches.Count >= 4)
         {
-            // spawn bomb at the current piece's position using gridManager.SpawnBomb()
-            gridManager.SpawnBomb(X, Y); // Trigger bomb effect at the current piece's position
-
+            gridManager.SpawnSpecialPiece(X, Y, GridManager.SpecialPieceType.Bomb);
 
         }
 
         //if horizontalMatches count 5 or more , then call ClearRow
         if (horizontalMatches.Count >= 5)
         {
-            //Debug.Log("Horizontal match of 5 or more found, clearing entire row.");
-            //ClearRow(Y); // Clear the entire row where the match was found
+            gridManager.SpawnSpecialPiece(X, Y, GridManager.SpecialPieceType.Column_Clear);
         }
 
         //if horizontalMatches count 6 or more , then call ClearColour
         if (horizontalMatches.Count >= 6 || verticalMatches.Count >= 6)
         {
-            //Debug.Log("Match of 6 or more found, clearing all pieces of the same colour.");
-            //ClearColour(pieceType); // Clear all pieces of the same colour
+            gridManager.SpawnSpecialPiece(X, Y, GridManager.SpecialPieceType.Row_Clear);
         }
 
 
@@ -528,22 +385,20 @@ public class Piece : MonoBehaviour
         //if verticalMatches count 4 or more , then call Bomb(int x, int y)
         if (verticalMatches.Count >= 4)
         {
-            //Debug.Log("Vertical match of 4 or more found, triggering bomb effect.");
-            gridManager.SpawnBomb(X, Y); // Trigger bomb effect at the current piece's position
+            gridManager.SpawnSpecialPiece(X, Y, GridManager.SpecialPieceType.Bomb);
+
         }
 
         //if verticalMatches count 4 or more , then call ClearColoumn
         if (verticalMatches.Count >= 5)
         {
-            //Debug.Log("Vertical match of 5 or more found, clearing entire column.");
-            ClearColoumn(X); // Clear the entire column where the match was found
+            gridManager.SpawnSpecialPiece(X, Y, GridManager.SpecialPieceType.Column_Clear);
         }
 
         //if horizontalMatches count 6 or more , then call ClearColour
         if (horizontalMatches.Count >= 6 || verticalMatches.Count >= 6)
         {
-            //Debug.Log("Match of 6 or more found, clearing all pieces of the same colour.");
-            ClearColour(pieceType); // Clear all pieces of the same colour
+            gridManager.SpawnSpecialPiece(X, Y, GridManager.SpecialPieceType.Row_Clear);
         }
     }
 
@@ -586,8 +441,10 @@ public class Piece : MonoBehaviour
     {
         //Invoke(nameof(gridManager.UpdateGrid), 0.1f); // Delay to allow destruction to complete
 
-        gridManager.UpdateGrid(); // Let GridManager handle collapsing and refilling
+        //gridManager.UpdateGrid(); // Let GridManager handle collapsing and refilling
         //Debug.Log("Grid updated after match.");
+
+        gridManager.UpdateGrid(false);
     }
 
 
@@ -728,5 +585,7 @@ public class Piece : MonoBehaviour
             }
         }
     }
+
+
 
 }

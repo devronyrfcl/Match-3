@@ -1702,7 +1702,7 @@ Transform:
   m_GameObject: {fileID: 1192773737}
   serializedVersion: 2
   m_LocalRotation: {x: 0, y: 0, z: 0, w: 1}
-  m_LocalPosition: {x: 0.08, y: 0, z: 0}
+  m_LocalPosition: {x: 0.08, y: 0, z: -1.253}
   m_LocalScale: {x: 1, y: 1, z: 1}
   m_ConstrainProportionsScale: 0
   m_Children: []
@@ -1904,7 +1904,7 @@ GameObject:
   m_Icon: {fileID: 0}
   m_NavMeshLayer: 0
   m_StaticEditorFlags: 0
-  m_IsActive: 1
+  m_IsActive: 0
 --- !u!114 &1498887747
 MonoBehaviour:
   m_ObjectHideFlags: 0
@@ -4962,6 +4962,10 @@ MonoBehaviour:
   brickPrefab: {fileID: 0}
   particlePrefab: {fileID: 0}
   GridBackgroundBlock: {fileID: 0}
+  Bomb: {fileID: 0}
+  Coloumn_Clear: {fileID: 0}
+  Row_Clear: {fileID: 0}
+  Colour_Clear: {fileID: 0}
 --- !u!4 &1507033402
 Transform:
   m_ObjectHideFlags: 0
@@ -5145,7 +5149,7 @@ Animator:
   m_GameObject: {fileID: 2033650197}
   m_Enabled: 1
   m_Avatar: {fileID: 0}
-  m_Controller: {fileID: 9100000, guid: 78a940d914cf3d64d866829ba3035e49, type: 2}
+  m_Controller: {fileID: 9100000, guid: 89cca9919002bd84285aae1166842aa9, type: 2}
   m_CullingMode: 0
   m_UpdateMode: 0
   m_ApplyRootMotion: 0
