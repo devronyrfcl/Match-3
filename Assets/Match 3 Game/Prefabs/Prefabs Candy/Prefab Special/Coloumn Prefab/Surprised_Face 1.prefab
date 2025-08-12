@@ -13,7 +13,7 @@ GameObject:
   - component: {fileID: 839993508281971385}
   - component: {fileID: 7068620627162160305}
   m_Layer: 0
-  m_Name: Z_Special Coloumn
+  m_Name: Surprised_Face 1
   m_TagString: Untagged
   m_Icon: {fileID: 0}
   m_NavMeshLayer: 0
@@ -74,9 +74,9 @@ SpriteRenderer:
   m_LightmapParameters: {fileID: 0}
   m_SortingLayerID: 0
   m_SortingLayer: 0
-  m_SortingOrder: 1
-  m_Sprite: {fileID: 1763060895, guid: dd1b28b7bcf8bcb4681c1c856cb374fa, type: 3}
-  m_Color: {r: 1, g: 1, b: 1, a: 1}
+  m_SortingOrder: 0
+  m_Sprite: {fileID: -1040283631, guid: 08e60bfc27965c847b8897bbe079155b, type: 3}
+  m_Color: {r: 0.23584908, g: 0.23584908, b: 0.23584908, a: 1}
   m_FlipX: 0
   m_FlipY: 0
   m_DrawMode: 0
@@ -105,8 +105,8 @@ MonoBehaviour:
   otherPiece: {fileID: 0}
   swipeAngle: 0
   pieceType: 6
-  specialPieceType: 1
-  IsSpecialPiece: 1
+  specialPieceType: 0
+  IsSpecialPiece: 0
   gridManager: {fileID: 0}
   isMatched: 0
   stickToGrid: 1

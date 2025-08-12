@@ -18,28 +18,17 @@ public class GridManager : MonoBehaviour
 
     public GameObject GridBackgroundBlock; // Array of background block prefabs for the grid
 
-    // Enum for identifying special piece types
-    public enum SpecialPieceType
-    {
-        Bomb,
-        Column_Clear,
-        Row_Clear,
-        Colour_Clear
-    }
 
-    [System.Serializable]
-    public struct SpecialPieceData
-    {
-        public int x;
-        public int y;
-        public SpecialPieceType type;
-    }
 
-    // Prefab references
-    public GameObject Bomb;
-    public GameObject Coloumn_Clear;
-    public GameObject Row_Clear;
-    public GameObject Colour_Clear;
+
+
+    //define currentPiece
+    //private Piece currentPiece; // Reference to the currently selected piece
+
+    //public enum PieceType { Blue, Green, Orange, Pink, Purple, Red, SkyBlue, Yellow }; // Enum for piece types
+
+
+
 
     // Start is called before the first frame update
     void Start()
@@ -47,6 +36,8 @@ public class GridManager : MonoBehaviour
         grid = new GameObject[levelData.gridWidth, levelData.gridHeight];
         SpawnGridBackgroundBlock(); // Call the method to spawn background blocks
         CreateGrid(); // Call the method to create the grid and place pieces
+
+        
 
     }
 
@@ -128,17 +119,84 @@ public class GridManager : MonoBehaviour
         }
     }
 
-    // Public method to refill with optional special pieces
-    public void UpdateGrid(bool withSpecialPieces, List<SpecialPieceData> specialPieces = null)
+
+    //the grid and place pieces using seed from LevelData and also use block cells
+
+
+
+    // grid and place pieces position based on piecePrefabs attactched script Piece.SetPosition(x, y)
+    /*public void CreateGrid()
     {
-        StartCoroutine(RefillGridCoroutine(withSpecialPieces, specialPieces));
+        for (int x = 0; x < gridWidth; x++)
+        {
+            for (int y = 0; y < gridHeight; y++)
+            {
+                int randomIndex = Random.Range(0, piecePrefabs.Length);
+                GameObject piece = Instantiate(piecePrefabs[randomIndex], new Vector2(x, y), Quaternion.identity);
+                piece.GetComponent<Piece>().SetPosition(x, y); // Set the position of the piece in the grid
+                grid[x, y] = piece; // Store the piece in the grid array
+
+                piece.transform.SetParent(transform);
+                
+                piece.name = piece.GetComponent<Piece>().pieceType.ToString() + " (" + x + ", " + y + ")";
+            }
+        }
+
+        
+    }*/
+
+
+
+
+
+    public void UpdateGrid()
+    {
+        StartCoroutine(RefillGridCoroutine());
     }
 
-    private IEnumerator RefillGridCoroutine(bool withSpecialPieces, List<SpecialPieceData> specialPieces)
+    /*private IEnumerator RefillGridCoroutine()
+   {
+       yield return new WaitForSeconds(0.7f); // Reduced wait, feel free to adjust
+
+       for (int x = 0; x < levelData.gridWidth; x++)
+       {
+           for (int y = 0; y < levelData.gridHeight; y++)
+           {
+               if (grid[x, y] == null && !IsBlocked(x,y))
+               {
+                   int randomIndex = Random.Range(0, piecePrefabs.Length);
+                   GameObject newPiece = Instantiate(
+                       piecePrefabs[randomIndex],
+                       new Vector2(x, y + 1f), // Slightly above for fall effect
+                       Quaternion.identity
+                   );
+
+                   Piece pieceScript = newPiece.GetComponent<Piece>();
+                   pieceScript.SetPosition(x, y);
+                   newPiece.transform.SetParent(transform);
+                   newPiece.name = pieceScript.pieceType.ToString() + " (" + x + ", " + y + ")";
+
+                   // Start with zero scale (invisible)
+                   newPiece.transform.localScale = Vector3.zero;
+
+                   // Store in grid before animating
+                   grid[x, y] = newPiece;
+
+                   // Animate scale (appear) then move down
+                   newPiece.transform.DOScale(Vector3.one, 0.2f).SetEase(Ease.OutBack);
+                   newPiece.transform.DOMove(new Vector2(x, y), 0.3f).SetEase(Ease.OutBounce);
+               }
+           }
+       }
+
+       Debug.Log("Refill complete.");
+   }*/
+
+    /*private IEnumerator RefillGridCoroutine()
     {
         yield return new WaitForSeconds(0.2f);
 
-        // 1. Pieces fall down to fill empty spaces
+       // pieces fall down to fill empty spaces
         for (int x = 0; x < levelData.gridWidth; x++)
         {
             int fallDelayIndex = 0;
@@ -154,18 +212,101 @@ public class GridManager : MonoBehaviour
                             GameObject fallingPiece = grid[x, upperY];
                             Piece pieceScript = fallingPiece.GetComponent<Piece>();
 
-                            pieceScript.stickToGrid = false;
-
+                            // Update grid references
                             grid[x, y] = fallingPiece;
                             grid[x, upperY] = null;
 
+                            // Update logical position
                             pieceScript.X = x;
                             pieceScript.Y = y;
 
+                            // Animate fall
                             Vector2 targetPos = new Vector2(x, y);
+                            float fallTime = 0.5f;
                             float delay = fallDelayIndex * 0.06f;
 
-                            fallingPiece.transform.DOMove(targetPos, 0.5f)
+                            fallingPiece.transform.DOMove(targetPos, fallTime)
+                                .SetEase(Ease.InQuad)
+                                .SetDelay(delay);
+
+                            fallDelayIndex++;
+                            break;
+                        }
+                    }
+                }
+            }
+        }
+
+
+        yield return new WaitForSeconds(0.35f);
+
+        // Refill empty cells with new pieces
+        for (int x = 0; x < levelData.gridWidth; x++)
+        {
+            for (int y = 0; y < levelData.gridHeight; y++)
+            {
+                if (grid[x, y] == null && !IsBlocked(x, y))
+                {
+                    int randomIndex = Random.Range(0, piecePrefabs.Length);
+                    GameObject newPiece = Instantiate(
+                        piecePrefabs[randomIndex],
+                        new Vector2(x, levelData.gridHeight + 1f), // Spawn above grid
+                        Quaternion.identity
+                    );
+                    Piece pieceScript = newPiece.GetComponent<Piece>();
+                    pieceScript.SetPosition(x, y);
+                    newPiece.transform.SetParent(transform);
+                    newPiece.name = pieceScript.pieceType.ToString() + " (" + x + ", " + y + ")";
+                    newPiece.transform.localScale = Vector3.zero;
+                    grid[x, y] = newPiece;
+
+                    newPiece.transform.DOScale(Vector3.one, 0.2f).SetEase(Ease.OutBack);
+                    newPiece.transform.DOMove(new Vector2(x, y), 0.3f).SetEase(Ease.OutBounce);
+                }
+            }
+        }
+
+        Debug.Log("Refill complete.");
+    }*/
+
+
+    private IEnumerator RefillGridCoroutine()
+    {
+        yield return new WaitForSeconds(0.2f);
+
+        // pieces fall down to fill empty spaces
+        for (int x = 0; x < levelData.gridWidth; x++)
+        {
+            int fallDelayIndex = 0;
+
+            for (int y = 0; y < levelData.gridHeight; y++)
+            {
+                if (grid[x, y] == null && !IsBlocked(x, y))
+                {
+                    for (int upperY = y + 1; upperY < levelData.gridHeight; upperY++)
+                    {
+                        if (grid[x, upperY] != null && !IsBlocked(x, upperY))
+                        {
+                            GameObject fallingPiece = grid[x, upperY];
+                            Piece pieceScript = fallingPiece.GetComponent<Piece>();
+
+                            // Disable grid sticking during fall
+                            pieceScript.stickToGrid = false;
+
+                            // Update grid references
+                            grid[x, y] = fallingPiece;
+                            grid[x, upperY] = null;
+
+                            // Update logical position
+                            pieceScript.X = x;
+                            pieceScript.Y = y;
+
+                            // Animate fall
+                            Vector2 targetPos = new Vector2(x, y);
+                            float fallTime = 0.5f;
+                            float delay = fallDelayIndex * 0.06f;
+
+                            fallingPiece.transform.DOMove(targetPos, fallTime)
                                 .SetEase(Ease.InQuad)
                                 .SetDelay(delay);
 
@@ -179,52 +320,7 @@ public class GridManager : MonoBehaviour
 
         yield return new WaitForSeconds(0.35f);
 
-        // 2. If special refill, spawn special pieces first
-        if (withSpecialPieces && specialPieces != null)
-        {
-            foreach (var sp in specialPieces)
-            {
-                if (grid[sp.x, sp.y] == null && !IsBlocked(sp.x, sp.y))
-                {
-                    GameObject prefabToSpawn = null;
-                    switch (sp.type)
-                    {
-                        case SpecialPieceType.Bomb:
-                            prefabToSpawn = Bomb;
-                            break;
-                        case SpecialPieceType.Column_Clear:
-                            prefabToSpawn = Coloumn_Clear;
-                            break;
-                        case SpecialPieceType.Row_Clear:
-                            prefabToSpawn = Row_Clear;
-                            break;
-                        case SpecialPieceType.Colour_Clear:
-                            prefabToSpawn = Colour_Clear;
-                            break;
-                    }
-
-                    if (prefabToSpawn != null)
-                    {
-                        GameObject specialPiece = Instantiate(prefabToSpawn,
-                            new Vector2(sp.x, levelData.gridHeight + 1f),
-                            Quaternion.identity);
-
-                        Piece pieceScript = specialPiece.GetComponent<Piece>();
-                        pieceScript.stickToGrid = false;
-                        pieceScript.SetPosition(sp.x, sp.y);
-
-                        specialPiece.transform.SetParent(transform);
-                        specialPiece.transform.localScale = Vector3.zero;
-                        grid[sp.x, sp.y] = specialPiece;
-
-                        specialPiece.transform.DOScale(Vector3.one, 0.2f).SetEase(Ease.OutBack);
-                        specialPiece.transform.DOMove(new Vector2(sp.x, sp.y), 0.3f).SetEase(Ease.OutBounce);
-                    }
-                }
-            }
-        }
-
-        // 3. Spawn remaining normal pieces
+        // Refill empty cells with new pieces
         for (int x = 0; x < levelData.gridWidth; x++)
         {
             for (int y = 0; y < levelData.gridHeight; y++)
@@ -232,15 +328,19 @@ public class GridManager : MonoBehaviour
                 if (grid[x, y] == null && !IsBlocked(x, y))
                 {
                     int randomIndex = Random.Range(0, piecePrefabs.Length);
-                    GameObject newPiece = Instantiate(piecePrefabs[randomIndex],
-                        new Vector2(x, levelData.gridHeight + 1f),
-                        Quaternion.identity);
-
+                    GameObject newPiece = Instantiate(
+                        piecePrefabs[randomIndex],
+                        new Vector2(x, levelData.gridHeight + 1f), // Spawn above grid
+                        Quaternion.identity
+                    );
                     Piece pieceScript = newPiece.GetComponent<Piece>();
-                    pieceScript.stickToGrid = false;
-                    pieceScript.SetPosition(x, y);
 
+                    // Disable grid sticking during spawn animation
+                    pieceScript.stickToGrid = false;
+
+                    pieceScript.SetPosition(x, y);
                     newPiece.transform.SetParent(transform);
+                    newPiece.name = pieceScript.pieceType.ToString() + " (" + x + ", " + y + ")";
                     newPiece.transform.localScale = Vector3.zero;
                     grid[x, y] = newPiece;
 
@@ -250,27 +350,32 @@ public class GridManager : MonoBehaviour
             }
         }
 
+        // Wait for all animations to finish before re-enabling grid sticking
         yield return new WaitForSeconds(0.5f);
 
-        // Re-enable sticking
+        // Re-enable stickToGrid for all pieces
         for (int x = 0; x < levelData.gridWidth; x++)
         {
             for (int y = 0; y < levelData.gridHeight; y++)
             {
                 if (grid[x, y] != null)
                 {
-                    grid[x, y].GetComponent<Piece>().stickToGrid = true;
+                    Piece pieceScript = grid[x, y].GetComponent<Piece>();
+                    pieceScript.stickToGrid = true;
                 }
             }
         }
 
         Debug.Log("Refill complete.");
 
-        // Call FindMatches after refill
+        yield return new WaitForSeconds(0.1f); // Optional delay before next refill
+        // Call FindMatches of piece after refill is complete
         foreach (var piece in pieces)
         {
             if (piece != null)
-                piece.FindMatches();
+            {
+                piece.FindMatches(); // Call FindMatches on each piece
+            }
         }
     }
 
@@ -293,42 +398,5 @@ public class GridManager : MonoBehaviour
         GameObject particle = Instantiate(particlePrefab, position, Quaternion.identity);
         Destroy(particle, 1f); // Destroy after 1 second to clean up
     }
-
-    public void SpawnSpecialPiece(int x, int y, SpecialPieceType type)
-    {
-        if (grid[x, y] != null) Destroy(grid[x, y]); // Remove old piece
-
-        GameObject prefabToSpawn = null;
-        switch (type)
-        {
-            case SpecialPieceType.Bomb:
-                prefabToSpawn = Bomb;
-                break;
-            case SpecialPieceType.Column_Clear:
-                prefabToSpawn = Coloumn_Clear;
-                break;
-            case SpecialPieceType.Row_Clear:
-                prefabToSpawn = Row_Clear;
-                break;
-            case SpecialPieceType.Colour_Clear:
-                prefabToSpawn = Colour_Clear;
-                break;
-        }
-
-        if (prefabToSpawn != null)
-        {
-            GameObject specialPiece = Instantiate(prefabToSpawn, new Vector2(x, levelData.gridHeight + 1f), Quaternion.identity);
-            Piece pieceScript = specialPiece.GetComponent<Piece>();
-            pieceScript.stickToGrid = false;
-            pieceScript.SetPosition(x, y);
-
-            specialPiece.transform.SetParent(transform);
-            grid[x, y] = specialPiece;
-
-            // Animate drop
-            specialPiece.transform.DOMove(new Vector2(x, y), 0.3f).SetEase(Ease.OutBounce);
-        }
-    }
-
 
 }

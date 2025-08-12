@@ -14,17 +14,6 @@ public enum PieceType
     Surprised_Face,
     Crying_Face,
 }
-
-public enum SpecialPieceType
-{
-    //Special Pieces
-    Bomb,
-    Coloumn_Clear,
-    Row_Clear,
-    Colour_Clear
-}
-
-
 public class Piece : MonoBehaviour
 {
     public int X;// X position in the grid
@@ -44,9 +33,12 @@ public class Piece : MonoBehaviour
 
     public PieceType pieceType; // Type of the piece
 
-    public SpecialPieceType specialPieceType; // Type of the special piece
+    
 
-    public bool IsSpecialPiece = false;
+    public bool IsSpecialBombPiece = false; // Special piece types for different match effects
+    public bool IsSpecialRowPiece = false; // Special piece types for different match effects
+    public bool IsSpecialColoumnPiece = false; // Special piece types for different match effects
+    public bool IsSpecialColorPiece = false; // Special piece types for different match effects
 
     public GridManager gridManager; // Reference to the PieceMatch script for matching logic
 
@@ -58,6 +50,9 @@ public class Piece : MonoBehaviour
     private LevelData levelData;
 
     public bool stickToGrid = true; // Whether the piece should stick to the grid
+
+    public GameObject ColoumnPiece;
+    public GameObject RowPiece;
 
 
     public void SetPosition(int x, int y)
@@ -101,59 +96,47 @@ public class Piece : MonoBehaviour
     void Update()
     {
         //CalculateAngle();
-
-
         Vector2Int snapped = Vector2Int.RoundToInt(transform.position);
-        transform.position = new Vector2(snapped.x, snapped.y); // Snap the piece to the grid position
+        transform.position = new Vector2(snapped.x, snapped.y); // Snap the piece to the grid position*/
 
-        // Check if the piece is a special piece is bomb and handle double-click on collider for bomb actions
-        if (IsSpecialPiece && specialPieceType == SpecialPieceType.Bomb)
+        if(IsSpecialBombPiece)
         {
-            Collider2D collider = GetComponent<Collider2D>();
-            if (collider != null && collider.enabled && Input.GetMouseButtonDown(0))
+            //If Double click to circle collider as usual then call bomb(int x, int y)
+            if (Input.GetMouseButtonDown(0))
             {
-                // Check if the mouse is over the collider
-                Vector2 mousePosition = Camera.main.ScreenToWorldPoint(Input.mousePosition);
-                if (collider.OverlapPoint(mousePosition))
+                if (Input.GetMouseButtonDown(0))
                 {
-                    // Handle double-click action for bomb
-                    Debug.Log("Bomb piece clicked! Triggering explosion...");
-                    Bomb(X, Y); // Call the Bomb method with the current piece's position
+                    Bomb(X, Y);
                 }
             }
         }
 
-        if(IsSpecialPiece && specialPieceType == SpecialPieceType.Coloumn_Clear)
+        if(IsSpecialRowPiece)
         {
-            Collider2D collider = GetComponent<Collider2D>();
-            if (collider != null && collider.enabled && Input.GetMouseButtonDown(0))
+            //If Double click to circle collider as usual then call ClearRow(int y)
+            if (Input.GetMouseButtonDown(0))
             {
-                // Check if the mouse is over the collider
-                Vector2 mousePosition = Camera.main.ScreenToWorldPoint(Input.mousePosition);
-                if (collider.OverlapPoint(mousePosition))
+                if (Input.GetMouseButtonDown(0))
                 {
-                    // Handle double-click action for column clear
-                    Debug.Log("Column Clear piece clicked! Clearing column...");
-                    ClearColoumn(X); // Call the ClearColoumn method with the current piece's X position
+                    ClearRow(Y);
                 }
             }
         }
 
-        if (IsSpecialPiece && specialPieceType == SpecialPieceType.Row_Clear)
+        if(IsSpecialColoumnPiece)
         {
-            Collider2D collider = GetComponent<Collider2D>();
-            if (collider != null && collider.enabled && Input.GetMouseButtonDown(0))
+            //If Double click to circle collider as usual then call ClearColoumn(int x)
+            if (Input.GetMouseButtonDown(0))
             {
-                // Check if the mouse is over the collider
-                Vector2 mousePosition = Camera.main.ScreenToWorldPoint(Input.mousePosition);
-                if (collider.OverlapPoint(mousePosition))
+                if (Input.GetMouseButtonDown(0))
                 {
-                    // Handle double-click action for row clear
-                    Debug.Log("Row Clear piece clicked! Clearing row...");
-                    ClearRow(Y); // Call the ClearRow method with the current piece's Y position
+                    ClearColoumn(X);
                 }
             }
         }
+
+
+
 
 
     }
@@ -314,20 +297,20 @@ public class Piece : MonoBehaviour
         //if horizontalMatches count 4 or more , then call Bomb(int x, int y)
         if (horizontalMatches.Count >= 4)
         {
-            gridManager.SpawnSpecialPiece(X, Y, GridManager.SpecialPieceType.Bomb);
+            
 
         }
 
         //if horizontalMatches count 5 or more , then call ClearRow
         if (horizontalMatches.Count >= 5)
         {
-            gridManager.SpawnSpecialPiece(X, Y, GridManager.SpecialPieceType.Column_Clear);
+            
         }
 
         //if horizontalMatches count 6 or more , then call ClearColour
         if (horizontalMatches.Count >= 6 || verticalMatches.Count >= 6)
         {
-            gridManager.SpawnSpecialPiece(X, Y, GridManager.SpecialPieceType.Row_Clear);
+            
         }
 
 
@@ -385,21 +368,26 @@ public class Piece : MonoBehaviour
         //if verticalMatches count 4 or more , then call Bomb(int x, int y)
         if (verticalMatches.Count >= 4)
         {
-            gridManager.SpawnSpecialPiece(X, Y, GridManager.SpecialPieceType.Bomb);
+            //call MarkAsMatched_2 using proper logic
+
 
         }
 
         //if verticalMatches count 4 or more , then call ClearColoumn
         if (verticalMatches.Count >= 5)
         {
-            gridManager.SpawnSpecialPiece(X, Y, GridManager.SpecialPieceType.Column_Clear);
+            
         }
 
         //if horizontalMatches count 6 or more , then call ClearColour
         if (horizontalMatches.Count >= 6 || verticalMatches.Count >= 6)
         {
-            gridManager.SpawnSpecialPiece(X, Y, GridManager.SpecialPieceType.Row_Clear);
+            
         }
+
+        
+
+        
     }
 
 
@@ -433,7 +421,33 @@ public class Piece : MonoBehaviour
     }
 
 
+    void MarkAsMatched_2(Piece piece)
+    {
+        //remove other pieces exept this one and spawn a special piece
+        Collider2D collider = piece.GetComponent<Collider2D>();
+        if (collider != null)
+        {
+            collider.enabled = false;
+        }
+        TriggerGridUpdate();
 
+        /*//destroy the piece after marking it as matched
+        if (piece == null || gridManager == null) return;
+        Destroy(piece.gameObject); // Destroy the matched piece*/
+
+
+
+        // Clear grid reference immediately
+        gridManager.grid[piece.X, piece.Y] = null;
+
+        // Animate scale down to zero before destroying the piece
+        piece.transform.DOScale(Vector2.zero, 0.3f).SetEase(Ease.InBack).OnComplete(() =>
+        {
+            //FindMatches(); // Call the method to find matches at the start
+            Debug.Log("Shimul Motherfucker");
+        });
+
+    }
 
 
 
@@ -444,7 +458,7 @@ public class Piece : MonoBehaviour
         //gridManager.UpdateGrid(); // Let GridManager handle collapsing and refilling
         //Debug.Log("Grid updated after match.");
 
-        gridManager.UpdateGrid(false);
+        gridManager.UpdateGrid();
     }
 
 
@@ -585,7 +599,6 @@ public class Piece : MonoBehaviour
             }
         }
     }
-
 
 
 }
