@@ -1,67 +1,84 @@
+﻿using System.Collections;
+using System.Collections.Generic;
 using UnityEngine;
 using DG.Tweening;
-using System.Collections.Generic;
 
-public class BackgroundManager : MonoBehaviour
+public class BubbleCloudSpawner : MonoBehaviour
 {
-    [Header("Bubble Settings")]
+    [Header("🔹 Bubble Settings")]
     public GameObject bubblePrefab;
-    public List<Transform> bubbleSpawnPoints;
-    public float bubbleSpawnInterval = 0.5f;
-    public float bubbleMoveDistance = 10f;
-    public float bubbleMinScale = 1f;
-    public float bubbleMaxScale = 5f;
-    public float bubbleMinSpeed = 3f;
-    public float bubbleMaxSpeed = 7f;
+    public Transform[] bubbleSpawnPoints;
+    public float bubbleSpawnInterval = 1.5f;
+    public float bubbleMoveSpeed = 2f;
+    public float bubbleTravelDistance = 5f;
+    public static Vector2 bubbleScaleRange = new Vector2(0.5f, 1.5f); // Accessible globally
 
-    [Header("Cloud Settings")]
-    public GameObject[] cloudPrefabs;
-    public List<Transform> leftSpawnPoints;
-    public List<Transform> rightSpawnPoints;
+    [Header("🔹 Cloud Settings")]
+    public GameObject cloudPrefab;
+    public Transform[] cloudSpawnLeft;
+    public Transform[] cloudSpawnRight;
     public float cloudSpawnInterval = 3f;
-    public float cloudMinSpeed = 2f;
-    public float cloudMaxSpeed = 5f;
-    public float cloudTravelDistance = 30f;
+    public float cloudMoveSpeed = 5f;
+    public float cloudTravelDistance = 20f;
 
     private void Start()
     {
-        InvokeRepeating(nameof(SpawnBubble), 0f, bubbleSpawnInterval);
-        InvokeRepeating(nameof(SpawnCloud), 1f, cloudSpawnInterval);
+        StartCoroutine(SpawnBubblesRoutine());
+        StartCoroutine(SpawnCloudsRoutine());
+    }
+
+    IEnumerator SpawnBubblesRoutine()
+    {
+        while (true)
+        {
+            SpawnBubble();
+            yield return new WaitForSeconds(bubbleSpawnInterval);
+        }
+    }
+
+    IEnumerator SpawnCloudsRoutine()
+    {
+        while (true)
+        {
+            SpawnCloud();
+            yield return new WaitForSeconds(cloudSpawnInterval);
+        }
     }
 
     void SpawnBubble()
     {
-        if (bubbleSpawnPoints.Count == 0 || bubblePrefab == null) return;
+        if (bubblePrefab == null || bubbleSpawnPoints.Length == 0) return;
 
-        Transform spawnPoint = bubbleSpawnPoints[Random.Range(0, bubbleSpawnPoints.Count)];
-        GameObject bubble = Instantiate(bubblePrefab, spawnPoint.position, Quaternion.identity, transform);
+        Transform spawnPoint = bubbleSpawnPoints[Random.Range(0, bubbleSpawnPoints.Length)];
+        GameObject bubble = Instantiate(bubblePrefab, spawnPoint.position, Quaternion.identity);
 
-        float scale = Random.Range(bubbleMinScale, bubbleMaxScale);
-        bubble.transform.localScale = Vector3.one * scale;
+        // Randomize scale
+        float scaleValue = Random.Range(bubbleScaleRange.x, bubbleScaleRange.y);
+        bubble.transform.localScale = Vector3.one * scaleValue;
 
-        float moveDuration = Random.Range(bubbleMinSpeed, bubbleMaxSpeed);
-
-        bubble.transform.DOMoveY(spawnPoint.position.y + bubbleMoveDistance, moveDuration)
-            .SetEase(Ease.Linear)
+        // Move upward
+        Vector3 targetPos = bubble.transform.position + Vector3.up * bubbleTravelDistance;
+        bubble.transform.DOMove(targetPos, bubbleMoveSpeed).SetEase(Ease.Linear)
             .OnComplete(() => Destroy(bubble));
     }
 
     void SpawnCloud()
     {
-        bool spawnFromLeft = Random.value > 0.5f;
+        if (cloudPrefab == null || cloudSpawnLeft.Length == 0 || cloudSpawnRight.Length == 0) return;
 
-        List<Transform> spawnList = spawnFromLeft ? leftSpawnPoints : rightSpawnPoints;
-        if (spawnList.Count == 0 || cloudPrefabs.Length == 0) return;
+        bool fromLeft = Random.value > 0.5f;
+        Transform spawnPoint = fromLeft
+            ? cloudSpawnLeft[Random.Range(0, cloudSpawnLeft.Length)]
+            : cloudSpawnRight[Random.Range(0, cloudSpawnRight.Length)];
 
-        Transform spawnPoint = spawnList[Random.Range(0, spawnList.Count)];
-        GameObject cloudPrefab = cloudPrefabs[Random.Range(0, cloudPrefabs.Length)];
-        GameObject cloud = Instantiate(cloudPrefab, spawnPoint.position, Quaternion.identity, transform);
+        GameObject cloud = Instantiate(cloudPrefab, spawnPoint.position, Quaternion.identity);
 
-        float moveDuration = Random.Range(cloudMinSpeed, cloudMaxSpeed);
-        Vector3 targetPos = spawnPoint.position + (spawnFromLeft ? Vector3.right : Vector3.left) * cloudTravelDistance;
+        // Determine target position
+        Vector3 targetPos = fromLeft
+            ? cloud.transform.position + Vector3.right * cloudTravelDistance
+            : cloud.transform.position + Vector3.left * cloudTravelDistance;
 
-        cloud.transform.DOMoveX(targetPos.x, moveDuration)
-            .SetEase(Ease.Linear)
+        cloud.transform.DOMove(targetPos, cloudMoveSpeed).SetEase(Ease.Linear)
             .OnComplete(() => Destroy(cloud));
     }
 }

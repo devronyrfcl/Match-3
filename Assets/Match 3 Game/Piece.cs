@@ -106,6 +106,18 @@ public class Piece : MonoBehaviour
         Vector2Int snapped = Vector2Int.RoundToInt(transform.position);
         transform.position = new Vector2(snapped.x, snapped.y); // Snap the piece to the grid position
 
+        if(specialPieceType == SpecialPieceType.Bomb && IsSpecialPiece)
+        {
+            //on double click, call Bomb(int x, int y)
+            if (Input.GetMouseButtonDown(0))
+            {
+                if (Input.GetMouseButtonDown(0))
+                {
+                    Bomb(X, Y); // Trigger bomb effect at the current piece's position
+                }
+            }
+        }
+
 
 
 
@@ -441,22 +453,24 @@ public class Piece : MonoBehaviour
         //if horizontalMatches count 4 or more , then call Bomb(int x, int y)
         if (horizontalMatches.Count >= 4)
         {
-            //Debug.Log("Horizontal match of 4 or more found, triggering bomb effect.");
-            Bomb(X, Y); // Trigger bomb effect at the current piece's position
+            // spawn bomb at the current piece's position using gridManager.SpawnBomb()
+            gridManager.SpawnBomb(X, Y); // Trigger bomb effect at the current piece's position
+
+
         }
 
         //if horizontalMatches count 5 or more , then call ClearRow
         if (horizontalMatches.Count >= 5)
         {
             //Debug.Log("Horizontal match of 5 or more found, clearing entire row.");
-            ClearRow(Y); // Clear the entire row where the match was found
+            //ClearRow(Y); // Clear the entire row where the match was found
         }
 
         //if horizontalMatches count 6 or more , then call ClearColour
         if (horizontalMatches.Count >= 6 || verticalMatches.Count >= 6)
         {
             //Debug.Log("Match of 6 or more found, clearing all pieces of the same colour.");
-            ClearColour(pieceType); // Clear all pieces of the same colour
+            //ClearColour(pieceType); // Clear all pieces of the same colour
         }
 
 
@@ -515,7 +529,7 @@ public class Piece : MonoBehaviour
         if (verticalMatches.Count >= 4)
         {
             //Debug.Log("Vertical match of 4 or more found, triggering bomb effect.");
-            Bomb(X, Y); // Trigger bomb effect at the current piece's position
+            gridManager.SpawnBomb(X, Y); // Trigger bomb effect at the current piece's position
         }
 
         //if verticalMatches count 4 or more , then call ClearColoumn
@@ -714,6 +728,5 @@ public class Piece : MonoBehaviour
             }
         }
     }
-
 
 }
