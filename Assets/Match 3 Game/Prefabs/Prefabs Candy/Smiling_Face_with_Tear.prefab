@@ -102,12 +102,20 @@ MonoBehaviour:
   Y: 0
   firstTouchPosition: {x: 0, y: 0}
   finalTouchPosition: {x: 0, y: 0}
-  touchAngle: 0
   otherPiece: {fileID: 0}
   swipeAngle: 0
   pieceType: 1
+  IsSpecialBombPiece: 0
+  IsSpecialRowPiece: 0
+  IsSpecialColoumnPiece: 0
+  IsSpecialColorPiece: 0
   gridManager: {fileID: 0}
   isMatched: 0
+  stickToGrid: 1
+  ColoumnPiece: {fileID: 8252069988943881566, guid: 60cf0b92ce84b8744aa712bc084bdf8f, type: 3}
+  RowPiece: {fileID: 8252069988943881566, guid: 41c210758cfdb004aa61b486adcab76c, type: 3}
+  BombPiece: {fileID: 7079316263224728815, guid: 2130cca2ee3197a4fbe3b5b31ac4b5c6, type: 3}
+  ColorPiece: {fileID: 7079316263224728815, guid: 3eb04ab5e1f3d044e96821fbe4079ec4, type: 3}
 --- !u!58 &7959495416234875339
 CircleCollider2D:
   m_ObjectHideFlags: 0

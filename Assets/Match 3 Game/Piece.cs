@@ -2,6 +2,7 @@
 using System.Collections.Generic;
 using UnityEngine;
 using DG.Tweening;
+using UnityEngine.UIElements;
 
 public enum PieceType
 {
@@ -53,6 +54,8 @@ public class Piece : MonoBehaviour
 
     public GameObject ColoumnPiece;
     public GameObject RowPiece;
+    public GameObject BombPiece;
+    public GameObject ColorPiece;
 
 
     public void SetPosition(int x, int y)
@@ -90,6 +93,8 @@ public class Piece : MonoBehaviour
 
         stickToGrid = true; // Enable sticking to grid by default
 
+
+
     }
 
     // Update is called once per frame
@@ -99,41 +104,38 @@ public class Piece : MonoBehaviour
         Vector2Int snapped = Vector2Int.RoundToInt(transform.position);
         transform.position = new Vector2(snapped.x, snapped.y); // Snap the piece to the grid position*/
 
-        if(IsSpecialBombPiece)
+        //if IsSpecialBombPiece is true and click on the piece using mouse raycast then bomb(int x, int y)
+        /*if (IsSpecialBombPiece && Input.GetMouseButtonDown(0))
         {
-            //If Double click to circle collider as usual then call bomb(int x, int y)
-            if (Input.GetMouseButtonDown(0))
+            Vector2 mousePosition = Camera.main.ScreenToWorldPoint(Input.mousePosition);
+            RaycastHit2D hit = Physics2D.Raycast(mousePosition, Vector2.zero);
+            if (hit.collider != null && hit.collider.gameObject == gameObject)
             {
-                if (Input.GetMouseButtonDown(0))
-                {
-                    Bomb(X, Y);
-                }
+                Bomb(X, Y); // Call the Bomb method with the current piece's position
             }
         }
 
-        if(IsSpecialRowPiece)
+        //if IsSpecialRowPiece is true and click on the piece using mouse raycast then ClearRow(int y)
+        if (IsSpecialRowPiece && Input.GetMouseButtonDown(0))
         {
-            //If Double click to circle collider as usual then call ClearRow(int y)
-            if (Input.GetMouseButtonDown(0))
+            Vector2 mousePosition = Camera.main.ScreenToWorldPoint(Input.mousePosition);
+            RaycastHit2D hit = Physics2D.Raycast(mousePosition, Vector2.zero);
+            if (hit.collider != null && hit.collider.gameObject == gameObject)
             {
-                if (Input.GetMouseButtonDown(0))
-                {
-                    ClearRow(Y);
-                }
+                ClearRow(Y); // Call the ClearRow method with the current piece's Y position
             }
         }
 
-        if(IsSpecialColoumnPiece)
+        //if IsSpecialColoumnPiece is true and click on the piece using mouse raycast then ClearColoumn(int x)
+        if (IsSpecialColoumnPiece && Input.GetMouseButtonDown(0))
         {
-            //If Double click to circle collider as usual then call ClearColoumn(int x)
-            if (Input.GetMouseButtonDown(0))
+            Vector2 mousePosition = Camera.main.ScreenToWorldPoint(Input.mousePosition);
+            RaycastHit2D hit = Physics2D.Raycast(mousePosition, Vector2.zero);
+            if (hit.collider != null && hit.collider.gameObject == gameObject)
             {
-                if (Input.GetMouseButtonDown(0))
-                {
-                    ClearColoumn(X);
-                }
+                ClearColoumn(X); // Call the ClearColoumn method with the current piece's X position
             }
-        }
+        }*/
 
 
 
@@ -164,7 +166,7 @@ public class Piece : MonoBehaviour
                 if ((Mathf.Abs(difference.x) == 1 && difference.y == 0) ||
                     (Mathf.Abs(difference.y) == 1 && difference.x == 0))
                 {
-                    Debug.Log("Swiped to: " + otherPiece.name + " from: " + gameObject.name);
+                    //Debug.Log("Swiped to: " + otherPiece.name + " from: " + gameObject.name);
 
                     Vector2 myTarget = otherPiece.transform.position;
                     Vector2 otherTarget = transform.position;
@@ -174,6 +176,8 @@ public class Piece : MonoBehaviour
                     originalWorldPosition = transform.position;
                     originalX = X;
                     originalY = Y;
+
+                    
 
                     other.originalWorldPosition = otherPiece.transform.position;
                     other.originalX = other.X;
@@ -200,6 +204,7 @@ public class Piece : MonoBehaviour
 
                         // Trigger match check
                         Invoke(nameof(FindMatches), 0.5f);
+                        other.Invoke(nameof(FindMatches), 0.5f);
                     }
                     else
                     {
@@ -224,8 +229,6 @@ public class Piece : MonoBehaviour
         //Invoke(nameof(FindMatches), 0.2f); // Call the method to find matches after a short delay
 
         //FindMatches();
-
-
 
     }
 
@@ -283,34 +286,53 @@ public class Piece : MonoBehaviour
                 if (piece != null && !piece.isMatched)
                 {
                     piece.isMatched = true;
+
+                    // 🔹 Special piece trigger check
+                    if (piece.IsSpecialBombPiece || piece.IsSpecialRowPiece ||
+                        piece.IsSpecialColoumnPiece || piece.IsSpecialColorPiece)
+                    {
+                        if (piece.IsSpecialBombPiece) piece.Bomb(X, Y);
+                        if (piece.IsSpecialRowPiece) piece.ClearRow(X);
+                        if (piece.IsSpecialColoumnPiece) piece.ClearColoumn(originalY);
+                        
+                    }
+
                     MarkAsMatched(piece);
-                }
-                else
-                {
-                    // If the piece is already matched, we need to reset the other piece
                 }
             }
             TriggerGridUpdate();
-            //Debug.Log($"Horizontal match of {horizontalMatches.Count} at ({X},{Y})");
         }
 
         //if horizontalMatches count 4 or more , then call Bomb(int x, int y)
         if (horizontalMatches.Count >= 4)
         {
-            
+            //spawn coloumn piece
+            GameObject spawnedPieceGameObject = Instantiate(RowPiece, transform.position, Quaternion.identity);
+            spawnedPieceGameObject.transform.SetParent(gridManager.transform); // Set the parent to the grid manager
+
+
+            gridManager.RegisterNewPiece(spawnedPieceGameObject, X, Y);
 
         }
 
         //if horizontalMatches count 5 or more , then call ClearRow
         if (horizontalMatches.Count >= 5)
         {
-            
+            GameObject spawnedPieceGameObject = Instantiate(RowPiece, transform.position, Quaternion.identity);
+            spawnedPieceGameObject.transform.SetParent(gridManager.transform); // Set the parent to the grid manager
+
+
+            gridManager.RegisterNewPiece(spawnedPieceGameObject, X, Y);
         }
 
         //if horizontalMatches count 6 or more , then call ClearColour
         if (horizontalMatches.Count >= 6 || verticalMatches.Count >= 6)
         {
-            
+            GameObject spawnedPieceGameObject = Instantiate(ColorPiece, transform.position, Quaternion.identity);
+            spawnedPieceGameObject.transform.SetParent(gridManager.transform); // Set the parent to the grid manager
+
+
+            gridManager.RegisterNewPiece(spawnedPieceGameObject, X, Y);
         }
 
 
@@ -340,21 +362,33 @@ public class Piece : MonoBehaviour
 
         if (verticalMatches.Count >= 3)
         {
+            //take refernce int value of this piece coloumn and row
+            int X = this.X;
+            int Y = this.Y;
+
+
             foreach (var piece in verticalMatches)
             {
                 if (piece != null && !piece.isMatched)
                 {
                     piece.isMatched = true;
+
+                    // 🔹 Special piece trigger check
+                    if (piece.IsSpecialBombPiece || piece.IsSpecialRowPiece ||
+                        piece.IsSpecialColoumnPiece || piece.IsSpecialColorPiece)
+                    {
+                        if (piece.IsSpecialBombPiece) piece.Bomb(piece.X, piece.Y);
+                        if (piece.IsSpecialRowPiece) piece.ClearRow(piece.Y);
+                        if (piece.IsSpecialColoumnPiece) piece.ClearColoumn(piece.X);
+
+                    }
+
                     MarkAsMatched(piece);
-                }
-                else
-                {
-                    // If the piece is already matched, we need to reset the other piece
                 }
             }
             TriggerGridUpdate();
-            //Debug.Log($"Vertical match of {verticalMatches.Count} at ({X},{Y})");
         }
+
         else
         {
             //Debug.Log("No matches found.");
@@ -369,6 +403,11 @@ public class Piece : MonoBehaviour
         if (verticalMatches.Count >= 4)
         {
             //call MarkAsMatched_2 using proper logic
+            GameObject spawnedPieceGameObject = Instantiate(ColoumnPiece, transform.position, Quaternion.identity);
+            spawnedPieceGameObject.transform.SetParent(gridManager.transform); // Set the parent to the grid manager
+
+
+            gridManager.RegisterNewPiece(spawnedPieceGameObject, X, Y);
 
 
         }
@@ -376,13 +415,21 @@ public class Piece : MonoBehaviour
         //if verticalMatches count 4 or more , then call ClearColoumn
         if (verticalMatches.Count >= 5)
         {
-            
+            GameObject spawnedPieceGameObject = Instantiate(ColoumnPiece, transform.position, Quaternion.identity);
+            spawnedPieceGameObject.transform.SetParent(gridManager.transform); // Set the parent to the grid manager
+
+
+            gridManager.RegisterNewPiece(spawnedPieceGameObject, X, Y);
         }
 
         //if horizontalMatches count 6 or more , then call ClearColour
         if (horizontalMatches.Count >= 6 || verticalMatches.Count >= 6)
         {
-            
+            GameObject spawnedPieceGameObject = Instantiate(ColorPiece, transform.position, Quaternion.identity);
+            spawnedPieceGameObject.transform.SetParent(gridManager.transform); // Set the parent to the grid manager
+
+
+            gridManager.RegisterNewPiece(spawnedPieceGameObject, X, Y);
         }
 
         
@@ -415,13 +462,15 @@ public class Piece : MonoBehaviour
         // Animate scale down to zero before destroying the piece
         piece.transform.DOScale(Vector2.zero, 0.3f).SetEase(Ease.InBack).OnComplete(() =>
         {
+            gridManager.SpawnParticleEffect(X, Y);
+
             //FindMatches(); // Call the method to find matches at the start
             Destroy(piece.gameObject);
         });
     }
 
 
-    void MarkAsMatched_2(Piece piece)
+    /*public void MarkAsMatched_2(Piece piece)
     {
         //remove other pieces exept this one and spawn a special piece
         Collider2D collider = piece.GetComponent<Collider2D>();
@@ -431,9 +480,9 @@ public class Piece : MonoBehaviour
         }
         TriggerGridUpdate();
 
-        /*//destroy the piece after marking it as matched
+        //destroy the piece after marking it as matched
         if (piece == null || gridManager == null) return;
-        Destroy(piece.gameObject); // Destroy the matched piece*/
+        Destroy(piece.gameObject); // Destroy the matched piece
 
 
 
@@ -446,8 +495,8 @@ public class Piece : MonoBehaviour
             //FindMatches(); // Call the method to find matches at the start
             Debug.Log("Shimul Motherfucker");
         });
-
-    }
+    
+    }*/
 
 
 
@@ -457,6 +506,7 @@ public class Piece : MonoBehaviour
 
         //gridManager.UpdateGrid(); // Let GridManager handle collapsing and refilling
         //Debug.Log("Grid updated after match.");
+
 
         gridManager.UpdateGrid();
     }
@@ -468,7 +518,7 @@ public class Piece : MonoBehaviour
     // Helper method to check if no matches were found after a swap. If no matches found, reverse the swap wait for 1 sec and reset the positions using dotween
     private IEnumerator SwipeBackAfterDelay(float delay = 1f)
     {
-        Debug.Log("No matches found, reversing swap...");
+        //Debug.Log("No matches found, reversing swap...");
 
         yield return new WaitForSeconds(delay);
 
@@ -507,6 +557,9 @@ public class Piece : MonoBehaviour
             {
                 piece.isMatched = true;
                 MarkAsMatched(piece);
+                Debug.Log("Coloumn cleared at index: " + coloumnIndex + " for piece type: " + piece.pieceType);
+
+
             }
         }
     }
@@ -520,6 +573,7 @@ public class Piece : MonoBehaviour
             {
                 piece.isMatched = true;
                 MarkAsMatched(piece);
+                Debug.Log("Row cleared at index: " + rowIndex + " for piece type: " + piece.pieceType);
             }
         }
     }
@@ -556,6 +610,7 @@ public class Piece : MonoBehaviour
                     {
                         piece.isMatched = true;
                         MarkAsMatched(piece);
+                        Debug.Log("Bomb triggered at (" + targetX + ", " + targetY + ")");
                     }
                 }
             }
@@ -599,6 +654,8 @@ public class Piece : MonoBehaviour
             }
         }
     }
+
+    
 
 
 }

@@ -26,8 +26,8 @@ Transform:
   m_GameObject: {fileID: 6571167659602851199}
   serializedVersion: 2
   m_LocalRotation: {x: -0, y: -0, z: -0, w: 1}
-  m_LocalPosition: {x: 0, y: 0.168, z: 0}
-  m_LocalScale: {x: 0.89393, y: 0.89393, z: 0.89393}
+  m_LocalPosition: {x: 0, y: 0, z: 0}
+  m_LocalScale: {x: 1, y: 1, z: 1}
   m_ConstrainProportionsScale: 0
   m_Children: []
   m_Father: {fileID: 7893228772792634509}
@@ -73,7 +73,7 @@ SpriteRenderer:
   m_SortingLayerID: 0
   m_SortingLayer: 0
   m_SortingOrder: 0
-  m_Sprite: {fileID: 21300000, guid: d9f2fb639acdc25409df99a4c48a87ba, type: 3}
+  m_Sprite: {fileID: 1042738762, guid: dd1b28b7bcf8bcb4681c1c856cb374fa, type: 3}
   m_Color: {r: 1, g: 1, b: 1, a: 1}
   m_FlipX: 0
   m_FlipY: 0
@@ -97,7 +97,7 @@ GameObject:
   - component: {fileID: 839993508281971385}
   - component: {fileID: 7068620627162160305}
   m_Layer: 0
-  m_Name: Z_Special Bomb
+  m_Name: Z_Special ColorPiece
   m_TagString: Untagged
   m_Icon: {fileID: 0}
   m_NavMeshLayer: 0

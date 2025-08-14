@@ -76,7 +76,7 @@ SpriteRenderer:
   m_SortingLayer: 0
   m_SortingOrder: 0
   m_Sprite: {fileID: -97493459, guid: bbcceb2198677444b8d58f504ae86f07, type: 3}
-  m_Color: {r: 0, g: 1, b: 0.9424863, a: 1}
+  m_Color: {r: 0, g: 0, b: 0, a: 1}
   m_FlipX: 0
   m_FlipY: 0
   m_DrawMode: 0
@@ -105,11 +105,15 @@ MonoBehaviour:
   otherPiece: {fileID: 0}
   swipeAngle: 0
   pieceType: 4
-  specialPieceType: 0
-  IsSpecialPiece: 0
+  IsSpecialBombPiece: 0
+  IsSpecialRowPiece: 1
+  IsSpecialColoumnPiece: 0
+  IsSpecialColorPiece: 0
   gridManager: {fileID: 0}
   isMatched: 0
   stickToGrid: 1
+  ColoumnPiece: {fileID: 0}
+  RowPiece: {fileID: 0}
 --- !u!58 &1453061582961287770
 CircleCollider2D:
   m_ObjectHideFlags: 0

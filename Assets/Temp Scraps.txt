@@ -519,3 +519,38 @@ public class Piece : MonoBehaviour
 
 
 
+if(IsSpecialBombPiece)
+        {
+            //If Double click to circle collider as usual then call bomb(int x, int y)
+            if (Input.GetMouseButtonDown(0))
+            {
+                if (Input.GetMouseButtonDown(0))
+                {
+                    Bomb(X, Y);
+                }
+            }
+        }
+
+        if(IsSpecialRowPiece)
+        {
+            //If Double click to circle collider as usual then call ClearRow(int y)
+            if (Input.GetMouseButtonDown(0))
+            {
+                if (Input.GetMouseButtonDown(0))
+                {
+                    ClearRow(Y);
+                }
+            }
+        }
+
+        if(IsSpecialColoumnPiece)
+        {
+            //If Double click to circle collider as usual then call ClearColoumn(int x)
+            if (Input.GetMouseButtonDown(0))
+            {
+                if (Input.GetMouseButtonDown(0))
+                {
+                    ClearColoumn(X);
+                }
+            }
+        }

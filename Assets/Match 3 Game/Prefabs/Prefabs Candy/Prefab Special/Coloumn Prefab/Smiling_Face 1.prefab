@@ -105,11 +105,15 @@ MonoBehaviour:
   otherPiece: {fileID: 0}
   swipeAngle: 0
   pieceType: 0
-  specialPieceType: 0
-  IsSpecialPiece: 0
+  IsSpecialBombPiece: 0
+  IsSpecialRowPiece: 0
+  IsSpecialColoumnPiece: 1
+  IsSpecialColorPiece: 0
   gridManager: {fileID: 0}
   isMatched: 0
   stickToGrid: 1
+  ColoumnPiece: {fileID: 0}
+  RowPiece: {fileID: 0}
 --- !u!58 &1875970771031773305
 CircleCollider2D:
   m_ObjectHideFlags: 0
