@@ -554,3 +554,30 @@ if(IsSpecialBombPiece)
                 }
             }
         }
+
+
+
+
+
+
+
+        if (isSpinning)
+        {
+            currentTime += Time.deltaTime;
+
+            float progress = Mathf.Clamp01(currentTime / spinDuration);
+
+            // Ease out (slows down smoothly)
+            float easedProgress = 1 - Mathf.Pow(1 - progress, 3);
+
+            float currentAngle = easedProgress * totalAngle;
+            spinObject.transform.rotation = Quaternion.Euler(0, 0, -currentAngle);
+
+            if (progress >= 1f)
+            {
+                isSpinning = false;
+                onSpinComplete.Invoke(); // Trigger the event when spin is complet
+            }
+
+
+        }

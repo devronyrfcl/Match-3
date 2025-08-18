@@ -797,7 +797,7 @@ public class GridManager : MonoBehaviour
             {
                 stars = 3; // Full stars
                 Debug.Log("3 stars and 100XP earned!");
-                XP = 55;
+                XP = 100;
             }
             else if (currentMoves >= levelData.movesCount * 0.2f && currentTime >= levelData.timeLimit * 0.2f)
             {
@@ -809,27 +809,12 @@ public class GridManager : MonoBehaviour
             {
                 stars = 1; // One star
                 Debug.Log("1 star and 20 XP earned!");
-                XP = 20;
+                XP = 10;
             }
         }
 
 
-        // Calculate XP based on moves and time left. more moves and move time left, more XP
-        /*else if (currentMoves > 0 && currentTime > 0)
-        {
-            if (currentMoves >= levelData.movesCount * 0.25f && currentTime >= levelData.timeLimit * 0.25f)
-            {
-                XP = 100; // Full XP
-            }
-            else if (currentMoves >= levelData.movesCount * 0.2f && currentTime >= levelData.timeLimit * 0.2f)
-            {
-                XP = 50; // Half XP
-            }
-            else
-            {
-                XP = 20; // Minimum XP
-            }
-        }*/
+        
 
         // Show the stars UI. By default, all Glowing stars are hidden and normal stars are shown
         for (int i = 0; i < 3; i++)
@@ -850,9 +835,6 @@ public class GridManager : MonoBehaviour
         // Update XP UI
         xpAmount.text = XP.ToString();
         Debug.Log("Stars: " + stars + ", XP: " + XP);
-
-
-
 
     }
 
