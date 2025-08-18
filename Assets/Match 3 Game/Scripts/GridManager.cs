@@ -21,7 +21,7 @@ public class GridManager : MonoBehaviour
 
     public LevelData[] levelDatas; // Array of LevelData ScriptableObjects for different levels
 
-    private int currentLevelIndex = 0;
+    public int currentLevelIndex = 0;
     private const string SelectedLevelIndexKey = "SelectedLevelIndex";
 
 
@@ -261,6 +261,9 @@ public class GridManager : MonoBehaviour
 
         // Recreate the grid with the new LevelData
         CreateGrid();
+
+        
+
     }
 
     void LoadPlayerAbilities()
@@ -309,7 +312,11 @@ public class GridManager : MonoBehaviour
         GameOverPanel.transform.DOScale(Vector3.one, 0.5f).SetEase(Ease.OutBack); // Scale to normal size
         // Optionally, you can also reset the game state or show options to restart or exit
         // Reset the grid and pieces
-        CalculateStarAndShow();
+        //CalculateStarAndShow();
+        //delay CalculateStarAndShow() for 0.5 seconds
+        Invoke("CalculateStarAndShow", 0.5f);
+
+        
 
         SaveNewAbilityCounts(Ability_bombCurrentAmount, Ability_colorBombCurrentAmount, Ability_extraMovesCurrentAmount);
         
@@ -836,7 +843,20 @@ public class GridManager : MonoBehaviour
         xpAmount.text = XP.ToString();
         Debug.Log("Stars: " + stars + ", XP: " + XP);
 
+        //send star and xp data to PlayerDataManager
+        SendStarXpDataToPlayerDataManager(currentLevelIndex + 1, stars, XP);
+
     }
+
+    void SendStarXpDataToPlayerDataManager(int levelId, int stars, int xp)
+    {
+        
+        PlayerDataManager.Instance.SetLevelStars(levelId, stars, xp);
+        PlayerDataManager.Instance.SendXP(levelId, xp);
+        PlayerDataManager.Instance.SavePlayerData(); // Save the updated player data to the JSON file
+        
+    }
+    
 
     /*void NoStarXP()
     {

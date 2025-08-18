@@ -54,7 +54,9 @@ public class Spin : MonoBehaviour
                     finalAngle = spinObject.transform.eulerAngles.z;
                    
                     HandleResult(finalAngle);
-                    
+                    checkSpinCountForAds();
+
+
                 });
             onWatchComplete.Invoke();
         }
@@ -158,19 +160,22 @@ public class Spin : MonoBehaviour
 
         // Show spin UI again
         if (spinLeftText != null) spinLeftText.gameObject.SetActive(true);
+
+        checkSpinCountForAds();
     }
 
-    void update()
+    void checkSpinCountForAds()
     {
+        //if spin count 0 then show ad button
         if (spinCount <= 0)
         {
-            spinNowBtn.SetActive(false);
-            watchAdBtn.SetActive(true);
+            if (spinNowBtn != null) spinNowBtn.SetActive(false);
+            if (watchAdBtn != null) watchAdBtn.SetActive(true);
         }
         else
         {
-            spinNowBtn.SetActive(true);
-            watchAdBtn.SetActive(false);
+            if (spinNowBtn != null) spinNowBtn.SetActive(true);
+            if (watchAdBtn != null) watchAdBtn.SetActive(false);
         }
     }
 

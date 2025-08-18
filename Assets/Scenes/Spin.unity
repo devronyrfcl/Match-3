@@ -11043,8 +11043,8 @@ MonoBehaviour:
           m_StringArgument: 
           m_BoolArgument: 0
         m_CallState: 2
-  spinNowBtn: {fileID: 0}
-  watchAdBtn: {fileID: 0}
+  spinNowBtn: {fileID: 1012138896}
+  watchAdBtn: {fileID: 1397421711}
   spinCount: 2
   spinLeftText: {fileID: 1557075499}
 --- !u!1 &1557075497

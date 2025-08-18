@@ -42,11 +42,11 @@ public class PlayerDataManager : MonoBehaviour
         }
 
         // Example usage
-        SetAllData(1, 0, 2, 50); // 🔥 Example: setting level 1, unlocked, 2 stars, 50 XP
+        /*SetAllData(1, 0, 2, 50); // 🔥 Example: setting level 1, unlocked, 2 stars, 50 XP
         SetAllData(2, 1, 3, 10); // 🔥 Example: setting level 2, locked, 3 stars, 100 XP
 
 
-        SetCurrentLevel(1); // 🔥 Example: setting level 1 as current
+        SetCurrentLevel(1); // 🔥 Example: setting level 1 as current*/
 
         SavePlayerData();
     }
@@ -172,5 +172,21 @@ public class PlayerDataManager : MonoBehaviour
         SetLevelLocked(levelId, lockedValue);
         SetLevelStars(levelId, stars, xp);
         
+    }
+
+    //send xp of specific level
+    public void SendXP(int levelId, int xp)
+    {
+        LevelInfo level = playerData.Levels.Find(l => l.LevelID == levelId);
+        if (level != null)
+        {
+            level.XP += xp;
+            playerData.TotalXP += xp;
+            Debug.Log($"XP for Level {levelId} updated: {xp}, Total XP: {playerData.TotalXP}");
+        }
+        else
+        {
+            Debug.LogWarning($"Level {levelId} not found to send XP.");
+        }
     }
 }

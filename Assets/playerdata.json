@@ -1,7 +1,7 @@
 {
     "Name": "Dev Rony",
     "PlayerID": "34vfg434ggv4543fgge2324",
-    "TotalXP": 900,
+    "TotalXP": 1080,
     "PlayerBombAbilityCount": 38,
     "PlayerColorBombAbilityCount": 35,
     "PlayerExtraMoveAbilityCount": 10,
@@ -10,13 +10,13 @@
         {
             "LevelID": 1,
             "Stars": 2,
-            "XP": 750,
+            "XP": 50,
             "LevelLocked": 0
         },
         {
             "LevelID": 2,
             "Stars": 3,
-            "XP": 150,
+            "XP": 10,
             "LevelLocked": 1
         },
         {
