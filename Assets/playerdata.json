@@ -1,22 +1,70 @@
 {
-    "Name": "",
-    "PlayerID": "",
-    "TotalXP": 540,
-    "PlayerBombAbilityCount": 40,
-    "PlayerColorBombAbilityCount": 36,
+    "Name": "Dev Rony",
+    "PlayerID": "34vfg434ggv4543fgge2324",
+    "TotalXP": 900,
+    "PlayerBombAbilityCount": 38,
+    "PlayerColorBombAbilityCount": 35,
     "PlayerExtraMoveAbilityCount": 10,
     "CurrentLevelId": 1,
     "Levels": [
         {
             "LevelID": 1,
             "Stars": 2,
-            "XP": 450,
+            "XP": 750,
             "LevelLocked": 0
         },
         {
             "LevelID": 2,
             "Stars": 3,
-            "XP": 90,
+            "XP": 150,
+            "LevelLocked": 1
+        },
+        {
+            "LevelID": 3,
+            "Stars": 0,
+            "XP": 0,
+            "LevelLocked": 1
+        },
+        {
+            "LevelID": 4,
+            "Stars": 0,
+            "XP": 0,
+            "LevelLocked": 1
+        },
+        {
+            "LevelID": 5,
+            "Stars": 0,
+            "XP": 0,
+            "LevelLocked": 1
+        },
+        {
+            "LevelID": 6,
+            "Stars": 0,
+            "XP": 0,
+            "LevelLocked": 1
+        },
+        {
+            "LevelID": 7,
+            "Stars": 0,
+            "XP": 0,
+            "LevelLocked": 1
+        },
+        {
+            "LevelID": 8,
+            "Stars": 0,
+            "XP": 0,
+            "LevelLocked": 1
+        },
+        {
+            "LevelID": 9,
+            "Stars": 0,
+            "XP": 0,
+            "LevelLocked": 1
+        },
+        {
+            "LevelID": 10,
+            "Stars": 0,
+            "XP": 0,
             "LevelLocked": 1
         }
     ]

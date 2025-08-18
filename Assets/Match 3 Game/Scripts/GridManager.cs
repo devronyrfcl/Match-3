@@ -63,6 +63,11 @@ public class GridManager : MonoBehaviour
 
     public GameObject GameOverPanel;
     public GameObject itemWarningPanel;
+    public int stars = 0;
+    public int XP = 0; // XP earned in the level
+    public GameObject[] normalStars; // Empty stars
+    public GameObject[] glowStars;   // Filled stars
+    public TMP_Text xpAmount;
 
 
 
@@ -304,9 +309,10 @@ public class GridManager : MonoBehaviour
         GameOverPanel.transform.DOScale(Vector3.one, 0.5f).SetEase(Ease.OutBack); // Scale to normal size
         // Optionally, you can also reset the game state or show options to restart or exit
         // Reset the grid and pieces
+        CalculateStarAndShow();
 
         SaveNewAbilityCounts(Ability_bombCurrentAmount, Ability_colorBombCurrentAmount, Ability_extraMovesCurrentAmount);
-
+        
     }
 
 
@@ -774,6 +780,97 @@ public class GridManager : MonoBehaviour
     public void Crying_Face() => DeductTarget(PieceType.Crying_Face);
     #endregion
 
-    
-    
+    public void CalculateStarAndShow()
+    {
+        //if  level datas Target1Count and Target2Count are 0, then no stars and no XP
+        if (levelData.target1Count == 0 && levelData.target2Count == 0)
+        {
+            stars = 0; // No stars
+            XP = 0; // No XP
+            Debug.Log("No stars and no XP because targets are 0.");
+        }
+        // Calculate stars based on moves and time left. more moves and move time left, more stars
+
+        else if (currentMoves > 0 && currentTime > 0)
+        {
+            if (currentMoves >= levelData.movesCount * 0.25f && currentTime >= levelData.timeLimit * 0.25f)
+            {
+                stars = 3; // Full stars
+                Debug.Log("3 stars and 100XP earned!");
+                XP = 55;
+            }
+            else if (currentMoves >= levelData.movesCount * 0.2f && currentTime >= levelData.timeLimit * 0.2f)
+            {
+                stars = 2; // Two stars
+                Debug.Log("2 stars and 50 XP earned!");
+                XP = 50;
+            }
+            else
+            {
+                stars = 1; // One star
+                Debug.Log("1 star and 20 XP earned!");
+                XP = 20;
+            }
+        }
+
+
+        // Calculate XP based on moves and time left. more moves and move time left, more XP
+        /*else if (currentMoves > 0 && currentTime > 0)
+        {
+            if (currentMoves >= levelData.movesCount * 0.25f && currentTime >= levelData.timeLimit * 0.25f)
+            {
+                XP = 100; // Full XP
+            }
+            else if (currentMoves >= levelData.movesCount * 0.2f && currentTime >= levelData.timeLimit * 0.2f)
+            {
+                XP = 50; // Half XP
+            }
+            else
+            {
+                XP = 20; // Minimum XP
+            }
+        }*/
+
+        // Show the stars UI. By default, all Glowing stars are hidden and normal stars are shown
+        for (int i = 0; i < 3; i++)
+        {
+            if (i < stars)
+            {
+                glowStars[i].SetActive(true); // Show glowing stars
+                normalStars[i].SetActive(false); // Hide normal stars
+            }
+            else
+            {
+                glowStars[i].SetActive(false); // Hide glowing stars
+                normalStars[i].SetActive(true); // Show normal stars
+                Debug.Log("No stars earned for star index: " + i);
+            }
+        }
+
+        // Update XP UI
+        xpAmount.text = XP.ToString();
+        Debug.Log("Stars: " + stars + ", XP: " + XP);
+
+
+
+
+    }
+
+    /*void NoStarXP()
+    {
+        //if  level datas Target1Count and Target2Count are 0, then no stars and no XP
+        if(levelData.target1Count == 0 && levelData.target2Count == 0)
+        {
+            stars = 0; // No stars
+            XP = 0; // No XP
+        }
+        // Show the stars UI. By default, all Glowing stars are hidden and normal stars are shown
+        for (int i = 0; i < 3; i++)
+        {
+            glowStars[i].SetActive(false); // Hide glowing stars
+            normalStars[i].SetActive(true); // Show normal stars
+        }
+
+    }*/
+
 }

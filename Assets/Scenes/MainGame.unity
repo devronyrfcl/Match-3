@@ -20595,6 +20595,17 @@ MonoBehaviour:
   currentTime: 0
   GameOverPanel: {fileID: 1676779544}
   itemWarningPanel: {fileID: 1049529511}
+  stars: 0
+  XP: 0
+  normalStars:
+  - {fileID: 976545480}
+  - {fileID: 1962521459}
+  - {fileID: 268480374}
+  glowStars:
+  - {fileID: 1866742012}
+  - {fileID: 1761719174}
+  - {fileID: 49590674}
+  xpAmount: {fileID: 426857276}
   smilingFaceSprite: {fileID: -625046086, guid: 08e60bfc27965c847b8897bbe079155b, type: 3}
   smilingFaceWithTearSprite: {fileID: -698371609, guid: bbcceb2198677444b8d58f504ae86f07, type: 3}
   angryFaceSprite: {fileID: 114186026, guid: bbcceb2198677444b8d58f504ae86f07, type: 3}
