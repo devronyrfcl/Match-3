@@ -172,8 +172,8 @@ public class StageManager : MonoBehaviour
             totalXP += level.XP;
             totalStars += level.Stars;
         }
-        TotalXP.text = $"Total XP: {totalXP}";
-        TotalStar.text = $"Total Stars: {totalStars}";
+        TotalXP.text = $"{totalXP}";
+        TotalStar.text = $"{totalStars}";
         Name.text = playerData.Name; // Display player name
     }
 
