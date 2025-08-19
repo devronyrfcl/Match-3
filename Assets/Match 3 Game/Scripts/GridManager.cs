@@ -6,6 +6,7 @@ using TMPro;
 using UnityEngine;
 using UnityEngine.UI;
 using System.IO;
+using UnityEngine.SceneManagement;
 
 
 
@@ -62,6 +63,7 @@ public class GridManager : MonoBehaviour
     private int currentTarget2;
 
     public GameObject GameOverPanel;
+    public TMP_Text gameOverText; // Text to display game over message
     public GameObject itemWarningPanel;
     public int stars = 0;
     public int XP = 0; // XP earned in the level
@@ -168,7 +170,7 @@ public class GridManager : MonoBehaviour
         if (target2CountText != null)
             target2CountText.text = currentTarget2Count.ToString();
 
-
+        
 
 
     }
@@ -301,6 +303,9 @@ public class GridManager : MonoBehaviour
 
     void GameOver()
     {
+        //gameOverText will be = level + currentLevelIndex + 1
+        gameOverText.text = "Level :" + (currentLevelIndex + 1);
+
         // Handle game over logic here
         // For example, show a game over screen or reset the game
         Debug.Log("Game Over! You can implement your game over logic here.");
@@ -320,6 +325,93 @@ public class GridManager : MonoBehaviour
 
         SaveNewAbilityCounts(Ability_bombCurrentAmount, Ability_colorBombCurrentAmount, Ability_extraMovesCurrentAmount);
         
+    }
+
+    public void CalculateStarAndShow()
+    {
+        //if  level datas Target1Count and Target2Count are 0, then no stars and no XP
+        if (levelData.target1Count == 0 && levelData.target2Count == 0)
+        {
+            stars = 0; // No stars
+            XP = 0; // No XP
+            Debug.Log("No stars and no XP because targets are 0.");
+        }
+        // Calculate stars based on moves and time left. more moves and move time left, more stars
+
+        else if (currentMoves > 0 && currentTime > 0)
+        {
+            if (currentMoves >= levelData.movesCount * 0.25f && currentTime >= levelData.timeLimit * 0.25f)
+            {
+                stars = 3; // Full stars
+                Debug.Log("3 stars and 100XP earned!");
+                XP = 100;
+            }
+            else if (currentMoves >= levelData.movesCount * 0.2f && currentTime >= levelData.timeLimit * 0.2f)
+            {
+                stars = 2; // Two stars
+                Debug.Log("2 stars and 50 XP earned!");
+                XP = 50;
+            }
+            else
+            {
+                stars = 1; // One star
+                Debug.Log("1 star and 20 XP earned!");
+                XP = 10;
+            }
+        }
+
+
+
+
+        // Show the stars UI. By default, all Glowing stars are hidden and normal stars are shown
+        for (int i = 0; i < 3; i++)
+        {
+            if (i < stars)
+            {
+                glowStars[i].SetActive(true); // Show glowing stars
+                normalStars[i].SetActive(false); // Hide normal stars
+            }
+            else
+            {
+                glowStars[i].SetActive(false); // Hide glowing stars
+                normalStars[i].SetActive(true); // Show normal stars
+                Debug.Log("No stars earned for star index: " + i);
+            }
+        }
+
+        // Update XP UI
+        xpAmount.text = XP.ToString();
+        Debug.Log("Stars: " + stars + ", XP: " + XP);
+
+        //send star and xp data to PlayerDataManager
+        SendStarXpDataToPlayerDataManager(currentLevelIndex + 1, 0, stars, XP);
+        
+
+    }
+
+    void SendStarXpDataToPlayerDataManager(int levelId, int lockedValue, int stars, int xp)
+    {
+
+        PlayerDataManager.Instance.SetLevelStars(levelId, stars, xp);
+        PlayerDataManager.Instance.SendXP(levelId, xp);
+
+        PlayerDataManager.Instance.SetAllData(currentLevelIndex + 2, 0, 0, 0);// Set the next level data to 0 stars and 0 XP, and unlock it
+        PlayerDataManager.Instance.SetCurrentLevel(currentLevelIndex + 2);
+
+        //PlayerDataManager.Instance.SetLevelLocked(currentLevelIndex + 2, 0); // Unlock the next level (currentLevelIndex + 2 because levels are 1-based in PlayerDataManager)
+
+
+        PlayerDataManager.Instance.SavePlayerData(); // Save the updated player data to the JSON file
+
+    }
+    
+
+    
+
+    public void BackToMainMenu()
+    {
+        // Load the main menu scene
+        SceneManager.LoadScene("MainMenu");
     }
 
 
@@ -787,75 +879,7 @@ public class GridManager : MonoBehaviour
     public void Crying_Face() => DeductTarget(PieceType.Crying_Face);
     #endregion
 
-    public void CalculateStarAndShow()
-    {
-        //if  level datas Target1Count and Target2Count are 0, then no stars and no XP
-        if (levelData.target1Count == 0 && levelData.target2Count == 0)
-        {
-            stars = 0; // No stars
-            XP = 0; // No XP
-            Debug.Log("No stars and no XP because targets are 0.");
-        }
-        // Calculate stars based on moves and time left. more moves and move time left, more stars
-
-        else if (currentMoves > 0 && currentTime > 0)
-        {
-            if (currentMoves >= levelData.movesCount * 0.25f && currentTime >= levelData.timeLimit * 0.25f)
-            {
-                stars = 3; // Full stars
-                Debug.Log("3 stars and 100XP earned!");
-                XP = 100;
-            }
-            else if (currentMoves >= levelData.movesCount * 0.2f && currentTime >= levelData.timeLimit * 0.2f)
-            {
-                stars = 2; // Two stars
-                Debug.Log("2 stars and 50 XP earned!");
-                XP = 50;
-            }
-            else
-            {
-                stars = 1; // One star
-                Debug.Log("1 star and 20 XP earned!");
-                XP = 10;
-            }
-        }
-
-
-        
-
-        // Show the stars UI. By default, all Glowing stars are hidden and normal stars are shown
-        for (int i = 0; i < 3; i++)
-        {
-            if (i < stars)
-            {
-                glowStars[i].SetActive(true); // Show glowing stars
-                normalStars[i].SetActive(false); // Hide normal stars
-            }
-            else
-            {
-                glowStars[i].SetActive(false); // Hide glowing stars
-                normalStars[i].SetActive(true); // Show normal stars
-                Debug.Log("No stars earned for star index: " + i);
-            }
-        }
-
-        // Update XP UI
-        xpAmount.text = XP.ToString();
-        Debug.Log("Stars: " + stars + ", XP: " + XP);
-
-        //send star and xp data to PlayerDataManager
-        SendStarXpDataToPlayerDataManager(currentLevelIndex + 1, stars, XP);
-
-    }
-
-    void SendStarXpDataToPlayerDataManager(int levelId, int stars, int xp)
-    {
-        
-        PlayerDataManager.Instance.SetLevelStars(levelId, stars, xp);
-        PlayerDataManager.Instance.SendXP(levelId, xp);
-        PlayerDataManager.Instance.SavePlayerData(); // Save the updated player data to the JSON file
-        
-    }
+    
     
 
     /*void NoStarXP()

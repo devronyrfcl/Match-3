@@ -57,7 +57,7 @@ public class PlayerDataManager : MonoBehaviour
         {
             Name = name,
             PlayerID = playerId,
-            TotalXP = 0,
+            //TotalXP = 0,
             PlayerBombAbilityCount = 0,
             PlayerColorBombAbilityCount = 0,
             PlayerExtraMoveAbilityCount = 0,
@@ -107,8 +107,8 @@ public class PlayerDataManager : MonoBehaviour
             level.XP += xp;
         }
 
-        playerData.TotalXP += xp;
-        Debug.Log($"Level {levelId} updated: Stars={stars}, XP={xp}, TotalXP={playerData.TotalXP}");
+        //playerData.TotalXP += xp;
+        Debug.Log($"Level {levelId} updated: Stars={stars}, XP={xp}");
     }
 
     public void SetLevelLocked(int levelId, int lockedValue)
@@ -180,9 +180,9 @@ public class PlayerDataManager : MonoBehaviour
         LevelInfo level = playerData.Levels.Find(l => l.LevelID == levelId);
         if (level != null)
         {
-            level.XP += xp;
-            playerData.TotalXP += xp;
-            Debug.Log($"XP for Level {levelId} updated: {xp}, Total XP: {playerData.TotalXP}");
+            level.XP = xp;
+            //playerData.TotalXP += xp;
+            Debug.Log($"XP for Level {levelId} updated: {xp}");
         }
         else
         {

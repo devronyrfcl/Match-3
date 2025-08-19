@@ -1,6 +1,7 @@
 ﻿using System.IO;
 using UnityEngine;
 using UnityEngine.SceneManagement; // ✅ Needed for scene loading
+using TMPro; // ✅ Needed for text display
 
 public class StageManager : MonoBehaviour
 {
@@ -9,6 +10,10 @@ public class StageManager : MonoBehaviour
 
     [Header("JSON Save File")]
     public string fileName = "playerdata.json";
+
+    public TMP_Text TotalStar;
+    public TMP_Text TotalXP;
+    public TMP_Text Name;
 
     private PlayerData playerData;
 
@@ -25,6 +30,7 @@ public class StageManager : MonoBehaviour
     {
         LoadPlayerData();
         ApplyDataToButtons();
+        ShowTotalXPandTotalStars();
     }
 
     private void LoadPlayerData()
@@ -151,5 +157,24 @@ public class StageManager : MonoBehaviour
         Debug.Log($"StageManager: Level {levelId} is locked. Please unlock it first.");
         // You can also show a UI message or popup here
     }
-    
+
+    void ShowTotalXPandTotalStars()
+    {
+        if (playerData == null)
+        {
+            Debug.LogError("StageManager: No player data available.");
+            return;
+        }
+        int totalXP = 0;
+        int totalStars = 0;
+        foreach (LevelInfo level in playerData.Levels)
+        {
+            totalXP += level.XP;
+            totalStars += level.Stars;
+        }
+        TotalXP.text = $"Total XP: {totalXP}";
+        TotalStar.text = $"Total Stars: {totalStars}";
+        Name.text = playerData.Name; // Display player name
+    }
+
 }

@@ -10782,7 +10782,19 @@ MonoBehaviour:
   m_TargetGraphic: {fileID: 1420760751}
   m_OnClick:
     m_PersistentCalls:
-      m_Calls: []
+      m_Calls:
+      - m_Target: {fileID: 1672323532}
+        m_TargetAssemblyTypeName: GridManager, Assembly-CSharp
+        m_MethodName: BackToMainMenu
+        m_Mode: 1
+        m_Arguments:
+          m_ObjectArgument: {fileID: 0}
+          m_ObjectArgumentAssemblyTypeName: UnityEngine.Object, UnityEngine
+          m_IntArgument: 0
+          m_FloatArgument: 0
+          m_StringArgument: 
+          m_BoolArgument: 0
+        m_CallState: 2
 --- !u!114 &1420760751
 MonoBehaviour:
   m_ObjectHideFlags: 0
@@ -20578,6 +20590,7 @@ MonoBehaviour:
   - {fileID: 11400000, guid: 8cbec75d7881e40438be29079faba43a, type: 2}
   - {fileID: 11400000, guid: 94d8ad93d5f417c48b6882cd18bc4242, type: 2}
   - {fileID: 11400000, guid: c9e6167e85997eb41b1f14bd43bfa26f, type: 2}
+  currentLevelIndex: 0
   brickPrefab: {fileID: 8850409025718004857, guid: 811c5880cf652a247b6c80a7f0073223, type: 3}
   particlePrefab: {fileID: 6210172836853080571, guid: 6db5431061a9c9f439d58bf876aeadc3, type: 3}
   GridBackgroundBlock: {fileID: 8785358703781879313, guid: 7eb08adfeac695048ad07ffd81d7a5df, type: 3}
@@ -20594,6 +20607,7 @@ MonoBehaviour:
   Ability_extraMovesCurrentAmount: 0
   currentTime: 0
   GameOverPanel: {fileID: 1676779544}
+  gameOverText: {fileID: 1099942960}
   itemWarningPanel: {fileID: 1049529511}
   stars: 0
   XP: 0

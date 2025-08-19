@@ -8,7 +8,7 @@ public class PlayerData
 {
     public string Name;
     public string PlayerID;
-    public int TotalXP;
+    //public int TotalXP;
 
     public int PlayerBombAbilityCount;
     public int PlayerColorBombAbilityCount;
