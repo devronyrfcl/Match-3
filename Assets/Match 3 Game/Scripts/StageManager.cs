@@ -1,7 +1,10 @@
-﻿using System.IO;
+﻿using DG.Tweening; // ✅ Needed for DOTween animations
+using System.Collections; // ✅ Needed for coroutines
+using System.IO;
+using TMPro; // ✅ Needed for text display
 using UnityEngine;
 using UnityEngine.SceneManagement; // ✅ Needed for scene loading
-using TMPro; // ✅ Needed for text display
+using UnityEngine.UI; // ✅ Needed for UI components
 
 public class StageManager : MonoBehaviour
 {
@@ -14,6 +17,11 @@ public class StageManager : MonoBehaviour
     public TMP_Text TotalStar;
     public TMP_Text TotalXP;
     public TMP_Text Name;
+    public GameObject EmojisImage; // Reference to the emojis image GameObject
+
+
+
+
 
     private PlayerData playerData;
 
@@ -31,6 +39,8 @@ public class StageManager : MonoBehaviour
         LoadPlayerData();
         ApplyDataToButtons();
         ShowTotalXPandTotalStars();
+        
+        
     }
 
     private void LoadPlayerData()
@@ -97,24 +107,30 @@ public class StageManager : MonoBehaviour
         return 0;
     }
 
-    // ✅ New function: Save selected level & load MainGame
-    /*public void PlayCurrentLevel()
+    IEnumerator EmojiLoading()
     {
-        int currentLevelIndex = GetCurrentLevelIndex();
-        int currentLevelId = levelButtons[currentLevelIndex].levelId;
+        RectTransform emojiRect = EmojisImage.GetComponent<RectTransform>();
 
-        // Save current level to PlayerPrefs (subtract 1 so index starts from 0)
-        PlayerPrefs.SetInt(SelectedLevelIndexKey, currentLevelId + 1);
-        PlayerPrefs.Save();
 
-        Debug.Log($"StageManager: Saved {SelectedLevelIndexKey} = {currentLevelId - 1}");
+        // ✅ Move EmojisImage into view (Y: 2150 → -1777)
+        yield return emojiRect.DOAnchorPosY(-1777f, 1f).SetEase(Ease.InOutQuad).WaitForCompletion();
 
-        // Load the MainGame scene
-        SceneManager.LoadScene("MainGame");
-    }*/
+        // ✅ Wait 1 second
+        yield return new WaitForSeconds(1f);
 
+
+
+    }
     public void SelectLevel(LevelButtonManager clickedButton)
     {
+        StartCoroutine(SelectLevelCoroutine(clickedButton));
+    }
+
+    private IEnumerator SelectLevelCoroutine(LevelButtonManager clickedButton)
+    {
+        // Run Emoji animation first
+        yield return StartCoroutine(EmojiLoading());
+
         int clickedIndex = -1;
 
         // Find index of clicked button
@@ -128,7 +144,7 @@ public class StageManager : MonoBehaviour
         }
 
         if (clickedIndex == -1)
-            return; // safety check
+            yield break; // safety check
 
         // Check if the level is locked
         LevelInfo levelInfo = playerData.Levels.Find(l => l.LevelID == clickedButton.levelId);
@@ -137,7 +153,7 @@ public class StageManager : MonoBehaviour
         if (isLocked)
         {
             OnLockedLevelClicked(clickedButton.levelId); // call separate function
-            return;
+            yield break;
         }
 
         // ✅ Level is unlocked → save and load scene
@@ -149,6 +165,7 @@ public class StageManager : MonoBehaviour
 
         SceneManager.LoadScene("MainGame");
     }
+
 
 
     void OnLockedLevelClicked(int levelId)
@@ -177,4 +194,8 @@ public class StageManager : MonoBehaviour
         Name.text = playerData.Name; // Display player name
     }
 
+
+    
+
+    
 }

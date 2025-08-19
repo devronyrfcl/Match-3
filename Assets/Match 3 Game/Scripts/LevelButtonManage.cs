@@ -1,6 +1,8 @@
-﻿using UnityEngine;
-using UnityEngine.UI;
+﻿using DG.Tweening;
 using TMPro;
+using UnityEngine;
+using UnityEngine.UI;
+using System.Collections;
 
 public class LevelButtonManager : MonoBehaviour
 {
@@ -37,6 +39,7 @@ public class LevelButtonManager : MonoBehaviour
         UpdateLevelIdText();
     }
 
+    
 
     public void UpdateButtonState()
     {
@@ -112,6 +115,7 @@ public class LevelButtonManager : MonoBehaviour
     {
         if (stageManager != null)
         {
+            
             stageManager.SelectLevel(this); // just pass the clicked button
         }
     }

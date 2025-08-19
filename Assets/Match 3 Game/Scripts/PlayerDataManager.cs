@@ -2,6 +2,11 @@
 using System.IO;
 using System.Collections.Generic;
 using UnityEngine;
+using System.Collections;
+using PlayFab;
+using PlayFab.ClientModels;
+using UnityEngine.UI;
+using TMPro;
 
 
 public class PlayerDataManager : MonoBehaviour
@@ -9,8 +14,14 @@ public class PlayerDataManager : MonoBehaviour
     private string savePath;
     public PlayerData playerData;
 
+    public bool isLaunched = false; // Flag to check if the game has been launched
+    public string PlayFabPlayerID; // PlayFab Player ID
+    public string PlayFabPlayerName; // PlayFab Player Name
+
     public static PlayerDataManager Instance { get; private set; }
 
+
+    #region "Offline JSON"
     private void Awake()
     {
         // Singleton pattern
@@ -29,27 +40,25 @@ public class PlayerDataManager : MonoBehaviour
     {
         savePath = Path.Combine(Application.dataPath, "playerdata.json");
 
+        LoginAsGuest();
+
         if (File.Exists(savePath))
         {
             LoadPlayerData();
+            
             Debug.Log("Existing player data loaded.");
         }
         else
         {
             CreateNewPlayer("Player", Guid.NewGuid().ToString());
             SavePlayerData();
+            
             Debug.Log("No save found. Default player created.");
         }
 
-        // Example usage
-        /*SetAllData(1, 0, 2, 50); // 🔥 Example: setting level 1, unlocked, 2 stars, 50 XP
-        SetAllData(2, 1, 3, 10); // 🔥 Example: setting level 2, locked, 3 stars, 100 XP
-
-
-        SetCurrentLevel(1); // 🔥 Example: setting level 1 as current*/
-
-        SavePlayerData();
     }
+
+    
 
     public void CreateNewPlayer(string name, string playerId)
     {
@@ -71,6 +80,7 @@ public class PlayerDataManager : MonoBehaviour
         string json = JsonUtility.ToJson(playerData, true);
         File.WriteAllText(savePath, json);
         Debug.Log("Player data saved: " + savePath);
+        
     }
 
     public void LoadPlayerData()
@@ -88,6 +98,10 @@ public class PlayerDataManager : MonoBehaviour
             SavePlayerData();
         }
     }
+
+
+    //if playerData name is not matched with PlayFabManager player name, then set PlayfabManager player name to playerData name
+
 
     // 🔥 Set level stars and XP
     public void SetLevelStars(int levelId, int stars, int xp)
@@ -171,7 +185,6 @@ public class PlayerDataManager : MonoBehaviour
     {
         SetLevelLocked(levelId, lockedValue);
         SetLevelStars(levelId, stars, xp);
-        
     }
 
     //send xp of specific level
@@ -189,4 +202,94 @@ public class PlayerDataManager : MonoBehaviour
             Debug.LogWarning($"Level {levelId} not found to send XP.");
         }
     }
+
+    #endregion
+
+
+    #region "PlayFab Integration"
+    void LoginAsGuest()
+    {
+        var request = new LoginWithCustomIDRequest
+        {
+            CustomId = SystemInfo.deviceUniqueIdentifier,
+            CreateAccount = true
+        };
+        PlayFabClientAPI.LoginWithCustomID(request, OnLoginSuccess, OnError);
+
+        //GetUserName();
+    }
+    void OnLoginSuccess(LoginResult result)
+    {
+        Debug.Log("Successfully logged in as guest");
+        // Handle successful login
+
+        PlayFabPlayerID = result.PlayFabId;
+        GetUserName();
+
+        // Get user name
+
+        //CheckAndSetPlayerName();
+
+        Invoke("CheckAndSetPlayerName", 2f); // Delay to ensure playerName is set after login
+        PlayerDataManager.Instance.isLaunched = true;
+
+
+    }
+    void OnError(PlayFabError error)
+    {
+        Debug.LogError("Error during PlayFab operation: " + error.GenerateErrorReport());
+        // Handle error
+    }
+
+    
+
+    //get user name. if user name not found, then loadscene.isFoundName = false;
+    public void GetUserName()
+    {
+        var request = new GetAccountInfoRequest();
+        PlayFabClientAPI.GetAccountInfo(request, OnGetUserNameSuccess, OnError);
+    }
+    void OnGetUserNameSuccess(GetAccountInfoResult result)
+    {
+        if (result.AccountInfo.TitleInfo != null && !string.IsNullOrEmpty(result.AccountInfo.TitleInfo.DisplayName))
+        {
+            PlayFabPlayerName = result.AccountInfo.TitleInfo.DisplayName;
+            Debug.Log("User name retrieved: " + PlayFabPlayerName);
+            
+            
+        }
+        else
+        {
+            Debug.LogWarning("User name not found, setting isFoundName to false");
+            
+        }
+    }
+
+
+    // Set user name using PlayFab API from another script (e.g., loadscene.cs)
+    public void SetUserName(string name)
+    {
+        if (!string.IsNullOrEmpty(name))
+        {
+            var request = new UpdateUserTitleDisplayNameRequest
+            {
+                DisplayName = name
+            };
+            PlayFabClientAPI.UpdateUserTitleDisplayName(request, OnUpdateUserNameSuccess, OnError);
+        }
+        else
+        {
+            Debug.LogError("User name input is empty");
+        }
+    }
+
+
+    void OnUpdateUserNameSuccess(UpdateUserTitleDisplayNameResult result)
+    {
+        PlayFabPlayerName = result.DisplayName;
+        Debug.Log("User name updated to: " + PlayFabPlayerName);
+        
+    }
+
+    #endregion
 }

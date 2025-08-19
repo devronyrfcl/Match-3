@@ -29,7 +29,7 @@ public class DemoScript : MonoBehaviour
     {
         // This method is called when the "Add Level" button is clicked
         Debug.Log("Add Level button clicked!");
-        PlayerDataManager.Instance.SetName(userName);
+        //PlayerDataManager.Instance.SetName(userName);
 
         //wait for a second and save data
         SaveDataAfterDelay();

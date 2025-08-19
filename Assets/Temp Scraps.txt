@@ -581,3 +581,34 @@ if(IsSpecialBombPiece)
 
 
         }
+
+
+
+
+public void GetUserNameAndID()
+    {
+        var request = new GetAccountInfoRequest();
+        PlayFabClientAPI.GetAccountInfo(request, OnGetAccountInfoSuccess, OnError);
+    }
+    void OnGetAccountInfoSuccess(GetAccountInfoResult result)
+    {
+
+        //if name is not found, get name = "Guest"
+        if (string.IsNullOrEmpty(result.AccountInfo.Username))
+        {
+            playerName = "Guest";
+            if(loadScene != null)
+            {
+                loadScene.isFoundName = false; // Set the flag to false if name is not found
+            }
+
+        }
+        else
+        {
+            playerName = result.AccountInfo.Username;
+            loadScene.isFoundName = true; 
+        }
+        playerName = result.AccountInfo.Username;
+        Debug.Log("User Name: " + playerName);
+        Debug.Log("User ID: " + playerID);
+    }

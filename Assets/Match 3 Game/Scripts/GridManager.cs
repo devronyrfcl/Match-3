@@ -1,4 +1,4 @@
-using DG.Tweening;
+﻿using DG.Tweening;
 using System.Collections;
 using System.Collections.Generic;
 using System.Runtime.CompilerServices;
@@ -37,6 +37,8 @@ public class GridManager : MonoBehaviour
 
 
     [Header("Main Game Visuals")]
+    public GameObject EmojisImage;
+
     public TextMeshProUGUI timeText;
     //public int currentTime; // Current time in seconds
     public TextMeshProUGUI movesCountText;
@@ -109,11 +111,14 @@ public class GridManager : MonoBehaviour
 
         LoadLevel();
 
+
         SpawnGridBackgroundBlock(); // Call the method to spawn background blocks
         //CreateGrid(); // Call the method to create the grid and place pieces
 
         //timescale will be 1
         //Time.timeScale = 0.2f;
+
+        StartCoroutine(EmojiLoading()); // Start the emoji loading coroutine
 
         currentTime = levelData.timeLimit;
         currentMoves = levelData.movesCount;
@@ -411,9 +416,30 @@ public class GridManager : MonoBehaviour
     public void BackToMainMenu()
     {
         // Load the main menu scene
-        SceneManager.LoadScene("MainMenu");
+        StartCoroutine(EmojiLoading_2());
     }
 
+
+    IEnumerator EmojiLoading()
+    {
+        RectTransform emojiRect = EmojisImage.GetComponent<RectTransform>();
+
+        canControl = false; // Disable player controls during loading
+        // Move EmojisImage into view (Y: -1250 to 2500)
+        yield return emojiRect.DOAnchorPosY(2500f, 1f).SetEase(Ease.InOutQuad).WaitForCompletion();
+        canControl = true; // Re-enable player controls after loading
+    }
+
+    IEnumerator EmojiLoading_2()
+    {
+        RectTransform emojiRect = EmojisImage.GetComponent<RectTransform>();
+        // Move EmojisImage into view (Y: 2500 to -1250)
+        canControl = false;
+        yield return emojiRect.DOAnchorPosY(-1250f, 1f).SetEase(Ease.InOutQuad).WaitForCompletion();
+
+
+        SceneManager.LoadScene("MainMenu");
+    }
 
 
     #endregion
@@ -879,8 +905,8 @@ public class GridManager : MonoBehaviour
     public void Crying_Face() => DeductTarget(PieceType.Crying_Face);
     #endregion
 
-    
-    
+
+
 
     /*void NoStarXP()
     {
@@ -898,5 +924,5 @@ public class GridManager : MonoBehaviour
         }
 
     }*/
-
+    
 }
