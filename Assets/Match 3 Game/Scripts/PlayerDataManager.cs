@@ -9,6 +9,13 @@ using UnityEngine.UI;
 using TMPro;
 
 
+[Serializable]
+public class LevelListWrapper
+{
+    public List<LevelInfo> Levels;
+}
+
+
 public class PlayerDataManager : MonoBehaviour
 {
     private string savePath;
@@ -67,12 +74,14 @@ public class PlayerDataManager : MonoBehaviour
             Name = name,
             PlayerID = playerId,
             //TotalXP = 0,
-            PlayerBombAbilityCount = 0,
-            PlayerColorBombAbilityCount = 0,
-            PlayerExtraMoveAbilityCount = 0,
+            PlayerBombAbilityCount = 20,
+            PlayerColorBombAbilityCount = 20,
+            PlayerExtraMoveAbilityCount = 20,
             CurrentLevelId = 1, // 🔥 Default start at level 1
             Levels = new List<LevelInfo>()
         };
+
+        SendPlayerDataToPlayFab();
     }
 
     public void SavePlayerData()
@@ -80,7 +89,9 @@ public class PlayerDataManager : MonoBehaviour
         string json = JsonUtility.ToJson(playerData, true);
         File.WriteAllText(savePath, json);
         Debug.Log("Player data saved: " + savePath);
-        
+
+        SendPlayerDataToPlayFab(); // Send data to PlayFab after saving locally
+
     }
 
     public void LoadPlayerData()
@@ -159,6 +170,7 @@ public class PlayerDataManager : MonoBehaviour
     public void SetName(string newName)
     {
         playerData.Name = newName;
+        SetUserName(newName);
     }
 
     public void SetPlayerID(string newPlayerID)
@@ -224,16 +236,8 @@ public class PlayerDataManager : MonoBehaviour
         // Handle successful login
 
         PlayFabPlayerID = result.PlayFabId;
-        GetUserName();
-
-        // Get user name
-
-        //CheckAndSetPlayerName();
-
         Invoke("CheckAndSetPlayerName", 2f); // Delay to ensure playerName is set after login
-        PlayerDataManager.Instance.isLaunched = true;
-
-
+        isLaunched = true;
     }
     void OnError(PlayFabError error)
     {
@@ -244,27 +248,6 @@ public class PlayerDataManager : MonoBehaviour
     
 
     //get user name. if user name not found, then loadscene.isFoundName = false;
-    public void GetUserName()
-    {
-        var request = new GetAccountInfoRequest();
-        PlayFabClientAPI.GetAccountInfo(request, OnGetUserNameSuccess, OnError);
-    }
-    void OnGetUserNameSuccess(GetAccountInfoResult result)
-    {
-        if (result.AccountInfo.TitleInfo != null && !string.IsNullOrEmpty(result.AccountInfo.TitleInfo.DisplayName))
-        {
-            PlayFabPlayerName = result.AccountInfo.TitleInfo.DisplayName;
-            Debug.Log("User name retrieved: " + PlayFabPlayerName);
-            
-            
-        }
-        else
-        {
-            Debug.LogWarning("User name not found, setting isFoundName to false");
-            
-        }
-    }
-
 
     // Set user name using PlayFab API from another script (e.g., loadscene.cs)
     public void SetUserName(string name)
@@ -290,6 +273,43 @@ public class PlayerDataManager : MonoBehaviour
         Debug.Log("User name updated to: " + PlayFabPlayerName);
         
     }
+
+
+    // send player level data and PlayerExtraMoveAbilityCount, PlayerColorBombAbilityCount, PlayerBombAbilityCount to PlayFab
+    public void SendPlayerDataToPlayFab()
+    {
+        if (playerData == null)
+        {
+            Debug.LogError("Player data is null, cannot send to PlayFab.");
+            return;
+        }
+
+        // 🔥 Serialize levels list to JSON
+        string levelsJson = JsonUtility.ToJson(new LevelListWrapper { Levels = playerData.Levels }, true);
+
+        var request = new UpdateUserDataRequest
+        {
+            Data = new Dictionary<string, string>
+        {
+            { "PlayerName", playerData.Name },
+            { "PlayerID", playerData.PlayerID },
+            { "CurrentLevelId", playerData.CurrentLevelId.ToString() },
+            { "PlayerBombAbilityCount", playerData.PlayerBombAbilityCount.ToString() },
+            { "PlayerColorBombAbilityCount", playerData.PlayerColorBombAbilityCount.ToString() },
+            { "PlayerExtraMoveAbilityCount", playerData.PlayerExtraMoveAbilityCount.ToString() },
+            { "Levels", levelsJson }
+        }
+        };
+
+        PlayFabClientAPI.UpdateUserData(request, OnUpdateUserDataSuccess, OnError);
+    }
+
+    void OnUpdateUserDataSuccess(UpdateUserDataResult result)
+    {
+        Debug.Log("Player data sent to PlayFab successfully.");
+    }
+
+
 
     #endregion
 }

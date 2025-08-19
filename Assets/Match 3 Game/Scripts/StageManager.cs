@@ -175,7 +175,7 @@ public class StageManager : MonoBehaviour
         // You can also show a UI message or popup here
     }
 
-    void ShowTotalXPandTotalStars()
+    public void ShowTotalXPandTotalStars()
     {
         if (playerData == null)
         {

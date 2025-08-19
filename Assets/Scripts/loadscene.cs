@@ -18,8 +18,10 @@ public class loadscene : MonoBehaviour
     public TMP_InputField userNameInput;
     public TMP_Text UserID;
 
-    
-    
+    public StageManager stageManager; // Reference to StageManager
+
+
+
 
     void Start()
     {
@@ -44,12 +46,10 @@ public class loadscene : MonoBehaviour
             Debug.LogWarning("Username cannot be empty.");
             return;
         }
-        // Set the username in PlayFabManager
-        //PlayFabManager.Instance.SetUserName(userName);
-        // Check if the name is found
-        //isFoundName = PlayFabManager.Instance.CheckIfNameExists(userName);
-        // If name is found, hide the name panel
         
+        PlayerDataManager.Instance.SetName(userName);
+        PlayerDataManager.Instance.SavePlayerData();
+
     }
 
 
@@ -63,7 +63,7 @@ public class loadscene : MonoBehaviour
         }
         
         //Debug.Log("? Loading bar filled completely!");
-        //namePanel.SetActive(true);
+        namePanel.SetActive(true);
 
         //proceed to next step
         yield return null;
@@ -74,11 +74,12 @@ public class loadscene : MonoBehaviour
 
     public void OnNextClicked()
     {
-        
+
         namePanel.SetActive(false);     
-        
-        
-       
+
+        SetUserName();
+
+
     }
 
 
@@ -102,6 +103,8 @@ public class loadscene : MonoBehaviour
 
         // ✅ Move EmojisImage back up (Y: -1777 → 2150)
         yield return emojiRect.DOAnchorPosY(2150f, 1f).SetEase(Ease.InOutQuad).WaitForCompletion();
+
+        stageManager.ShowTotalXPandTotalStars();
     }
 
 
