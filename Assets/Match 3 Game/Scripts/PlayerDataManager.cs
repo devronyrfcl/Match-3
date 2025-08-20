@@ -25,7 +25,11 @@ public class PlayerDataManager : MonoBehaviour
     public string PlayFabPlayerID; // PlayFab Player ID
     public string PlayFabPlayerName; // PlayFab Player Name
 
+    public bool isFoundName = false; // Flag to check if player name is found
+
     public static PlayerDataManager Instance { get; private set; }
+
+    
 
 
     #region "Offline JSON"
@@ -308,6 +312,24 @@ public class PlayerDataManager : MonoBehaviour
     {
         Debug.Log("Player data sent to PlayFab successfully.");
     }
+
+    //if playerData name is not matched with PlayFabManager player name, then set PlayfabManager player name to playerData name also isFoundName = false;
+    public void CheckAndSetPlayerName()
+    {
+        if (string.IsNullOrEmpty(PlayFabPlayerName))
+        {
+            Debug.Log("Player name not found, setting default name.");
+            SetUserName(playerData.Name);
+            isFoundName = false; // Name not found
+        }
+        else
+        {
+            playerData.Name = PlayFabPlayerName;
+            isFoundName = true; // Name found
+            Debug.Log("Player name found: " + PlayFabPlayerName);
+        }
+    }
+
 
 
 

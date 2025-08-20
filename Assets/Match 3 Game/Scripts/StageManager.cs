@@ -5,6 +5,8 @@ using TMPro; // ✅ Needed for text display
 using UnityEngine;
 using UnityEngine.SceneManagement; // ✅ Needed for scene loading
 using UnityEngine.UI; // ✅ Needed for UI components
+using PlayFab;
+using PlayFab.ClientModels;
 
 public class StageManager : MonoBehaviour
 {
@@ -19,7 +21,7 @@ public class StageManager : MonoBehaviour
     public TMP_Text Name;
     public GameObject EmojisImage; // Reference to the emojis image GameObject
 
-
+    public GameObject namePanel; // Reference to the name panel GameObject
 
 
 
@@ -195,7 +197,19 @@ public class StageManager : MonoBehaviour
     }
 
 
-    
 
-    
+
+    //if PlayerDataManager.isFoundName = false , then show name panel
+    public void CheckAndShowNamePanel()
+    {
+        if (playerData == null || string.IsNullOrEmpty(playerData.Name))
+        {
+            namePanel.SetActive(true); // Show name panel if no name found
+        }
+        else
+        {
+            namePanel.SetActive(false); // Hide if name exists
+        }
+    }
+
 }

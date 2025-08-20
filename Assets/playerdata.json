@@ -1,10 +1,10 @@
 {
-    "Name": "Ummaaah",
-    "PlayerID": "87596184-da3b-4668-b907-e72eaa3830b5",
-    "PlayerBombAbilityCount": 18,
-    "PlayerColorBombAbilityCount": 20,
+    "Name": "asadsdadadadsa",
+    "PlayerID": "15929ff8-55dd-468a-94a2-e247a81e12be",
+    "PlayerBombAbilityCount": 16,
+    "PlayerColorBombAbilityCount": 9,
     "PlayerExtraMoveAbilityCount": 20,
-    "CurrentLevelId": 2,
+    "CurrentLevelId": 4,
     "Levels": [
         {
             "LevelID": 1,
@@ -14,6 +14,18 @@
         },
         {
             "LevelID": 2,
+            "Stars": 3,
+            "XP": 100,
+            "LevelLocked": 0
+        },
+        {
+            "LevelID": 3,
+            "Stars": 3,
+            "XP": 100,
+            "LevelLocked": 0
+        },
+        {
+            "LevelID": 4,
             "Stars": 0,
             "XP": 0,
             "LevelLocked": 0

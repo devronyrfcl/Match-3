@@ -69,7 +69,10 @@ public class loadscene : MonoBehaviour
         yield return null;
         LoadingFrame.gameObject.SetActive(false);
         newButton.SetActive(true);
-        
+
+        stageManager.CheckAndShowNamePanel();
+
+
     }
 
     public void OnNextClicked()
