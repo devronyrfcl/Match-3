@@ -9363,7 +9363,7 @@ RectTransform:
   m_PrefabInstance: {fileID: 0}
   m_PrefabAsset: {fileID: 0}
   m_GameObject: {fileID: 1306946394}
-  m_LocalRotation: {x: -0, y: -0, z: 0.004999979, w: 0.99998754}
+  m_LocalRotation: {x: 0, y: 0, z: 0, w: 1}
   m_LocalPosition: {x: 0, y: 0, z: 0}
   m_LocalScale: {x: 1, y: 1, z: 1}
   m_ConstrainProportionsScale: 0
@@ -11544,6 +11544,7 @@ MonoBehaviour:
   onSpinComplete:
     m_PersistentCalls:
       m_Calls: []
+<<<<<<< Updated upstream
   onWatchComplete:
     m_PersistentCalls:
       m_Calls:
@@ -11709,6 +11710,10 @@ CanvasRenderer:
   m_PrefabAsset: {fileID: 0}
   m_GameObject: {fileID: 1557075497}
   m_CullTransparentMesh: 1
+=======
+  spinCount: 6
+  spinLeftText: {fileID: 0}
+>>>>>>> Stashed changes
 --- !u!1 &1608817776
 GameObject:
   m_ObjectHideFlags: 0

@@ -67,6 +67,10 @@ public class PlayerDataManager : MonoBehaviour
             Debug.Log("No save found. Default player created.");
         }
 
+
+
+        SavePlayerData();
+
     }
 
     
@@ -334,4 +338,21 @@ public class PlayerDataManager : MonoBehaviour
 
 
     #endregion
+
+    //send xp of specific level
+    /*public void SendXP(int levelId, int xp)
+    {
+        LevelInfo level = playerData.Levels.Find(l => l.LevelID == levelId);
+        if (level != null)
+        {
+            level.XP += xp;
+            playerData.TotalXP += xp;
+            Debug.Log($"XP for Level {levelId} updated: {xp}, Total XP: {playerData.TotalXP}");
+        }
+        else
+        {
+            Debug.LogWarning($"Level {levelId} not found to send XP.");
+        }
+    }*/
+
 }

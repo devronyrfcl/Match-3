@@ -906,7 +906,46 @@ public class GridManager : MonoBehaviour
     #endregion
 
 
+/*
+<<<<<<< Updated upstream
+=======
+        
 
+        // Show the stars UI. By default, all Glowing stars are hidden and normal stars are shown
+        for (int i = 0; i < 3; i++)
+        {
+            if (i < stars)
+            {
+                glowStars[i].SetActive(true); // Show glowing stars
+                normalStars[i].SetActive(false); // Hide normal stars
+            }
+            else
+            {
+                glowStars[i].SetActive(false); // Hide glowing stars
+                normalStars[i].SetActive(true); // Show normal stars
+                Debug.Log("No stars earned for star index: " + i);
+            }
+        }
+
+        // Update XP UI
+        xpAmount.text = XP.ToString();
+        Debug.Log("Stars: " + stars + ", XP: " + XP);
+
+        //send star and xp data to PlayerDataManager
+        SendStarXpDataToPlayerDataManager(currentLevelIndex + 1, stars, XP);
+
+    }
+>>>>>>> Stashed changes
+
+    void SendStarXpDataToPlayerDataManager(int levelId, int stars, int xp)
+    {
+        
+        PlayerDataManager.Instance.SetLevelStars(levelId, stars, xp);
+        PlayerDataManager.Instance.SendXP(levelId, xp);
+        PlayerDataManager.Instance.SavePlayerData(); // Save the updated player data to the JSON file
+        
+    }
+    
 
     /*void NoStarXP()
     {
