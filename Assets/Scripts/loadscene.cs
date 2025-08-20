@@ -3,6 +3,7 @@ using System.Collections;
 using TMPro; // For TMP_InputField
 using UnityEngine;
 using UnityEngine.UI;
+using UnityEngine.SceneManagement; // For scene management
 
 public class loadscene : MonoBehaviour
 {
@@ -70,7 +71,8 @@ public class loadscene : MonoBehaviour
         LoadingFrame.gameObject.SetActive(false);
         newButton.SetActive(true);
 
-        stageManager.CheckAndShowNamePanel();
+        
+        stageManager.RefreashData();
 
 
     }
@@ -78,10 +80,10 @@ public class loadscene : MonoBehaviour
     public void OnNextClicked()
     {
 
-        namePanel.SetActive(false);     
-
+        namePanel.SetActive(false);
         SetUserName();
 
+        SceneManager.LoadScene("MainMenu");
 
     }
 

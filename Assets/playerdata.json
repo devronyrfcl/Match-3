@@ -1,51 +1,25 @@
 {
-<<<<<<< Updated upstream
-    "Name": "asadsdadadadsa",
-    "PlayerID": "15929ff8-55dd-468a-94a2-e247a81e12be",
+    "Name": "Rubaiya",
+    "PlayerID": "f608db15-473e-49f2-b442-92d35d4f6716",
     "PlayerBombAbilityCount": 16,
-    "PlayerColorBombAbilityCount": 9,
+    "PlayerColorBombAbilityCount": 19,
     "PlayerExtraMoveAbilityCount": 20,
-    "CurrentLevelId": 4,
+    "CurrentLevelId": 3,
     "Levels": [
         {
             "LevelID": 1,
             "Stars": 3,
             "XP": 100,
-=======
-    "Name": "Dev Rony",
-    "PlayerID": "34vfg434ggv4543fgge2324",
-    "TotalXP": 1080,
-    "PlayerBombAbilityCount": 38,
-    "PlayerColorBombAbilityCount": 35,
-    "PlayerExtraMoveAbilityCount": 10,
-    "CurrentLevelId": 1,
-    "Levels": [
-        {
-            "LevelID": 1,
-            "Stars": 2,
-            "XP": 50,
->>>>>>> Stashed changes
             "LevelLocked": 0
         },
         {
             "LevelID": 2,
             "Stars": 3,
-<<<<<<< Updated upstream
             "XP": 100,
             "LevelLocked": 0
-=======
-            "XP": 10,
-            "LevelLocked": 1
->>>>>>> Stashed changes
         },
         {
             "LevelID": 3,
-            "Stars": 3,
-            "XP": 100,
-            "LevelLocked": 0
-        },
-        {
-            "LevelID": 4,
             "Stars": 0,
             "XP": 0,
             "LevelLocked": 0

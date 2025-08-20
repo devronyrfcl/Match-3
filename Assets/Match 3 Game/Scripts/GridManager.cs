@@ -66,6 +66,7 @@ public class GridManager : MonoBehaviour
 
     public GameObject GameOverPanel;
     public TMP_Text gameOverText; // Text to display game over message
+    public TMP_Text level_Count;
     public GameObject itemWarningPanel;
     public int stars = 0;
     public int XP = 0; // XP earned in the level
@@ -310,6 +311,7 @@ public class GridManager : MonoBehaviour
     {
         //gameOverText will be = level + currentLevelIndex + 1
         gameOverText.text = "Level :" + (currentLevelIndex + 1);
+        level_Count.text = (currentLevelIndex + 1).ToString(); // Update level count text
 
         // Handle game over logic here
         // For example, show a game over screen or reset the game
@@ -417,6 +419,8 @@ public class GridManager : MonoBehaviour
     {
         // Load the main menu scene
         StartCoroutine(EmojiLoading_2());
+
+        PlayerDataManager.Instance.GetCurrentLevel(); // Initialize current level after creating new player
     }
 
 

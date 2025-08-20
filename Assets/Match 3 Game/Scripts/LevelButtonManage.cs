@@ -27,6 +27,23 @@ public class LevelButtonManager : MonoBehaviour
 
     public StageManager stageManager; // Assign in Inspector
 
+    public void SetInteractable(bool value)
+    {
+        /*if (button != null)
+            button.interactable = value;*/
+        this.GetComponent<Button>().interactable = value;
+        buttonImage.color = value ? Color.white : Color.gray; // Change color based on interactability
+        /*if (currentLevelGlow != null)
+        {
+            currentLevelGlow.SetActive(value && isCurrentLevel);
+        }
+        if (levelIdText != null)
+        {
+            levelIdText.color = value ? Color.white : Color.gray; // Change text color based on interactability
+        }*/
+
+    }
+
     private void Awake()
     {
         buttonImage = GetComponent<Image>();

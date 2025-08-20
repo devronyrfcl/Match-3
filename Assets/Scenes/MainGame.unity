@@ -20787,6 +20787,7 @@ MonoBehaviour:
   currentTime: 0
   GameOverPanel: {fileID: 1676779544}
   gameOverText: {fileID: 1099942960}
+  level_Count: {fileID: 960917884}
   itemWarningPanel: {fileID: 1049529511}
   stars: 0
   XP: 0

@@ -27,6 +27,8 @@ public class PlayerDataManager : MonoBehaviour
 
     public bool isFoundName = false; // Flag to check if player name is found
 
+    public int currentLevel = 1; // 🔥 Universal current level tracker
+
     public static PlayerDataManager Instance { get; private set; }
 
     
@@ -70,6 +72,7 @@ public class PlayerDataManager : MonoBehaviour
 
 
         SavePlayerData();
+        GetCurrentLevel(); // Initialize current level from player data
 
     }
 
@@ -87,9 +90,27 @@ public class PlayerDataManager : MonoBehaviour
             PlayerExtraMoveAbilityCount = 20,
             CurrentLevelId = 1, // 🔥 Default start at level 1
             Levels = new List<LevelInfo>()
+            {
+                new LevelInfo { LevelID = 1, Stars = 0, XP = 0, LevelLocked = 0 }, // Start with level 1 unlocked
+                new LevelInfo { LevelID = 2, Stars = 0, XP = 0, LevelLocked = 1 }, // Level 2 locked by default
+                new LevelInfo { LevelID = 3, Stars = 0, XP = 0, LevelLocked = 1 } // Level 3 locked by default
+            }
         };
 
         SendPlayerDataToPlayFab();
+    }
+
+    public void GetCurrentLevel()
+    {
+        if (playerData != null)
+        {
+            currentLevel = playerData.CurrentLevelId;
+            Debug.Log("Current Level: " + currentLevel);
+        }
+        else
+        {
+            Debug.LogWarning("Player data is null, cannot get current level.");
+        }
     }
 
     public void SavePlayerData()
@@ -109,12 +130,15 @@ public class PlayerDataManager : MonoBehaviour
             string json = File.ReadAllText(savePath);
             playerData = JsonUtility.FromJson<PlayerData>(json);
             Debug.Log("Player data loaded.");
+            GetCurrentLevel(); // Initialize current level from loaded data
         }
         else
         {
             Debug.LogWarning("Save file not found, creating new player...");
             CreateNewPlayer("Player", Guid.NewGuid().ToString());
             SavePlayerData();
+            GetCurrentLevel(); // Initialize current level after creating new player
+
         }
     }
 
@@ -222,6 +246,8 @@ public class PlayerDataManager : MonoBehaviour
             Debug.LogWarning($"Level {levelId} not found to send XP.");
         }
     }
+
+    
 
     #endregion
 
@@ -354,5 +380,7 @@ public class PlayerDataManager : MonoBehaviour
             Debug.LogWarning($"Level {levelId} not found to send XP.");
         }
     }*/
+
+
 
 }

@@ -21,7 +21,18 @@ public class StageManager : MonoBehaviour
     public TMP_Text Name;
     public GameObject EmojisImage; // Reference to the emojis image GameObject
 
+    public TMP_Text bombAbilityCount;
+    public TMP_Text colorBombAbilityCount;
+    public TMP_Text extraMoveAbilityCount;
+
     public GameObject namePanel; // Reference to the name panel GameObject
+
+    public int currentLevel;
+
+    public HomeButtonManager mapHomeButton; // Reference to the HomeButtonManager
+    public HomeButtonManager spinButton;
+
+    public GameObject shopUI;
 
 
 
@@ -38,13 +49,18 @@ public class StageManager : MonoBehaviour
 
     void Start()
     {
+        mapHomeButton.ShowButton(); // Show the map home button
+
         LoadPlayerData();
         ApplyDataToButtons();
         ShowTotalXPandTotalStars();
-        
-        
     }
 
+
+    private void Update()
+    {
+        GetCurrentLevelInt();
+    }
     private void LoadPlayerData()
     {
         if (File.Exists(SavePath))
@@ -60,41 +76,58 @@ public class StageManager : MonoBehaviour
         }
     }
 
+
+
     private void ApplyDataToButtons()
     {
-        if (playerData == null || playerData.Levels == null)
-        {
-            Debug.LogError("StageManager: No level data available.");
-            return;
-        }
 
-        int currentLevelIndex = GetCurrentLevelIndex();
+        
+
+        /*//enable btn.isCurrentLevel=true if current level
+        for (int i = 0; i < levelButtons.Length; i++)
+        {
+            LevelButtonManager btn = levelButtons[i];
+            btn.isCurrentLevel = (i + 1 == currentLevel); // Levels start from 1
+            btn.SetInteractable(!btn.isCurrentLevel); // Disable interaction for current level button
+        }*/
+
+
+        //int currentLevelIndex = GetCurrentLevelIndex();
 
         for (int i = 0; i < levelButtons.Length; i++)
         {
             LevelButtonManager btn = levelButtons[i];
             btn.SetLevelId(i + 1); // Levels start from 1
 
+            btn.isCurrentLevel = (i + 1 == currentLevel); // Levels start from 1
+            //btn.SetInteractable(!btn.isCurrentLevel); // Disable interaction for current level button
             LevelInfo levelInfo = playerData.Levels.Find(l => l.LevelID == btn.levelId);
             if (levelInfo != null)
             {
                 btn.SetStar(levelInfo.Stars);
                 btn.SetLocked(levelInfo.LevelLocked == 1);
+
+                // 🔥 Make button not interactable if locked
+                btn.GetComponent<Button>().interactable = (levelInfo.LevelLocked == 0);
             }
             else
             {
                 // If level not found in JSON, default: locked & 0 stars
                 btn.SetStar(0);
                 btn.SetLocked(true);
+
+                btn.GetComponent<Button>().interactable = false; // 🔒
             }
 
-            // ✅ Ensure only one current level is active
-            bool isCurrent = (i == currentLevelIndex);
-            btn.SetCurrentLevel(isCurrent);
+            
+
+
+
+            
         }
     }
 
-    private int GetCurrentLevelIndex()
+    /*private int GetCurrentLevelIndex()
     {
         // Example: first unlocked level with <3 stars
         for (int i = 0; i < levelButtons.Length; i++)
@@ -107,7 +140,7 @@ public class StageManager : MonoBehaviour
 
         // If all locked, fallback to first one
         return 0;
-    }
+    }*/
 
     IEnumerator EmojiLoading()
     {
@@ -174,6 +207,10 @@ public class StageManager : MonoBehaviour
     {
         // Handle locked level click (e.g., show message)
         Debug.Log($"StageManager: Level {levelId} is locked. Please unlock it first.");
+
+        //reset sce
+
+        
         // You can also show a UI message or popup here
     }
 
@@ -194,6 +231,12 @@ public class StageManager : MonoBehaviour
         TotalXP.text = $"{totalXP}";
         TotalStar.text = $"{totalStars}";
         Name.text = playerData.Name; // Display player name
+
+
+        //show ability counts
+        bombAbilityCount.text = playerData.PlayerBombAbilityCount.ToString();
+        colorBombAbilityCount.text = playerData.PlayerColorBombAbilityCount.ToString();
+        extraMoveAbilityCount.text = playerData.PlayerExtraMoveAbilityCount.ToString();
     }
 
 
@@ -212,4 +255,34 @@ public class StageManager : MonoBehaviour
         }
     }
 
+
+    public void RefreashData()
+    {
+               // Reload player data and update buttons
+        LoadPlayerData();
+        ApplyDataToButtons();
+        ShowTotalXPandTotalStars();
+        CheckAndShowNamePanel(); // Ensure name panel visibility is updated
+    }
+
+    void GetCurrentLevelInt()
+    {
+        // Get the current level from PlayerPrefs
+        currentLevel = PlayerDataManager.Instance.currentLevel;
+    }
+
+    public void OnClickAbilityButton()
+    {
+        //if bomb or color bomb or extra move ability count is 0 then debug log "No abilities left"
+        if (playerData.PlayerBombAbilityCount <= 0 && playerData.PlayerColorBombAbilityCount <= 0 && playerData.PlayerExtraMoveAbilityCount <= 0)
+        {
+            spinButton.ShowButton(); // Show the spin button
+            return;
+        }
+        else
+        {
+            shopUI.SetActive(true); // Show the shop UI
+        }
+
+    }
 }
