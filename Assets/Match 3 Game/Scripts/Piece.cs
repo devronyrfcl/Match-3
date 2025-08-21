@@ -9,11 +9,11 @@ public enum PieceType
     Smiling_Face,
     Smiling_Face_with_Tear,
     Angry_Face,
-    Laughing_Face,
-    Smiling_Face_With_Heart_Eyes,
-    Sleeping_Face,
+    Freeze_Face,
+    SunGlass_Face,
+    Jumbo_Angry,
     Surprised_Face,
-    Crying_Face,
+    Sad_Face,
 }
 public class Piece : MonoBehaviour
 {
@@ -58,6 +58,8 @@ public class Piece : MonoBehaviour
     public GameObject BombPiece;
     public GameObject ColorPiece;
 
+    public Animator pieceAnimator; // Animator for the piece
+
 
     public void SetPosition(int x, int y)
     {
@@ -92,8 +94,8 @@ public class Piece : MonoBehaviour
             Debug.LogError("GridManager not found in the scene.");
         }
         
+        StartCoroutine(AnimatePiece()); // Start the piece animation coroutine
 
-        
 
 
 
@@ -834,19 +836,19 @@ public class Piece : MonoBehaviour
             case PieceType.Angry_Face:
                 OnAngryFaceMatched();
                 break;
-            case PieceType.Laughing_Face:
+            case PieceType.Freeze_Face:
                 OnLaughingFaceMatched();
                 break;
-            case PieceType.Smiling_Face_With_Heart_Eyes:
+            case PieceType.SunGlass_Face:
                 OnSmilingFaceWithHeartEyesMatched();
                 break;
-            case PieceType.Sleeping_Face:
+            case PieceType.Jumbo_Angry:
                 OnSleepingFaceMatched();
                 break;
             case PieceType.Surprised_Face:
                 OnSurprisedFaceMatched();
                 break;
-            case PieceType.Crying_Face:
+            case PieceType.Sad_Face:
                 OnCryingFaceMatched();
                 break;
 
@@ -900,5 +902,18 @@ public class Piece : MonoBehaviour
         gridManager.Smiling_Face_With_Heart_Eyes();
     }
 
-
+    // 2ndMotion animation trigger will called after and after few random seconds
+    public IEnumerator AnimatePiece()
+    {
+        if (pieceAnimator != null)
+        {
+            pieceAnimator.SetTrigger("2ndMotion"); // Trigger the 2ndMotion animation
+        }
+        else
+        {
+            Debug.LogWarning("Piece Animator is not assigned!");
+        }
+        yield return new WaitForSeconds(Random.Range(1f, 5f)); // Wait for a random time before triggering again
+        StartCoroutine(AnimatePiece()); // Repeat the animation
+    }
 }

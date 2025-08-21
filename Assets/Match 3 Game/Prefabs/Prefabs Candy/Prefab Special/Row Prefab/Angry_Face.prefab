@@ -527,14 +527,14 @@ MonoBehaviour:
   swipeAngle: 0
   pieceType: 2
   IsSpecialBombPiece: 0
-  IsSpecialRowPiece: 0
+  IsSpecialRowPiece: 1
   IsSpecialColoumnPiece: 0
   IsSpecialColorPiece: 0
   gridManager: {fileID: 0}
   isMatched: 0
   stickToGrid: 1
-  ColoumnPiece: {fileID: 5159586067197779178, guid: f86ea0b159e08f746ac9aa2a8a77fc8c, type: 3}
-  RowPiece: {fileID: 5159586067197779178, guid: 1a3cb860a23b2fc4fb7f0dd3ee84fa1d, type: 3}
+  ColoumnPiece: {fileID: 5159586067197779178, guid: 2f297b223a5c50b4698d33e4d71c16e4, type: 3}
+  RowPiece: {fileID: 5159586067197779178, guid: 43586a4335edcd640bc161508a4dbd83, type: 3}
   BombPiece: {fileID: 7079316263224728815, guid: 2130cca2ee3197a4fbe3b5b31ac4b5c6, type: 3}
   ColorPiece: {fileID: 7079316263224728815, guid: 3eb04ab5e1f3d044e96821fbe4079ec4, type: 3}
   pieceAnimator: {fileID: 7094104552180067925}
@@ -738,7 +738,7 @@ SpriteRenderer:
   m_SortingLayerID: 0
   m_SortingLayer: 0
   m_SortingOrder: -4
-  m_Sprite: {fileID: 21300000, guid: 0d1297cab32d8804f83a620a3012e954, type: 3}
+  m_Sprite: {fileID: 21300000, guid: ee8bbf2e4451e984991a4ed50cfb8ec2, type: 3}
   m_Color: {r: 1, g: 1, b: 1, a: 1}
   m_FlipX: 0
   m_FlipY: 0

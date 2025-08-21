@@ -873,11 +873,11 @@ public class GridManager : MonoBehaviour
             case PieceType.Smiling_Face: return smilingFaceSprite;
             case PieceType.Smiling_Face_with_Tear: return smilingFaceWithTearSprite;
             case PieceType.Angry_Face: return angryFaceSprite;
-            case PieceType.Laughing_Face: return laughingFaceSprite;
-            case PieceType.Smiling_Face_With_Heart_Eyes: return smilingFaceWithHeartEyesSprite;
-            case PieceType.Sleeping_Face: return sleepingFaceSprite;
+            case PieceType.Freeze_Face: return laughingFaceSprite;
+            case PieceType.SunGlass_Face: return smilingFaceWithHeartEyesSprite;
+            case PieceType.Jumbo_Angry: return sleepingFaceSprite;
             case PieceType.Surprised_Face: return surprisedFaceSprite;
-            case PieceType.Crying_Face: return cryingFaceSprite;
+            case PieceType.Sad_Face: return cryingFaceSprite;
             default: return null;
         }
     }
@@ -902,11 +902,11 @@ public class GridManager : MonoBehaviour
     public void Smiling_Face() => DeductTarget(PieceType.Smiling_Face);
     public void Smiling_Face_with_Tear() => DeductTarget(PieceType.Smiling_Face_with_Tear);
     public void Angry_Face() => DeductTarget(PieceType.Angry_Face);
-    public void Laughing_Face() => DeductTarget(PieceType.Laughing_Face);
-    public void Smiling_Face_With_Heart_Eyes() => DeductTarget(PieceType.Smiling_Face_With_Heart_Eyes);
-    public void Sleeping_Face() => DeductTarget(PieceType.Sleeping_Face);
+    public void Laughing_Face() => DeductTarget(PieceType.Freeze_Face);
+    public void Smiling_Face_With_Heart_Eyes() => DeductTarget(PieceType.SunGlass_Face);
+    public void Sleeping_Face() => DeductTarget(PieceType.Jumbo_Angry);
     public void Surprised_Face() => DeductTarget(PieceType.Surprised_Face);
-    public void Crying_Face() => DeductTarget(PieceType.Crying_Face);
+    public void Crying_Face() => DeductTarget(PieceType.Sad_Face);
     #endregion
 
 

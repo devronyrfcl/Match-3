@@ -4744,7 +4744,7 @@ SpriteRenderer:
   m_LightmapParameters: {fileID: 0}
   m_SortingLayerID: 0
   m_SortingLayer: 0
-  m_SortingOrder: -4
+  m_SortingOrder: -8
   m_Sprite: {fileID: 21300000, guid: 4f2cc3e121b3e7944b180997ff76527f, type: 3}
   m_Color: {r: 1, g: 1, b: 1, a: 1}
   m_FlipX: 0
@@ -5203,6 +5203,110 @@ MonoBehaviour:
     parentTransformRect: {fileID: 0}
     parentTransform: {fileID: 0}
     partOfPrefab: 0
+--- !u!1 &791951020
+GameObject:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  serializedVersion: 6
+  m_Component:
+  - component: {fileID: 791951022}
+  - component: {fileID: 791951021}
+  m_Layer: 0
+  m_Name: Grid Manager (1)
+  m_TagString: Untagged
+  m_Icon: {fileID: 0}
+  m_NavMeshLayer: 0
+  m_StaticEditorFlags: 0
+  m_IsActive: 0
+--- !u!114 &791951021
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 791951020}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 52cf891585c0591439d23b158f9f8e2a, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
+  piecePrefabs:
+  - {fileID: 5159586067197779178, guid: 474ce74a21ed8bb4c83386b716db42b0, type: 3}
+  - {fileID: 1237422285867484529, guid: 92724ac75009cc6498544c5641bc5432, type: 3}
+  - {fileID: 4447580820403757667, guid: 2b286e7534f3e8a47be0e6063dee85f5, type: 3}
+  - {fileID: 8502751441075322089, guid: 8f56843240e03fb40a9255f8e2841df9, type: 3}
+  - {fileID: 2213740410953808157, guid: f37ab09247ed76d4ebdc2817976cf9fb, type: 3}
+  - {fileID: 6382024892613143254, guid: 88d36026813ecad4395b98838b624026, type: 3}
+  pieces: []
+  levelData: {fileID: 11400000, guid: 8c5df71e49e601045abce2afe66696c8, type: 2}
+  levelDatas:
+  - {fileID: 11400000, guid: 8c5df71e49e601045abce2afe66696c8, type: 2}
+  - {fileID: 11400000, guid: 93f1df55424d4f241ab64b60d8c20915, type: 2}
+  - {fileID: 11400000, guid: 8cbec75d7881e40438be29079faba43a, type: 2}
+  - {fileID: 11400000, guid: 94d8ad93d5f417c48b6882cd18bc4242, type: 2}
+  - {fileID: 11400000, guid: c9e6167e85997eb41b1f14bd43bfa26f, type: 2}
+  currentLevelIndex: 0
+  brickPrefab: {fileID: 8850409025718004857, guid: 811c5880cf652a247b6c80a7f0073223, type: 3}
+  particlePrefab: {fileID: 6210172836853080571, guid: 6db5431061a9c9f439d58bf876aeadc3, type: 3}
+  GridBackgroundBlock: {fileID: 8785358703781879313, guid: 7eb08adfeac695048ad07ffd81d7a5df, type: 3}
+  isPlacingBomb: 0
+  isPlacingColor: 0
+  canControl: 1
+  EmojisImage: {fileID: 193695059}
+  timeText: {fileID: 1279298964}
+  movesCountText: {fileID: 893151959}
+  Ability_bombCountText: {fileID: 1312174013}
+  Ability_ColorBombCountText: {fileID: 2039110666}
+  Ability_extraMovesCountText: {fileID: 1969368660}
+  Ability_bombCurrentAmount: 0
+  Ability_colorBombCurrentAmount: 0
+  Ability_extraMovesCurrentAmount: 0
+  currentTime: 0
+  GameOverPanel: {fileID: 1676779544}
+  gameOverText: {fileID: 1099942960}
+  level_Count: {fileID: 960917884}
+  itemWarningPanel: {fileID: 1049529511}
+  stars: 0
+  XP: 0
+  normalStars:
+  - {fileID: 976545480}
+  - {fileID: 1962521459}
+  - {fileID: 268480374}
+  glowStars:
+  - {fileID: 1866742012}
+  - {fileID: 1761719174}
+  - {fileID: 49590674}
+  xpAmount: {fileID: 426857276}
+  smilingFaceSprite: {fileID: -625046086, guid: 08e60bfc27965c847b8897bbe079155b, type: 3}
+  smilingFaceWithTearSprite: {fileID: -698371609, guid: bbcceb2198677444b8d58f504ae86f07, type: 3}
+  angryFaceSprite: {fileID: 114186026, guid: bbcceb2198677444b8d58f504ae86f07, type: 3}
+  laughingFaceSprite: {fileID: -144446945, guid: bbcceb2198677444b8d58f504ae86f07, type: 3}
+  smilingFaceWithHeartEyesSprite: {fileID: -97493459, guid: bbcceb2198677444b8d58f504ae86f07, type: 3}
+  sleepingFaceSprite: {fileID: 1219771145, guid: bbcceb2198677444b8d58f504ae86f07, type: 3}
+  surprisedFaceSprite: {fileID: -1040283631, guid: 08e60bfc27965c847b8897bbe079155b, type: 3}
+  cryingFaceSprite: {fileID: -1330854120, guid: bbcceb2198677444b8d58f504ae86f07, type: 3}
+  target1Image: {fileID: 1987731741}
+  target2Image: {fileID: 1148772886}
+  target1CountText: {fileID: 835158233}
+  target2CountText: {fileID: 1415148926}
+  fileName: playerdata.json
+--- !u!4 &791951022
+Transform:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 791951020}
+  serializedVersion: 2
+  m_LocalRotation: {x: 0, y: 0, z: 0, w: 1}
+  m_LocalPosition: {x: -1.5960848, y: -1.9789103, z: 0.0029947748}
+  m_LocalScale: {x: 1, y: 1, z: 1}
+  m_ConstrainProportionsScale: 0
+  m_Children: []
+  m_Father: {fileID: 0}
+  m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
 --- !u!1 &809632758
 GameObject:
   m_ObjectHideFlags: 0
@@ -7214,7 +7318,7 @@ SpriteRenderer:
   m_LightmapParameters: {fileID: 0}
   m_SortingLayerID: 0
   m_SortingLayer: 0
-  m_SortingOrder: -7
+  m_SortingOrder: -9
   m_Sprite: {fileID: 21300000, guid: 614d5fbd4a3479e4d89c74837218ffae, type: 3}
   m_Color: {r: 1, g: 1, b: 1, a: 1}
   m_FlipX: 0
@@ -20758,8 +20862,6 @@ MonoBehaviour:
   - {fileID: 8502751441075322089, guid: 8f56843240e03fb40a9255f8e2841df9, type: 3}
   - {fileID: 2213740410953808157, guid: f37ab09247ed76d4ebdc2817976cf9fb, type: 3}
   - {fileID: 6382024892613143254, guid: 88d36026813ecad4395b98838b624026, type: 3}
-  - {fileID: 8252069988943881566, guid: 8b321ead8f49de1469401f5f2e0564b7, type: 3}
-  - {fileID: 7079316263224728815, guid: f60385ac0407f244b856f8be99eb5514, type: 3}
   pieces: []
   levelData: {fileID: 11400000, guid: 8c5df71e49e601045abce2afe66696c8, type: 2}
   levelDatas:
@@ -25026,6 +25128,7 @@ MonoBehaviour:
   RowPiece: {fileID: 0}
   BombPiece: {fileID: 7079316263224728815, guid: 2130cca2ee3197a4fbe3b5b31ac4b5c6, type: 3}
   ColorPiece: {fileID: 0}
+  pieceAnimator: {fileID: 0}
 --- !u!4 &3149696421285854848
 Transform:
   m_ObjectHideFlags: 0
@@ -25298,6 +25401,7 @@ SceneRoots:
   m_ObjectHideFlags: 0
   m_Roots:
   - {fileID: 1672323533}
+  - {fileID: 791951022}
   - {fileID: 1582293963}
   - {fileID: 519420032}
   - {fileID: 2073036227}
