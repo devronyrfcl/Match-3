@@ -27,3 +27,13 @@ public class LevelInfo
     public int XP;
     public int LevelLocked; // 0 = unlocked, 1 = locked
 }
+
+[Serializable]
+public class LeaderboardEntry
+{
+    public string PlayFabId;
+    public string DisplayName;
+    public int XP;
+    public int Stars;
+    public int Rank;
+}

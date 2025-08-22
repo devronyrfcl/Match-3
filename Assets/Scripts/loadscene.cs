@@ -110,6 +110,8 @@ public class loadscene : MonoBehaviour
         yield return emojiRect.DOAnchorPosY(2150f, 1f).SetEase(Ease.InOutQuad).WaitForCompletion();
 
         stageManager.ShowTotalXPandTotalStars();
+
+        stageManager.RefreashData();
     }
 
 

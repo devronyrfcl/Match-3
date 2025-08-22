@@ -34,12 +34,15 @@ public class StageManager : MonoBehaviour
 
     public GameObject shopUI;
 
+    public int totalStars;
+    public int totalXP;
+    public TMP_InputField userNameInput; // Reference to the input field for username
+
 
 
     private PlayerData playerData;
 
-    private string SavePath => Path.Combine(Application.dataPath, fileName);
-
+    private string SavePath => Path.Combine(Application.persistentDataPath, fileName);
 
     private const string SelectedLevelIndexKey = "SelectedLevelIndex";
 
@@ -54,6 +57,7 @@ public class StageManager : MonoBehaviour
         LoadPlayerData();
         ApplyDataToButtons();
         ShowTotalXPandTotalStars();
+        
     }
 
 
@@ -119,11 +123,12 @@ public class StageManager : MonoBehaviour
                 btn.GetComponent<Button>().interactable = false; // 🔒
             }
 
-            
+            SendDataToLeaderBoard();
 
 
 
-            
+
+
         }
     }
 
@@ -221,8 +226,8 @@ public class StageManager : MonoBehaviour
             Debug.LogError("StageManager: No player data available.");
             return;
         }
-        int totalXP = 0;
-        int totalStars = 0;
+        totalXP = 0;
+        totalStars = 0;
         foreach (LevelInfo level in playerData.Levels)
         {
             totalXP += level.XP;
@@ -284,5 +289,32 @@ public class StageManager : MonoBehaviour
             shopUI.SetActive(true); // Show the shop UI
         }
 
+    }
+
+
+    public void SendDataToLeaderBoard()
+    {
+        PlayerDataManager.Instance.SendLeaderboard(totalXP); // Send the score to the leaderboard
+    }
+
+    public void GetDataFromLeaderboard()
+    {
+        PlayerDataManager.Instance.GetLeaderboard();
+
+    }
+
+    public void SetUserName()
+    {
+
+        string userName = userNameInput.text.Trim();
+        if (string.IsNullOrEmpty(userName))
+        {
+            Debug.LogWarning("Username cannot be empty.");
+            return;
+        }
+
+        PlayerDataManager.Instance.SetName(userName);
+        PlayerDataManager.Instance.SavePlayerData();
+        RefreashData();
     }
 }

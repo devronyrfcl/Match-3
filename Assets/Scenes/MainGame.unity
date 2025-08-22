@@ -20902,14 +20902,14 @@ MonoBehaviour:
   - {fileID: 1761719174}
   - {fileID: 49590674}
   xpAmount: {fileID: 426857276}
-  smilingFaceSprite: {fileID: -625046086, guid: 08e60bfc27965c847b8897bbe079155b, type: 3}
+  smilingFaceSprite: {fileID: 1821095135, guid: 38ad45e61321cbc4ca6b7f55d38215d1, type: 3}
   smilingFaceWithTearSprite: {fileID: -698371609, guid: bbcceb2198677444b8d58f504ae86f07, type: 3}
-  angryFaceSprite: {fileID: 114186026, guid: bbcceb2198677444b8d58f504ae86f07, type: 3}
-  laughingFaceSprite: {fileID: -144446945, guid: bbcceb2198677444b8d58f504ae86f07, type: 3}
-  smilingFaceWithHeartEyesSprite: {fileID: -97493459, guid: bbcceb2198677444b8d58f504ae86f07, type: 3}
-  sleepingFaceSprite: {fileID: 1219771145, guid: bbcceb2198677444b8d58f504ae86f07, type: 3}
+  angryFaceSprite: {fileID: -1695785867, guid: 38ad45e61321cbc4ca6b7f55d38215d1, type: 3}
+  laughingFaceSprite: {fileID: 1526199242, guid: 38ad45e61321cbc4ca6b7f55d38215d1, type: 3}
+  smilingFaceWithHeartEyesSprite: {fileID: -483119358, guid: 38ad45e61321cbc4ca6b7f55d38215d1, type: 3}
+  sleepingFaceSprite: {fileID: -1180887549, guid: 38ad45e61321cbc4ca6b7f55d38215d1, type: 3}
   surprisedFaceSprite: {fileID: -1040283631, guid: 08e60bfc27965c847b8897bbe079155b, type: 3}
-  cryingFaceSprite: {fileID: -1330854120, guid: bbcceb2198677444b8d58f504ae86f07, type: 3}
+  cryingFaceSprite: {fileID: 1179024605, guid: 38ad45e61321cbc4ca6b7f55d38215d1, type: 3}
   target1Image: {fileID: 1987731741}
   target2Image: {fileID: 1148772886}
   target1CountText: {fileID: 835158233}

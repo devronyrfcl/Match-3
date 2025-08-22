@@ -11,6 +11,8 @@ public class HomeButtonManager : MonoBehaviour
     public RectTransform textRect;     // Text RectTransform
     public GameObject panel;
 
+    public GameObject[] DisbaleObjectArray;
+
     [Header("Animation Settings")]
     public float moveDuration = 0.5f;
     public float scaleDuration = 0.5f;
@@ -65,6 +67,15 @@ public class HomeButtonManager : MonoBehaviour
             if (manager != this) // Avoid hiding itself
             {
                 manager.HideButton();
+            }
+        }
+
+        //DisbaleObjectArray will be disabled when this button is shown
+        foreach (var obj in DisbaleObjectArray)
+        {
+            if (obj != null)
+            {
+                obj.SetActive(false); // Disable objects when this button is shown
             }
         }
 

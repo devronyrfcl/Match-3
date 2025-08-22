@@ -7,6 +7,8 @@ using PlayFab;
 using PlayFab.ClientModels;
 using UnityEngine.UI;
 using TMPro;
+using System.Linq;
+
 
 
 [Serializable]
@@ -31,7 +33,14 @@ public class PlayerDataManager : MonoBehaviour
 
     public static PlayerDataManager Instance { get; private set; }
 
-    
+    public int TotalXP
+    {
+        get { return playerData != null ? playerData.Levels.Sum(l => l.XP) : 0; }
+    }
+    public int TotalStars
+    {
+        get { return playerData != null ? playerData.Levels.Sum(l => l.Stars) : 0; }
+    }
 
 
     #region "Offline JSON"
@@ -51,7 +60,10 @@ public class PlayerDataManager : MonoBehaviour
 
     void Start()
     {
-        savePath = Path.Combine(Application.dataPath, "playerdata.json");
+        //save path will be in android/data/com.companyname.match3game/files/playerdata.json
+        savePath = Path.Combine(Application.persistentDataPath, "playerdata.json");
+
+        //savePath = Path.Combine(Application.dataPath, "playerdata.json");
 
         LoginAsGuest();
 
@@ -247,7 +259,23 @@ public class PlayerDataManager : MonoBehaviour
         }
     }
 
-    
+
+    public void AddColorBombAbility(int count)
+    {
+        playerData.PlayerColorBombAbilityCount += count;
+        //Debug.Log($"Added {count} Color Bombs. Total: {playerData.PlayerColorBombAbilityCount}");
+    }
+    public void AddBombAbility(int count)
+    {
+        playerData.PlayerBombAbilityCount += count;
+        //Debug.Log($"Added {count} Bombs. Total: {playerData.PlayerBombAbilityCount}");
+    }
+    public void AddExtraMoveAbility(int count)
+    {
+        playerData.PlayerExtraMoveAbilityCount += count;
+        //Debug.Log($"Added {count} Extra Moves. Total: {playerData.PlayerExtraMoveAbilityCount}");
+    }
+
 
     #endregion
 
@@ -361,6 +389,56 @@ public class PlayerDataManager : MonoBehaviour
     }
 
 
+    public void SendLeaderboard(int TotalXP)
+    {
+        var request = new UpdatePlayerStatisticsRequest
+        {
+            Statistics = new List<StatisticUpdate>
+            {
+                new StatisticUpdate
+                {
+                    StatisticName = "XP",
+                    Value = TotalXP
+                }
+            }
+        };
+        PlayFabClientAPI.UpdatePlayerStatistics(request, OnLeaderboardUpdate, OnError);
+    }
+
+    void OnLeaderboardUpdate(UpdatePlayerStatisticsResult result)
+    {
+        Debug.Log("Successfully updated leaderboard");
+    }
+
+    public void GetLeaderboard()
+    {
+        var request = new GetLeaderboardRequest
+        {
+            StatisticName = "XP",
+            StartPosition = 0,
+            MaxResultsCount = 10
+        };
+        PlayFabClientAPI.GetLeaderboard(request, OnLeaderboardGet, OnError);
+        //ShowNameOnLeaderboard();
+    }
+
+    public void OnLeaderboardGet(GetLeaderboardResult result)
+    {
+
+        //Show leaderboard entries
+        if (result.Leaderboard != null && result.Leaderboard.Count > 0)
+        {
+            foreach (var entry in result.Leaderboard)
+            {
+                Debug.Log($"Rank: {entry.Position + 1}, Player: {entry.DisplayName}, XP: {entry.StatValue}");
+            }
+        }
+        else
+        {
+            Debug.Log("No leaderboard entries found.");
+        }
+
+    }
 
 
     #endregion
