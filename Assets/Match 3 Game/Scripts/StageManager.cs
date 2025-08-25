@@ -53,11 +53,13 @@ public class StageManager : MonoBehaviour
     void Start()
     {
         mapHomeButton.ShowButton(); // Show the map home button
-
+        AudioManager.Instance.PlayMusic("MenuBG");
         LoadPlayerData();
         ApplyDataToButtons();
         ShowTotalXPandTotalStars();
+
         
+
     }
 
 

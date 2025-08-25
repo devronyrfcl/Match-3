@@ -60,6 +60,10 @@ public class Piece : MonoBehaviour
 
     public Animator pieceAnimator; // Animator for the piece
 
+    //Paricle Effect
+    public GameObject matchedParticle;
+    
+
 
     public void SetPosition(int x, int y)
     {
@@ -68,11 +72,6 @@ public class Piece : MonoBehaviour
         transform.position = new Vector2(x, y); // Set the position of the piece in the grid
     }
 
-    /*public void SetPieceType(PieceType type)
-    {
-        pieceType = type;
-        
-    }*/
 
     // Start is called before the first frame update
     void Start()
@@ -123,7 +122,7 @@ public class Piece : MonoBehaviour
             }
         }
 
-        /*//if IsSpecialRowPiece is true and click on the piece using mouse raycast then ClearRow(int y)
+        //if IsSpecialRowPiece is true and click on the piece using mouse raycast then ClearRow(int y)
         if (IsSpecialRowPiece && Input.GetMouseButtonDown(0))
         {
             Vector2 mousePosition = Camera.main.ScreenToWorldPoint(Input.mousePosition);
@@ -143,7 +142,7 @@ public class Piece : MonoBehaviour
             {
                 ClearColoumn(X); // Call the ClearColoumn method with the current piece's X position
             }
-        }*/
+        }
 
 
 
@@ -157,7 +156,9 @@ public class Piece : MonoBehaviour
         //FindMatches(); // Call the method to find matches at the start
     }
 
-    void UpdateTargetPosition()
+
+
+    /*void UpdateTargetPosition() // Update the target position based on swipe
     {
         if (finalTouchPosition != Vector2.zero)
         {
@@ -242,8 +243,106 @@ public class Piece : MonoBehaviour
                 }
             }
         }
-    }
+    }*/
 
+
+    void UpdateTargetPosition()
+    {
+        if (finalTouchPosition == Vector2.zero || !gridManager.canControl)
+            return;
+
+        // Calculate swipe direction
+        float dx = finalTouchPosition.x - firstTouchPosition.x;
+        float dy = finalTouchPosition.y - firstTouchPosition.y;
+
+        if (Mathf.Abs(dx) < 0.2f && Mathf.Abs(dy) < 0.2f)
+            return; // Ignore tiny swipes
+
+        int targetX = X;
+        int targetY = Y;
+
+        // Determine direction
+        if (Mathf.Abs(dx) > Mathf.Abs(dy))
+        {
+            // Horizontal swipe
+            if (dx > 0)
+                targetX = X + 1; // Right
+            else
+                targetX = X - 1; // Left
+        }
+        else
+        {
+            // Vertical swipe
+            if (dy > 0)
+                targetY = Y + 1; // Up
+            else
+                targetY = Y - 1; // Down
+        }
+
+        // Check bounds
+        if (targetX < 0 || targetX >= levelData.gridWidth || targetY < 0 || targetY >= levelData.gridHeight)
+            return;
+
+        GameObject targetPieceObj = gridManager.grid[targetX, targetY];
+        if (targetPieceObj == null)
+            return;
+
+        Piece targetPiece = targetPieceObj.GetComponent<Piece>();
+        if (targetPiece == null)
+            return;
+
+        // Set otherPiece for swipe back logic
+        otherPiece = targetPieceObj;
+
+        // Swap logic
+        Vector2 myTarget = targetPiece.transform.position;
+        Vector2 otherTarget = transform.position;
+        float swipeTime = 0.3f;
+
+        originalWorldPosition = transform.position;
+        originalX = X;
+        originalY = Y;
+
+        targetPiece.originalWorldPosition = targetPiece.transform.position;
+        targetPiece.originalX = targetPiece.X;
+        targetPiece.originalY = targetPiece.Y;
+
+        // Animate movement
+        transform.DOMove(myTarget, swipeTime);
+        targetPiece.transform.DOMove(otherTarget, swipeTime);
+
+        // Swap in grid
+        gridManager.grid[X, Y] = targetPieceObj;
+        gridManager.grid[targetPiece.X, targetPiece.Y] = this.gameObject;
+
+        // 🔹 NEW: Color piece swap interaction
+        if (this.IsSpecialColorPiece)
+        {
+            targetPiece.ClearColour(targetPiece.pieceType); // Clear all pieces of the type of the target piece
+            this.isMatched = true; // Mark this piece as matched
+            MarkAndDestroyColorPiece(this); // Destroy this piece after marking it as matched
+        }
+        else if (targetPiece.IsSpecialColorPiece)
+        {
+            this.ClearColour(this.pieceType); // Clear all pieces of this piece type
+            targetPiece.isMatched = true; // Mark the target piece as matched
+            MarkAndDestroyColorPiece(targetPiece); // Destroy the target piece after marking it as matched
+        }
+
+        // Swap logical coordinates
+        int tempX = X;
+        int tempY = Y;
+        X = targetPiece.X;
+        Y = targetPiece.Y;
+        targetPiece.X = tempX;
+        targetPiece.Y = tempY;
+
+        // Trigger match check
+        Invoke(nameof(FindMatches), 0.5f);
+        targetPiece.Invoke(nameof(FindMatches), 0.5f);
+
+        finalTouchPosition = Vector2.zero;
+    }
 
     void CalculateAngle()
     {
@@ -421,10 +520,27 @@ public class Piece : MonoBehaviour
                     if (piece.IsSpecialBombPiece || piece.IsSpecialRowPiece ||
                         piece.IsSpecialColoumnPiece || piece.IsSpecialColorPiece)
                     {
-                        if (piece.IsSpecialBombPiece) piece.Bomb(piece.X, piece.Y);
+                        /*if (piece.IsSpecialBombPiece) piece.Bomb(piece.X, piece.Y);
                         if (piece.IsSpecialRowPiece) piece.ClearRow(piece.Y);
-                        if (piece.IsSpecialColoumnPiece) piece.ClearColoumn(piece.X);
+                        if (piece.IsSpecialColoumnPiece) piece.ClearColoumn(piece.X);*/
 
+                        if (piece.IsSpecialBombPiece)
+                        {
+                            piece.Bomb(X, Y);
+                        }
+                        if (piece.IsSpecialRowPiece)
+                        {
+                            piece.ClearRow(Y);
+                            gridManager.SpawnHorizontalClear(Y);
+
+
+                        }
+                        if (piece.IsSpecialColoumnPiece)
+                        {
+                            piece.ClearColoumn(X);
+                            gridManager.SpawnVerticalClear(X);
+
+                        }
                     }
 
                     MarkAsMatched(piece);
@@ -496,16 +612,53 @@ public class Piece : MonoBehaviour
         }
         TriggerGridUpdate();
 
-        /*//destroy the piece after marking it as matched
-        if (piece == null || gridManager == null) return;
-        Destroy(piece.gameObject); // Destroy the matched piece*/
-
-
+        gridManager.PlayEffect();
 
         // Clear grid reference immediately
         gridManager.grid[piece.X, piece.Y] = null;
 
         TriggerPieceMatchedEvent(piece.pieceType);
+
+
+
+        // Effect handling with if–else logic
+        if (piece.IsSpecialRowPiece)
+        {
+            // Row particle effect
+            gridManager.SpawnHorizontalClear(piece.Y);
+            Debug.Log("Row piece matched at Y: " + piece.Y);
+        }
+        else if (piece.IsSpecialColoumnPiece)
+        {
+            // Column particle effect
+            gridManager.SpawnVerticalClear(piece.X);
+            Debug.Log("Coloumn piece matched at X: " + piece.X);
+        }
+        else if (piece.IsSpecialColorPiece)
+        {
+            // TODO: Add your color bomb effect
+            //SpawnColorBombEffect(piece.transform.position);
+        }
+        else if (piece.IsSpecialBombPiece)
+        {
+            // TODO: Add your bomb effect
+            //SpawnBombEffect(piece.transform.position);
+        }
+        else
+        {
+            // Normal piece matched effect
+            if (matchedParticle != null)
+            {
+                Instantiate(matchedParticle, piece.transform.position, Quaternion.identity);
+                
+            }
+        }
+
+        /*// Normal piece matched effect
+        if (matchedParticle != null)
+        {
+            Instantiate(matchedParticle, piece.transform.position, Quaternion.identity);
+        }*/
 
         // Animate scale down to zero before destroying the piece
         piece.transform.DOScale(Vector2.zero, 0.3f).SetEase(Ease.InBack).OnComplete(() =>
@@ -516,40 +669,12 @@ public class Piece : MonoBehaviour
 
             //FindMatches(); // Call the method to find matches at the start
             Destroy(piece.gameObject);
+            gridManager.PlayRandomSFX();
         });
     }
 
 
-    /*public void MarkAsMatched_2(Piece piece)
-    {
-        //remove other pieces exept this one and spawn a special piece
-        Collider2D collider = piece.GetComponent<Collider2D>();
-        if (collider != null)
-        {
-            collider.enabled = false;
-        }
-        TriggerGridUpdate();
-
-        //destroy the piece after marking it as matched
-        if (piece == null || gridManager == null) return;
-        Destroy(piece.gameObject); // Destroy the matched piece
-
-
-
-        // Clear grid reference immediately
-        gridManager.grid[piece.X, piece.Y] = null;
-
-        // Animate scale down to zero before destroying the piece
-        piece.transform.DOScale(Vector2.zero, 0.3f).SetEase(Ease.InBack).OnComplete(() =>
-        {
-            //FindMatches(); // Call the method to find matches at the start
-            Debug.Log("Shimul Motherfucker");
-        });
     
-    }*/
-
-
-
     void TriggerGridUpdate()
     {
         //Invoke(nameof(gridManager.UpdateGrid), 0.1f); // Delay to allow destruction to complete
@@ -605,9 +730,11 @@ public class Piece : MonoBehaviour
             Piece piece = gridManager.grid[coloumnIndex, y]?.GetComponent<Piece>();
             if (piece != null && !piece.isMatched)
             {
+                
                 piece.isMatched = true;
                 MarkAsMatched(piece);
-                Debug.Log("Coloumn cleared at index: " + coloumnIndex + " for piece type: " + piece.pieceType);
+                //Debug.Log("Coloumn cleared at index: " + coloumnIndex + " for piece type: " + piece.pieceType);
+                AudioManager.Instance.PlaySFX("ColoumnClear");
 
 
             }
@@ -621,11 +748,18 @@ public class Piece : MonoBehaviour
             Piece piece = gridManager.grid[x, rowIndex]?.GetComponent<Piece>();
             if (piece != null && !piece.isMatched)
             {
+                
                 piece.isMatched = true;
                 MarkAsMatched(piece);
-                Debug.Log("Row cleared at index: " + rowIndex + " for piece type: " + piece.pieceType);
+                //Debug.Log("Row cleared at index: " + rowIndex + " for piece type: " + piece.pieceType);
+                AudioManager.Instance.PlaySFX("RowClear");
+
+
             }
         }
+
+
+        
     }
 
     void ClearColour(PieceType type)
@@ -859,46 +993,46 @@ public class Piece : MonoBehaviour
     // Example custom behaviours:
     private void OnSmilingFaceMatched()
     {
-        Debug.Log("😊 Smiling Face matched! Play happy sound or animation.");
+        //Debug.Log("😊 Smiling Face matched! Play happy sound or animation.");
         gridManager.Smiling_Face();
     }
 
     private void OnSmilingFaceWithTearMatched()
     {
-        Debug.Log("😢 Smiling Face with Tear matched! Trigger sad effect.");
+        //Debug.Log("😢 Smiling Face with Tear matched! Trigger sad effect.");
         gridManager.Smiling_Face_with_Tear();
     }
 
     private void OnAngryFaceMatched()
     {
-        Debug.Log("😠 Angry Face matched! Shake camera maybe.");
+        //Debug.Log("😠 Angry Face matched! Shake camera maybe.");
         gridManager.Angry_Face();
     }
 
     public void OnLaughingFaceMatched()
     {
-        Debug.Log("😂 Laughing Face matched! Play laughter sound.");
+        //Debug.Log("😂 Laughing Face matched! Play laughter sound.");
         gridManager.Laughing_Face();
     }
     public void OnSleepingFaceMatched()
     {
-        Debug.Log("😴 Sleeping Face matched! Maybe slow down time effect.");
+        //Debug.Log("😴 Sleeping Face matched! Maybe slow down time effect.");
         gridManager.Sleeping_Face();
     }
     public void OnSurprisedFaceMatched()
     {
-        Debug.Log("😲 Surprised Face matched! Trigger surprise effect.");
+        //Debug.Log("😲 Surprised Face matched! Trigger surprise effect.");
         gridManager.Surprised_Face();
     }
     public void OnCryingFaceMatched()
     {
-        Debug.Log("😭 Crying Face matched! Play sad sound or animation.");
+        //Debug.Log("😭 Crying Face matched! Play sad sound or animation.");
         gridManager.Crying_Face();
     }
 
     private void OnSmilingFaceWithHeartEyesMatched()
     {
-        Debug.Log("😍 Smiling Face with Heart Eyes matched! Trigger love effect.");
+        //Debug.Log("😍 Smiling Face with Heart Eyes matched! Trigger love effect.");
         gridManager.Smiling_Face_With_Heart_Eyes();
     }
 
@@ -916,4 +1050,6 @@ public class Piece : MonoBehaviour
         yield return new WaitForSeconds(Random.Range(1f, 5f)); // Wait for a random time before triggering again
         StartCoroutine(AnimatePiece()); // Repeat the animation
     }
+    
+
 }

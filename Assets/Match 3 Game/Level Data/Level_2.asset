@@ -23,9 +23,9 @@ MonoBehaviour:
   target2Count: 6
   timeLimit: 60
   blockedCells:
-  - x: 0
+  - x: 1
     y: 1
-  - x: 4
-    y: 5
+  - x: 5
+    y: 4
   - x: 1
     y: 7

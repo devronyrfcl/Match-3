@@ -9,7 +9,12 @@ using System.IO;
 using UnityEngine.SceneManagement;
 
 
-
+[System.Serializable]
+public class SpriteData
+{
+    public Sprite sprite;
+    public Vector3 targetScale = Vector3.one; // Default (1,1,1), you can customize per sprite
+}
 
 
 public class GridManager : MonoBehaviour
@@ -53,7 +58,12 @@ public class GridManager : MonoBehaviour
     public int Ability_bombCurrentAmount;
     public int Ability_colorBombCurrentAmount;
     public int Ability_extraMovesCurrentAmount;
-    
+    public SpriteData[] sprites; // Each sprite has its own target scale
+    public Image targetImage; // Target Image component
+    public float scaleDuration = 0.3f; // How fast it scales
+    public float holdDuration = 0.5f;  // Hold time before scaling back
+    private Sequence currentSequence; // Track current tween sequence
+
 
     /*private int bombAmount;
     private int colorAmount;
@@ -95,7 +105,8 @@ public class GridManager : MonoBehaviour
     private int currentTarget1Count;
     private int currentTarget2Count;
 
-
+    public GameObject horizontalClearParticle;
+    public GameObject verticalClearParticle;
 
     private bool isTimerRunning = false;
     public string fileName = "playerdata.json";
@@ -112,6 +123,8 @@ public class GridManager : MonoBehaviour
         SavePath = Path.Combine(Application.persistentDataPath, "playerdata.json");
 
         LoadLevel();
+
+        //AudioManager.Instance.PlayMusic("MenuBG");
 
 
         SpawnGridBackgroundBlock(); // Call the method to spawn background blocks
@@ -163,6 +176,12 @@ public class GridManager : MonoBehaviour
 
     }
 
+    private void Awake()
+    {
+        if (targetImage != null)
+            targetImage.transform.localScale = Vector3.zero; // Start hidden
+    }
+
     private void UpdateUI()
     {
         movesCountText.text = currentMoves.ToString();
@@ -203,14 +222,15 @@ public class GridManager : MonoBehaviour
         //if currentTime is less than or equal to 0, then call a function name GameOver()
         if (currentTime <= 0)
         {
-            GameOver();
+            //GameOver();
+            StartCoroutine(GameOver());
             Debug.Log("Game Over! Time is up.");
             // You can call a GameOver function here if needed
         }
 
         if(currentMoves <= 0)
         {
-            GameOver();
+            StartCoroutine(GameOver());
             Debug.Log("Game Over! No moves left.");
             // You can call a GameOver function here if needed
         }
@@ -219,7 +239,7 @@ public class GridManager : MonoBehaviour
         {
             // You can call a function to handle level completion here
             Debug.Log("Level Completed!");
-            GameOver();
+            StartCoroutine(GameOver());
         }
 
 
@@ -308,8 +328,11 @@ public class GridManager : MonoBehaviour
 
 
 
-    void GameOver()
+    IEnumerator GameOver()
     {
+        //wait for 1 second
+        yield return new WaitForSeconds(1f);
+
         //gameOverText will be = level + currentLevelIndex + 1
         gameOverText.text = "Level :" + (currentLevelIndex + 1);
         level_Count.text = (currentLevelIndex + 1).ToString(); // Update level count text
@@ -917,5 +940,61 @@ public class GridManager : MonoBehaviour
     public void Crying_Face() => DeductTarget(PieceType.Sad_Face);
     #endregion
 
+
+
+    #region "Visual Effects and Sounds"
+    public void SpawnHorizontalClear(int y)
+    {
+
+        GameObject particle = Instantiate(horizontalClearParticle, new Vector2(levelData.gridWidth / 2f - 0.5f, y), Quaternion.identity);
+        particle.transform.SetParent(transform);
+        particle.name = "HorizontalClear (" + y + ")";
+        Destroy(particle, 1f); // Destroy after 1 second
+    }
+
+    public void SpawnVerticalClear(int x)
+    {
+        GameObject particle = Instantiate(verticalClearParticle, new Vector2(x, levelData.gridHeight / 2f - 0.5f), Quaternion.identity);
+        particle.transform.SetParent(transform);
+        particle.name = "VerticalClear (" + x + ")";
+        Destroy(particle, 1f); // Destroy after 1 second
+    }
+
+
+    //play random sfx sound(Pop_1, Pop_2, Pop_3, Pop_4) from AudioManager
+    public void PlayRandomSFX()
+    {
+        int randomIndex = Random.Range(1, 5); // Random index between 1 and 4
+        string sfxName = "Pop_" + randomIndex;
+        AudioManager.Instance.PlaySFX(sfxName);
+    }
+
+
+    public void PlayEffect()
+    {
+        if (sprites.Length == 0 || targetImage == null) return;
+
+        // If a previous tween is running, tween it back to zero immediately
+        if (currentSequence != null && currentSequence.IsActive() && currentSequence.IsPlaying())
+        {
+            currentSequence.Kill();
+            targetImage.transform.DOScale(Vector3.zero, scaleDuration * 0.5f).SetEase(Ease.InBack);
+        }
+
+        // Pick a random sprite
+        SpriteData data = sprites[Random.Range(0, sprites.Length)];
+        targetImage.sprite = data.sprite;
+
+        // Reset scale
+        targetImage.transform.localScale = Vector3.zero;
+
+        // Start new tween sequence
+        currentSequence = DOTween.Sequence();
+        currentSequence.Append(targetImage.transform.DOScale(data.targetScale, scaleDuration).SetEase(Ease.OutBack));
+        currentSequence.AppendInterval(holdDuration);
+        currentSequence.Append(targetImage.transform.DOScale(Vector3.zero, scaleDuration).SetEase(Ease.InBack));
+    }
+
+    #endregion
 
 }

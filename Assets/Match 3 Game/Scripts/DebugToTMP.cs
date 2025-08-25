@@ -12,6 +12,8 @@ public class DebugToTMP : MonoBehaviour
 
     private Queue<string> logQueue = new Queue<string>();
 
+    private bool isActive = true; // Default active
+
     void OnEnable()
     {
         Application.logMessageReceived += HandleLog;
@@ -24,6 +26,8 @@ public class DebugToTMP : MonoBehaviour
 
     private void HandleLog(string logString, string stackTrace, LogType type)
     {
+        if (!isActive) return; // Do nothing if disabled
+
         string logEntry = "";
 
         switch (type)
@@ -53,6 +57,17 @@ public class DebugToTMP : MonoBehaviour
         if (logText != null)
         {
             logText.text = string.Join("\n", logQueue.ToArray());
+        }
+    }
+
+    // Toggle function
+    public void ToggleLogActive()
+    {
+        isActive = !isActive;
+
+        if (!isActive && logText != null)
+        {
+            logText.text = ""; // Clear text when disabling
         }
     }
 }

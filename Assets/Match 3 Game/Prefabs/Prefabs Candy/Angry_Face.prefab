@@ -538,6 +538,9 @@ MonoBehaviour:
   BombPiece: {fileID: 7079316263224728815, guid: 2130cca2ee3197a4fbe3b5b31ac4b5c6, type: 3}
   ColorPiece: {fileID: 7079316263224728815, guid: 3eb04ab5e1f3d044e96821fbe4079ec4, type: 3}
   pieceAnimator: {fileID: 7094104552180067925}
+  matchedParticle: {fileID: 2309395577913353511, guid: 863c06703edcc194987b102d2e2166fd, type: 3}
+  horizontalMatchParticle: {fileID: 7665648454585897907, guid: 18f09faea31e56749b5e0bfde7d86414, type: 3}
+  verticalMatchParticle: {fileID: 7665648454585897907, guid: 4552607f89459774486dc4f81031f05b, type: 3}
 --- !u!58 &5618566969064250842
 CircleCollider2D:
   m_ObjectHideFlags: 0
@@ -738,7 +741,7 @@ SpriteRenderer:
   m_SortingLayerID: 0
   m_SortingLayer: 0
   m_SortingOrder: -4
-  m_Sprite: {fileID: 21300000, guid: 0d1297cab32d8804f83a620a3012e954, type: 3}
+  m_Sprite: {fileID: 21300000, guid: 1f1fa275f7ea6694faf7098852a2ae1f, type: 3}
   m_Color: {r: 1, g: 1, b: 1, a: 1}
   m_FlipX: 0
   m_FlipY: 0
