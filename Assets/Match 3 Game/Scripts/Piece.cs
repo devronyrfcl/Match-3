@@ -50,6 +50,8 @@ public class Piece : MonoBehaviour
 
     private LevelData levelData;
 
+
+
     public bool stickToGrid = true; // Whether the piece should stick to the grid
     
 

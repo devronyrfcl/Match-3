@@ -27,6 +27,7 @@ public class GridManager : MonoBehaviour
 
     public LevelData[] levelDatas; // Array of LevelData ScriptableObjects for different levels
 
+
     public int currentLevelIndex = 0;
     private const string SelectedLevelIndexKey = "SelectedLevelIndex";
 
@@ -108,7 +109,7 @@ public class GridManager : MonoBehaviour
     public GameObject horizontalClearParticle;
     public GameObject verticalClearParticle;
 
-    private bool isTimerRunning = false;
+    public bool isTimerRunning = false;
     public string fileName = "playerdata.json";
 
     private string SavePath; // = Path.Combine(Application.persistentDataPath, "playerdata.json");
@@ -244,6 +245,8 @@ public class GridManager : MonoBehaviour
         }*/
 
     }
+
+    
 
     void GameOverLogic()
     {
