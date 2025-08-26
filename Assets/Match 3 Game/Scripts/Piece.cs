@@ -21,14 +21,14 @@ public class Piece : MonoBehaviour
     public int Y; // Y position in the grid
 
     //Input related variables
-    public Vector2 firstTouchPosition; // Position of the first touch
-    public Vector2 finalTouchPosition; // Position of the last touch
+    private Vector2 firstTouchPosition; // Position of the first touch
+    private Vector2 finalTouchPosition; // Position of the last touch
     //public float touchAngle; // Angle of the touch movement
 
-    public GameObject otherPiece; // The Piece that will be swapped with the current Piece
+    private GameObject otherPiece; // The Piece that will be swapped with the current Piece
     private Vector2 tempPosition; // Temporary position for moving the Piece
 
-    public float swipeAngle; // Angle of the swipe gesture
+    private float swipeAngle; // Angle of the swipe gesture
     //public float swipeTime = 0.3f; // Duration for the tween animation
 
 
@@ -41,7 +41,7 @@ public class Piece : MonoBehaviour
     public bool IsSpecialColoumnPiece = false; // Special piece types for different match effects
     public bool IsSpecialColorPiece = false; // Special piece types for different match effects
 
-    public GridManager gridManager; // Reference to the PieceMatch script for matching logic
+    private GridManager gridManager; // Reference to the PieceMatch script for matching logic
 
     public bool isMatched = false; // Flag to check if the piece is matched
 
@@ -59,6 +59,10 @@ public class Piece : MonoBehaviour
     public GameObject ColorPiece;
 
     public Animator pieceAnimator; // Animator for the piece
+
+    // Animation Hashes
+    //private static readonly int IdleHash = Animator.StringToHash("2ndMotion");
+    
 
     //Paricle Effect
     public GameObject matchedParticle;
@@ -105,12 +109,23 @@ public class Piece : MonoBehaviour
     }
 
     // Update is called once per frame
-    void Update()
-    {
+    //void Update()
+    //{
         //CalculateAngle();
         /*Vector2Int snapped = Vector2Int.RoundToInt(transform.position);
         transform.position = new Vector2(snapped.x, snapped.y); // Snap the piece to the grid position*/
 
+    //}
+
+    private void FixedUpdate()
+    {
+        UpdateTargetPosition();
+        //FindMatches(); // Call the method to find matches at the start
+        SpecialPieceCall();
+    }
+
+    void SpecialPieceCall()
+    {
         //if IsSpecialBombPiece is true and click on the piece using mouse raycast then bomb(int x, int y)
         if (IsSpecialBombPiece && Input.GetMouseButtonDown(0))
         {
@@ -143,20 +158,7 @@ public class Piece : MonoBehaviour
                 ClearColoumn(X); // Call the ClearColoumn method with the current piece's X position
             }
         }
-
-
-
-
-
     }
-
-    private void FixedUpdate()
-    {
-        UpdateTargetPosition();
-        //FindMatches(); // Call the method to find matches at the start
-    }
-
-
 
     /*void UpdateTargetPosition() // Update the target position based on swipe
     {
@@ -336,6 +338,8 @@ public class Piece : MonoBehaviour
         Y = targetPiece.Y;
         targetPiece.X = tempX;
         targetPiece.Y = tempY;
+
+        AudioManager.Instance.PlaySFX("Swing_1");
 
         // Trigger match check
         Invoke(nameof(FindMatches), 0.5f);
@@ -702,6 +706,8 @@ public class Piece : MonoBehaviour
         Piece other = otherPiece.GetComponent<Piece>();
         if (other == null) yield break;
 
+        AudioManager.Instance.PlaySFX("Swing_1");
+
         float swipeTime = 0.3f;
 
         // Move both pieces back to their original positions
@@ -1041,7 +1047,7 @@ public class Piece : MonoBehaviour
     {
         if (pieceAnimator != null)
         {
-            pieceAnimator.SetTrigger("2ndMotion"); // Trigger the 2ndMotion animation
+            //pieceAnimator.SetTrigger("2ndMotion"); // Trigger the 2ndMotion animation
         }
         else
         {
@@ -1050,6 +1056,21 @@ public class Piece : MonoBehaviour
         yield return new WaitForSeconds(Random.Range(1f, 5f)); // Wait for a random time before triggering again
         StartCoroutine(AnimatePiece()); // Repeat the animation
     }
+
+
+    public void ActivateBomb()
+    {
+        if (IsSpecialBombPiece)
+        {
+            Bomb(X, Y);
+            isMatched = true;
+            MarkAndDestroyColorPiece(this); // Destroy this piece after marking it as matched
+            gridManager.DeductAbility_Bomb(1); // Deduct the bomb amount from the UI manager
+            AudioManager.Instance.PlaySFX("Bomb_1");
+        }
+    }
+
+
     
 
 }

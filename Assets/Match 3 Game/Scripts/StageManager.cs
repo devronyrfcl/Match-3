@@ -58,9 +58,12 @@ public class StageManager : MonoBehaviour
         ApplyDataToButtons();
         ShowTotalXPandTotalStars();
 
-        
+        Application.targetFrameRate = 60;
 
     }
+
+
+    //lock 60 fps
 
 
     private void Update()

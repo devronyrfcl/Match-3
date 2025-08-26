@@ -119,6 +119,8 @@ public class GridManager : MonoBehaviour
     // Start is called before the first frame update
     void Start()
     {
+        Application.targetFrameRate = 60;
+
         grid = new GameObject[levelData.gridWidth, levelData.gridHeight];
         SavePath = Path.Combine(Application.persistentDataPath, "playerdata.json");
 
@@ -217,9 +219,35 @@ public class GridManager : MonoBehaviour
             OnTimeUp();
         }
 
-        UpdateTimeText();
+        GameOverLogic();
 
-        //if currentTime is less than or equal to 0, then call a function name GameOver()
+
+        //if i click on any bomb then call bomb on that piece. use mouse position raycast to get the piece
+        /*if (Input.GetMouseButtonDown(0) && canControl)
+        {
+            Vector2 mousePos = Camera.main.ScreenToWorldPoint(Input.mousePosition);
+            RaycastHit2D hit = Physics2D.Raycast(mousePos, Vector2.zero);
+            if (hit.collider != null)
+            {
+                Piece piece = hit.collider.GetComponent<Piece>();
+                if (piece != null)
+                {
+                    if (isPlacingBomb && Ability_bombCurrentAmount > 0)
+                    {
+                        piece.ActivateBomb();
+                        DeductAbility_Bomb(1);
+                        isPlacingBomb = false;
+                    }
+                    
+                }
+            }
+        }*/
+
+    }
+
+    void GameOverLogic()
+    {
+        /*//if currentTime is less than or equal to 0, then call a function name GameOver()
         if (currentTime <= 0)
         {
             //GameOver();
@@ -228,7 +256,7 @@ public class GridManager : MonoBehaviour
             // You can call a GameOver function here if needed
         }
 
-        if(currentMoves <= 0)
+        if (currentMoves <= 0)
         {
             StartCoroutine(GameOver());
             Debug.Log("Game Over! No moves left.");
@@ -240,16 +268,32 @@ public class GridManager : MonoBehaviour
             // You can call a function to handle level completion here
             Debug.Log("Level Completed!");
             StartCoroutine(GameOver());
+        }*/
+
+
+        //optimised version of above code   
+        if ((currentTime <= 0 || currentMoves <= 0) && (currentTarget1Count > 0 || currentTarget2Count > 0))
+        {
+            // Game over condition: Time or moves are up, but targets are not met
+            StartCoroutine(GameOver());
+            Debug.Log("Game Over! Time is up or no moves left.");
         }
-
-
+        else if (currentTarget1Count <= 0 && currentTarget2Count <= 0)
+        {
+            // Level completed condition: All targets met
+            Debug.Log("Level Completed!");
+            StartCoroutine(GameOver());
+        }
     }
-
 
 
 
     private void FixedUpdate()
     {
+        UpdateTimeText();
+
+        
+
         //pieces objects will be the spawned pieces in the game
         pieces = new Piece[levelData.gridWidth * levelData.gridHeight];
         for (int x = 0; x < levelData.gridWidth; x++)
@@ -939,8 +983,6 @@ public class GridManager : MonoBehaviour
     public void Surprised_Face() => DeductTarget(PieceType.Surprised_Face);
     public void Crying_Face() => DeductTarget(PieceType.Sad_Face);
     #endregion
-
-
 
     #region "Visual Effects and Sounds"
     public void SpawnHorizontalClear(int y)
