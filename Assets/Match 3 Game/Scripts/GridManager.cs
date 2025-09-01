@@ -527,7 +527,7 @@ public class GridManager : MonoBehaviour
     {
         RectTransform emojiRect = EmojisImage.GetComponent<RectTransform>();
         // Move EmojisImage into view (Y: 2500 to -1250)
-        canControl = false;
+        
         yield return emojiRect.DOAnchorPosY(-1250f, 1f).SetEase(Ease.InOutQuad).WaitForCompletion();
 
 
@@ -607,7 +607,7 @@ public class GridManager : MonoBehaviour
 
     private IEnumerator RefillGridCoroutine()
     {
-        canControl = false; // Disable player controls during refill
+        
 
         yield return new WaitForSeconds(0.2f);
 
@@ -717,7 +717,7 @@ public class GridManager : MonoBehaviour
             }
         }
 
-        canControl = true; // Re-enable player controls after refill
+        canControl = true;
     }
 
     private bool IsBlocked(int x, int y)

@@ -255,15 +255,17 @@ public class Piece : MonoBehaviour
         /*if (finalTouchPosition == Vector2.zero || !gridManager.canControl)
             return;*/
 
-        if (finalTouchPosition == Vector2.zero)
-            return;
-
         if (!gridManager.canControl)
         {
             finalTouchPosition = Vector2.zero; // 🔹 discard old swipe
             firstTouchPosition = Vector2.zero; // (optional, also reset start point)
             return;
         }
+
+        if (finalTouchPosition == Vector2.zero)
+            return;
+
+        
 
         // Calculate swipe direction
         float dx = finalTouchPosition.x - firstTouchPosition.x;
@@ -353,7 +355,7 @@ public class Piece : MonoBehaviour
 
         AudioManager.Instance.PlaySFX("Swing_1");
 
-        gridManager.canControl = false; // Disable further input until current move is resolved
+        gridManager.canControl = false; // Disable further input until the swap is resolved
 
         // Trigger match check
         Invoke(nameof(FindMatches), 0.5f);
@@ -699,7 +701,7 @@ public class Piece : MonoBehaviour
         {
             gridManager.SpawnParticleEffect(X, Y);
 
-            gridManager.canControl = true;
+            
 
             //FindMatches(); // Call the method to find matches at the start
             Destroy(piece.gameObject);
@@ -828,8 +830,9 @@ public class Piece : MonoBehaviour
         {
             gridManager.grid[X, Y] = gameObject;
             gridManager.grid[other.X, other.Y] = otherPiece;
-            gridManager.canControl = true;
+            
         }
+        gridManager.canControl = true;
     }
 
 
