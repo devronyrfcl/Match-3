@@ -35461,6 +35461,7 @@ MonoBehaviour:
   isPlacingBomb: 0
   isPlacingColor: 0
   canControl: 1
+  isGameOver: 0
   EmojisImage: {fileID: 193695059}
   timeText: {fileID: 1279298964}
   movesCountText: {fileID: 893151959}
@@ -54446,11 +54447,13 @@ MonoBehaviour:
   m_EditorClassIdentifier: 
   X: 0
   Y: 0
+  otherPiece: {fileID: 0}
   pieceType: 6
   IsSpecialBombPiece: 0
   IsSpecialRowPiece: 0
   IsSpecialColoumnPiece: 0
   IsSpecialColorPiece: 0
+  preventSwipeBack: 0
   isMatched: 0
   stickToGrid: 1
   ColoumnPiece: {fileID: 0}

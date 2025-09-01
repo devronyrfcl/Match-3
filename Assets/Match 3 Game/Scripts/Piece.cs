@@ -2,7 +2,6 @@
 using System.Collections.Generic;
 using UnityEngine;
 using DG.Tweening;
-using UnityEngine.UIElements;
 
 public enum PieceType
 {
@@ -25,7 +24,7 @@ public class Piece : MonoBehaviour
     private Vector2 finalTouchPosition; // Position of the last touch
     //public float touchAngle; // Angle of the touch movement
 
-    private GameObject otherPiece; // The Piece that will be swapped with the current Piece
+    public GameObject otherPiece; // The Piece that will be swapped with the current Piece
     private Vector2 tempPosition; // Temporary position for moving the Piece
 
     private float swipeAngle; // Angle of the swipe gesture
@@ -40,6 +39,7 @@ public class Piece : MonoBehaviour
     public bool IsSpecialRowPiece = false; // Special piece types for different match effects
     public bool IsSpecialColoumnPiece = false; // Special piece types for different match effects
     public bool IsSpecialColorPiece = false; // Special piece types for different match effects
+    public bool preventSwipeBack = false; // Add this line
 
     private GridManager gridManager; // Reference to the PieceMatch script for matching logic
 
@@ -252,8 +252,18 @@ public class Piece : MonoBehaviour
 
     void UpdateTargetPosition()
     {
-        if (finalTouchPosition == Vector2.zero || !gridManager.canControl)
+        /*if (finalTouchPosition == Vector2.zero || !gridManager.canControl)
+            return;*/
+
+        if (finalTouchPosition == Vector2.zero)
             return;
+
+        if (!gridManager.canControl)
+        {
+            finalTouchPosition = Vector2.zero; // 🔹 discard old swipe
+            firstTouchPosition = Vector2.zero; // (optional, also reset start point)
+            return;
+        }
 
         // Calculate swipe direction
         float dx = finalTouchPosition.x - firstTouchPosition.x;
@@ -342,6 +352,8 @@ public class Piece : MonoBehaviour
         targetPiece.Y = tempY;
 
         AudioManager.Instance.PlaySFX("Swing_1");
+
+        gridManager.canControl = false; // Disable further input until current move is resolved
 
         // Trigger match check
         Invoke(nameof(FindMatches), 0.5f);
@@ -445,6 +457,7 @@ public class Piece : MonoBehaviour
                     }
 
                     MarkAsMatched(piece);
+
                     
                 }
             }
@@ -460,7 +473,10 @@ public class Piece : MonoBehaviour
             spawnedPieceGameObject.transform.SetParent(gridManager.transform); // Set the parent to the grid manager
 
 
-            gridManager.RegisterNewPiece(spawnedPieceGameObject, X, Y);
+            gridManager.RegisterNewPiece(spawnedPieceGameObject, X, Y); //*/
+
+            //just call MarkAsMatched using proper logic
+
 
         }
 
@@ -559,9 +575,8 @@ public class Piece : MonoBehaviour
 
         else
         {
-            //Debug.Log("No matches found.");
+            Debug.Log("No matches found.");
             isMatched = false; // Reset the matched state if no matches found
-            //CheckMoveCoHelper(); // Reverse the swap if no match
             StartCoroutine(SwipeBackAfterDelay()); // Reset the other piece if already matched
 
 
@@ -611,6 +626,19 @@ public class Piece : MonoBehaviour
     void MarkAsMatched(Piece piece)
     {
         
+        piece.preventSwipeBack = true; // Prevent swipe back for
+        // Prevent swipe back for the other piece as well
+        if (otherPiece != null)
+        {
+            Piece other = otherPiece.GetComponent<Piece>();
+            if (other != null)
+            {
+                other.preventSwipeBack = true;
+                //call otherPiece's ActiveSwapBack() coroutine
+                other.StartCoroutine(other.ActiveSwapBack());
+            }
+        }
+
         Collider2D collider = piece.GetComponent<Collider2D>();
         if (collider != null)
         {
@@ -671,12 +699,14 @@ public class Piece : MonoBehaviour
         {
             gridManager.SpawnParticleEffect(X, Y);
 
-            
+            gridManager.canControl = true;
 
             //FindMatches(); // Call the method to find matches at the start
             Destroy(piece.gameObject);
             gridManager.PlayRandomSFX();
         });
+
+        gridManager.GameOverLogic();
     }
 
 
@@ -696,8 +726,8 @@ public class Piece : MonoBehaviour
 
 
 
-    // Helper method to check if no matches were found after a swap. If no matches found, reverse the swap wait for 1 sec and reset the positions using dotween
-    private IEnumerator SwipeBackAfterDelay(float delay = 1f)
+    /*// Helper method to check if no matches were found after a swap. If no matches found, reverse the swap wait for 1 sec and reset the positions using dotween
+    private IEnumerator SwipeBackAfterDelay(float delay = 0.3f)
     {
         //Debug.Log("No matches found, reversing swap...");
 
@@ -725,8 +755,83 @@ public class Piece : MonoBehaviour
         gridManager.grid[X, Y] = this.gameObject;
         gridManager.grid[other.X, other.Y] = otherPiece;
 
+        gridManager.canControl = true;
 
+
+    }*/
+
+    /*private IEnumerator SwipeBackAfterDelay(float delay = 0.3f)
+    {
+        // Small delay before reversing the swap
+        yield return new WaitForSeconds(delay);
+
+        // Validate references
+        if (otherPiece == null) yield break;
+
+        Piece other = otherPiece.GetComponent<Piece>();
+        if (other == null) yield break;
+
+        // Play feedback sound
+        AudioManager.Instance?.PlaySFX("Swing_1");
+
+        const float swipeTime = 0.3f;
+
+        // Animate both pieces back to original positions
+        transform.DOMove(originalWorldPosition, swipeTime).SetEase(Ease.OutQuad);
+        otherPiece.transform.DOMove(other.originalWorldPosition, swipeTime).SetEase(Ease.OutQuad);
+
+        // Update coordinates after swipe back
+        X = originalX;
+        Y = originalY;
+        other.X = other.originalX;
+        other.Y = other.originalY;
+
+        // Restore grid references safely
+        if (gridManager != null && gridManager.grid != null)
+        {
+            gridManager.grid[X, Y] = gameObject;
+            gridManager.grid[other.X, other.Y] = otherPiece;
+            gridManager.canControl = true;
+        }
+    }*/
+
+
+    private IEnumerator SwipeBackAfterDelay(float delay = 0.3f)
+    {
+        // Small delay before reversing the swap
+        yield return new WaitForSeconds(delay);
+
+        // Prevent swipe back if this piece or the other is matched or destroyed
+        if (isMatched || otherPiece == null || otherPiece.GetComponent<Piece>()?.isMatched == true || preventSwipeBack)
+            yield break;
+
+        Piece other = otherPiece.GetComponent<Piece>();
+        if (other == null) yield break;
+
+        // Play feedback sound
+        AudioManager.Instance?.PlaySFX("Swing_1");
+
+        const float swipeTime = 0.3f;
+
+        // Animate both pieces back to original positions
+        transform.DOMove(originalWorldPosition, swipeTime).SetEase(Ease.OutQuad);
+        otherPiece.transform.DOMove(other.originalWorldPosition, swipeTime).SetEase(Ease.OutQuad);
+
+        // Update coordinates after swipe back
+        X = originalX;
+        Y = originalY;
+        other.X = other.originalX;
+        other.Y = other.originalY;
+
+        // Restore grid references safely
+        if (gridManager != null && gridManager.grid != null)
+        {
+            gridManager.grid[X, Y] = gameObject;
+            gridManager.grid[other.X, other.Y] = otherPiece;
+            gridManager.canControl = true;
+        }
     }
+
 
 
 
@@ -808,7 +913,7 @@ public class Piece : MonoBehaviour
                     {
                         piece.isMatched = true;
                         MarkAsMatched(piece);
-                        Debug.Log("Bomb triggered at (" + targetX + ", " + targetY + ")");
+                        //Debug.Log("Bomb triggered at (" + targetX + ", " + targetY + ")");
                     }
                 }
             }
@@ -1053,7 +1158,7 @@ public class Piece : MonoBehaviour
         }
         else
         {
-            Debug.LogWarning("Piece Animator is not assigned!");
+            //Debug.LogWarning("Piece Animator is not assigned!");
         }
         yield return new WaitForSeconds(Random.Range(1f, 5f)); // Wait for a random time before triggering again
         StartCoroutine(AnimatePiece()); // Repeat the animation
@@ -1072,7 +1177,11 @@ public class Piece : MonoBehaviour
         }
     }
 
-
     
+    public IEnumerator ActiveSwapBack()
+    {
+        yield return new WaitForSeconds(0.1f); // Small delay to ensure the swap has completed
+        preventSwipeBack = false; // Allow swipe back again
+    }
 
 }

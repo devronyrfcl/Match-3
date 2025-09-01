@@ -38,6 +38,7 @@ public class GridManager : MonoBehaviour
     public bool isPlacingBomb = false;
     public bool isPlacingColor = false;
     public bool canControl = true;
+    public bool isGameOver = false;
 
 
 
@@ -223,6 +224,11 @@ public class GridManager : MonoBehaviour
         GameOverLogic();
 
 
+        if(isGameOver)
+        {
+            GameOverHelper();
+        }
+
         //if i click on any bomb then call bomb on that piece. use mouse position raycast to get the piece
         /*if (Input.GetMouseButtonDown(0) && canControl)
         {
@@ -248,7 +254,7 @@ public class GridManager : MonoBehaviour
 
     
 
-    void GameOverLogic()
+    public void GameOverLogic()
     {
         /*//if currentTime is less than or equal to 0, then call a function name GameOver()
         if (currentTime <= 0)
@@ -278,14 +284,14 @@ public class GridManager : MonoBehaviour
         if ((currentTime <= 0 || currentMoves <= 0) && (currentTarget1Count > 0 || currentTarget2Count > 0))
         {
             // Game over condition: Time or moves are up, but targets are not met
-            StartCoroutine(GameOver());
+            isGameOver = true;
             Debug.Log("Game Over! Time is up or no moves left.");
         }
         else if (currentTarget1Count <= 0 && currentTarget2Count <= 0)
         {
             // Level completed condition: All targets met
             Debug.Log("Level Completed!");
-            StartCoroutine(GameOver());
+            isGameOver = true;
         }
     }
 
@@ -373,6 +379,11 @@ public class GridManager : MonoBehaviour
 
     }
 
+
+    void GameOverHelper()
+    {
+        StartCoroutine(GameOver());
+    }
 
 
     IEnumerator GameOver()
@@ -596,6 +607,8 @@ public class GridManager : MonoBehaviour
 
     private IEnumerator RefillGridCoroutine()
     {
+        canControl = false; // Disable player controls during refill
+
         yield return new WaitForSeconds(0.2f);
 
         // pieces fall down to fill empty spaces
@@ -643,6 +656,8 @@ public class GridManager : MonoBehaviour
         }
 
         yield return new WaitForSeconds(0.35f);
+
+        Random.InitState(levelData.GridSeed);
 
         // Refill empty cells with new pieces
         for (int x = 0; x < levelData.gridWidth; x++)
@@ -701,6 +716,8 @@ public class GridManager : MonoBehaviour
                 piece.FindMatches(); // Call FindMatches on each piece
             }
         }
+
+        canControl = true; // Re-enable player controls after refill
     }
 
     private bool IsBlocked(int x, int y)
