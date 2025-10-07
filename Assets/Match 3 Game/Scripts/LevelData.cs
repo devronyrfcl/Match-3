@@ -23,6 +23,8 @@ public class LevelData : ScriptableObject
     public int target1Count = 10; // Target count for the first type of piece
     public int target2Count = 5;
     public int timeLimit = 60; // Time limit for the level in seconds
+    public bool isTimedLevel;
+    public bool isMovesLevel;
     public BlockedCell[] blockedCells; //Array of blocked cells in the grid
 
 }

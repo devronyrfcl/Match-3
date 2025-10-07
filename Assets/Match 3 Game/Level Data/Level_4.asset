@@ -22,6 +22,8 @@ MonoBehaviour:
   target1Count: 100
   target2Count: 100
   timeLimit: 1000
+  isTimedLevel: 0
+  isMovesLevel: 1
   blockedCells:
   - x: 0
     y: 1

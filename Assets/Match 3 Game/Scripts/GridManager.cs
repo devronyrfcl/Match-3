@@ -72,7 +72,7 @@ public class GridManager : MonoBehaviour
     private int extraMovesAmount;*/
 
     public float currentTime;
-    private int currentMoves;
+    public int currentMoves;
     private int currentTarget1;
     private int currentTarget2;
 
@@ -85,6 +85,17 @@ public class GridManager : MonoBehaviour
     public GameObject[] normalStars; // Empty stars
     public GameObject[] glowStars;   // Filled stars
     public TMP_Text xpAmount;
+
+    public GameObject moveTargetUI;
+    public GameObject timeTargetUI;
+
+    //react transform of move image
+    public RectTransform imageSpawm;
+    public RectTransform imageTarget;
+    public GameObject moveImage;
+
+    public Canvas mainCanvas;
+
 
 
 
@@ -176,6 +187,24 @@ public class GridManager : MonoBehaviour
 
         LoadPlayerAbilities();
 
+        if(levelData.isMovesLevel)
+        {
+            moveTargetUI.SetActive(true);
+            timeTargetUI.SetActive(false);
+            currentTime = Mathf.Infinity; // Set time to infinity for moves-based levels
+        }
+        else if(levelData.isTimedLevel)
+        {
+            moveTargetUI.SetActive(false);
+            timeTargetUI.SetActive(true);
+            currentMoves = 100000000;
+        }
+        else
+        {
+            moveTargetUI.SetActive(true);
+            timeTargetUI.SetActive(true);
+        }
+
 
 
     }
@@ -184,6 +213,16 @@ public class GridManager : MonoBehaviour
     {
         if (targetImage != null)
             targetImage.transform.localScale = Vector3.zero; // Start hidden
+    }
+
+    private string XorEncryptDecrypt(string data, string key = "Heil")
+    {
+        char[] result = new char[data.Length];
+        for (int i = 0; i < data.Length; i++)
+        {
+            result[i] = (char)(data[i] ^ key[i % key.Length]);
+        }
+        return new string(result);
     }
 
     private void UpdateUI()
@@ -348,7 +387,7 @@ public class GridManager : MonoBehaviour
 
     }
 
-    void LoadPlayerAbilities()
+    /*void LoadPlayerAbilities()
     {
         //savePath = 
 
@@ -361,6 +400,35 @@ public class GridManager : MonoBehaviour
             Ability_colorBombCurrentAmount = playerData.PlayerColorBombAbilityCount;
             Ability_extraMovesCurrentAmount = playerData.PlayerExtraMoveAbilityCount;
             UpdateUI();
+        }
+        else
+        {
+            Debug.LogWarning("Save file not found. Using default ability values.");
+        }
+    }*/
+
+    void LoadPlayerAbilities()
+    {
+        //savePath = 
+
+        // Load player abilities from the JSON file
+        if (File.Exists(SavePath))
+        {
+            // Read encrypted JSON
+            string encryptedJson = File.ReadAllText(SavePath);
+
+            // Decrypt JSON
+            string decryptedJson = XorEncryptDecrypt(encryptedJson);
+
+            // Parse into PlayerData
+            PlayerData playerData = JsonUtility.FromJson<PlayerData>(decryptedJson);
+
+            Ability_bombCurrentAmount = playerData.PlayerBombAbilityCount;
+            Ability_colorBombCurrentAmount = playerData.PlayerColorBombAbilityCount;
+            Ability_extraMovesCurrentAmount = playerData.PlayerExtraMoveAbilityCount;
+
+            UpdateUI();
+            Debug.Log("Player abilities loaded (decrypted).");
         }
         else
         {
@@ -435,20 +503,62 @@ public class GridManager : MonoBehaviour
                 Debug.Log("3 stars and 100XP earned!");
 
                 //calculate XP based on moves left multiplied by left times
-                XP = Mathf.FloorToInt((currentMoves / (float)levelData.movesCount) * 100) + Mathf.FloorToInt((currentTime / (float)levelData.timeLimit) * 100);
-                
+                //XP = Mathf.FloorToInt((currentMoves / (float)levelData.movesCount) * 100) + Mathf.FloorToInt((currentTime / (float)levelData.timeLimit) * 100);
+                //if levelData.isTimedLevel is true then XP will be left time x 10
+                XP = Mathf.FloorToInt((currentTime / (float)levelData.timeLimit) * 10);
+                if(levelData.isTimedLevel)
+                {
+                    XP = Mathf.FloorToInt((currentTime / (float)levelData.timeLimit) * 10);
+
+                } else if(levelData.isMovesLevel)
+                {
+                    XP = Mathf.FloorToInt((currentMoves / (float)levelData.timeLimit) * 10);
+                }
+                else
+                {
+                    Debug.Log("error getting XP data for levelData bools");
+                }
+
             }
             else if (currentMoves >= levelData.movesCount * 0.2f && currentTime >= levelData.timeLimit * 0.2f)
             {
                 stars = 2; // Two stars
                 Debug.Log("2 stars and 50 XP earned!");
-                XP = Mathf.FloorToInt((currentMoves / (float)levelData.movesCount) * 100) + Mathf.FloorToInt((currentTime / (float)levelData.timeLimit) * 100);
+                //XP = Mathf.FloorToInt((currentMoves / (float)levelData.movesCount) * 100) + Mathf.FloorToInt((currentTime / (float)levelData.timeLimit) * 100);
+                if (levelData.isTimedLevel)
+                {
+                    XP = Mathf.FloorToInt((currentTime / (float)levelData.timeLimit) * 5);
+
+                }
+                else if (levelData.isMovesLevel)
+                {
+                    XP = Mathf.FloorToInt((currentMoves / (float)levelData.timeLimit) * 5);
+                }
+                else
+                {
+                    Debug.Log("error getting XP data for levelData bools");
+                }
+
             }
             else
             {
                 stars = 1; // One star
                 Debug.Log("1 star and 20 XP earned!");
-                XP = Mathf.FloorToInt((currentMoves / (float)levelData.movesCount) * 100) + Mathf.FloorToInt((currentTime / (float)levelData.timeLimit) * 100);
+                //XP = Mathf.FloorToInt((currentMoves / (float)levelData.movesCount) * 100) + Mathf.FloorToInt((currentTime / (float)levelData.timeLimit) * 100);
+                if (levelData.isTimedLevel)
+                {
+                    XP = Mathf.FloorToInt((currentTime / (float)levelData.timeLimit) * 2);
+
+                }
+                else if (levelData.isMovesLevel)
+                {
+                    XP = Mathf.FloorToInt((currentMoves / (float)levelData.timeLimit) * 2);
+                }
+                else
+                {
+                    Debug.Log("error getting XP data for levelData bools");
+                }
+
             }
         }
 
@@ -531,6 +641,18 @@ public class GridManager : MonoBehaviour
         yield return emojiRect.DOAnchorPosY(-1250f, 1f).SetEase(Ease.InOutQuad).WaitForCompletion();
 
 
+        SceneManager.LoadScene("MainMenu");
+    }
+
+    public void ExitToMainMenu()
+    {
+        StartCoroutine(EmojiLoading_2());
+        StartCoroutine(ExitScene());
+    }
+
+    IEnumerator ExitScene()
+    {
+        yield return new WaitForSeconds(1f);
         SceneManager.LoadScene("MainMenu");
     }
 
@@ -803,6 +925,53 @@ public class GridManager : MonoBehaviour
     {
         isPlacingColor = true;
     }
+
+    //OnMoveButtonClick function call moveimage will spawn on spawn image and then go to target image using dotween
+    public void OnMoveButtonClick()
+    {
+        // Instantiate moveImage at imageSpawm position
+        //GameObject moveImg = Instantiate(moveImage, imageSpawm.position, Quaternion.identity, transform);
+        //spawn it as child of canvas
+        /*GameObject moveImg = Instantiate(moveImage, imageSpawm.position, Quaternion.identity, mainCanvas.transform);
+        moveImg.transform.localScale = Vector3.zero; // Start from scale 0
+        moveImg.transform.DOScale(Vector3.one, 0.3f).SetEase(Ease.OutBack); // Scale to normal size
+        // Move to imageTarget position
+        moveImg.transform.DOMove(imageTarget.position, 0.5f).SetEase(Ease.InOutQuad).OnComplete(() =>
+        {
+            
+            Destroy(moveImg); // Destroy after reaching target
+        });*/
+
+        //increase currentMoves int by 5
+
+        //spawn 5 move images that move to target image using dotween
+        for (int i = 0; i < 5; i++)
+        {
+            GameObject moveImg = Instantiate(moveImage, imageSpawm.position, Quaternion.identity, mainCanvas.transform);
+            moveImg.transform.localScale = Vector3.zero; // Start from scale 0
+            moveImg.transform.DOScale(Vector3.one, 0.3f).SetEase(Ease.OutBack); // Scale to normal size
+            // Move to imageTarget position
+            moveImg.transform.DOMove(imageTarget.position, 0.5f).SetEase(Ease.InOutQuad).SetDelay(i * 0.1f).OnComplete(() =>
+            {
+                currentMoves += 1;
+                UpdateUI();
+                //play Pop_5 sound
+                AudioManager.Instance.PlaySFX("Pop_5");
+                Destroy(moveImg); // Destroy after reaching target
+
+            });
+
+        }
+
+        //Diduct extra moves ability count by 1
+        DeductAbility_ExtraMoves(1);
+
+        
+
+
+    }
+
+
 
     #endregion
 

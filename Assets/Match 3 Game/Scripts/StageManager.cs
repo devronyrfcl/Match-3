@@ -62,6 +62,15 @@ public class StageManager : MonoBehaviour
 
     }
 
+    private string XorEncryptDecrypt(string data, string key = "Heil")
+    {
+        char[] result = new char[data.Length];
+        for (int i = 0; i < data.Length; i++)
+        {
+            result[i] = (char)(data[i] ^ key[i % key.Length]);
+        }
+        return new string(result);
+    }
 
     //lock 60 fps
 
@@ -74,8 +83,14 @@ public class StageManager : MonoBehaviour
     {
         if (File.Exists(SavePath))
         {
-            string json = File.ReadAllText(SavePath);
-            playerData = JsonUtility.FromJson<PlayerData>(json);
+            //string json = File.ReadAllText(SavePath);
+
+            string encryptedJson = File.ReadAllText(SavePath);
+
+            // Decrypt before loading
+            string decryptedJson = XorEncryptDecrypt(encryptedJson);
+
+            playerData = JsonUtility.FromJson<PlayerData>(decryptedJson);
             Debug.Log("StageManager: Player data loaded.");
         }
         else
@@ -84,6 +99,27 @@ public class StageManager : MonoBehaviour
             playerData = new PlayerData(); // empty fallback
         }
     }
+
+
+    /*public void LoadPlayerData()
+    {
+        if (File.Exists(savePath))
+        {
+            
+
+            playerData = JsonUtility.FromJson<PlayerData>(decryptedJson);
+            Debug.Log("Player data loaded (decrypted).");
+
+            GetCurrentLevel();
+        }
+        else
+        {
+            Debug.LogWarning("Save file not found, creating new player...");
+            CreateNewPlayer("Temp", Guid.NewGuid().ToString());
+            SavePlayerData();
+            GetCurrentLevel();
+        }
+    }*/
 
 
 
@@ -128,13 +164,8 @@ public class StageManager : MonoBehaviour
                 btn.GetComponent<Button>().interactable = false; // 🔒
             }
 
-            SendDataToLeaderBoard();
-
-
-
-
-
         }
+        SendDataToLeaderBoard();
     }
 
     /*private int GetCurrentLevelIndex()
@@ -255,7 +286,7 @@ public class StageManager : MonoBehaviour
     //if PlayerDataManager.isFoundName = false , then show name panel
     public void CheckAndShowNamePanel()
     {
-        if (playerData == null || string.IsNullOrEmpty(playerData.Name))
+        /*if (playerData == null || string.IsNullOrEmpty(playerData.Name))
         {
             namePanel.SetActive(true); // Show name panel if no name found
         }
@@ -263,6 +294,19 @@ public class StageManager : MonoBehaviour
         {
             namePanel.SetActive(false); // Hide if name exists
         }
+
+        //if player data name is null or empty then show name panel. also check 
+        */
+
+        if(!PlayerDataManager.Instance.isFoundName)
+        {
+            namePanel.SetActive(true); // Show name panel if no name found
+        }
+        else
+        {
+            namePanel.SetActive(false); // Hide if name exists
+        }
+
     }
 
 
@@ -270,9 +314,11 @@ public class StageManager : MonoBehaviour
     {
                // Reload player data and update buttons
         LoadPlayerData();
+        PlayerDataManager.Instance.CheckAndSetPlayerName();
         ApplyDataToButtons();
         ShowTotalXPandTotalStars();
         CheckAndShowNamePanel(); // Ensure name panel visibility is updated
+        
     }
 
     void GetCurrentLevelInt()

@@ -21,6 +21,7 @@ public class LevelButtonManager : MonoBehaviour
     public Sprite lockedSprite;
     public Sprite unlockedSprite;
     private Image buttonImage;
+    public GameObject lockIcon; // Optional lock icon
 
     [Header("Current Level Effect")]
     public GameObject currentLevelGlow; // Optional effect for current level
@@ -77,6 +78,7 @@ public class LevelButtonManager : MonoBehaviour
             {
                 normalStars[i].SetActive(false);
                 glowStars[i].SetActive(false);
+                lockIcon.SetActive(true);
             }
             return;
         }
@@ -86,6 +88,7 @@ public class LevelButtonManager : MonoBehaviour
         {
             normalStars[i].SetActive(true);
             glowStars[i].SetActive(false);
+            lockIcon.SetActive(false);
         }
 
         // Show earned stars (glow effect)

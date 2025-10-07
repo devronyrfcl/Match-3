@@ -8,6 +8,7 @@ using PlayFab.ClientModels;
 using UnityEngine.UI;
 using TMPro;
 using System.Linq;
+using UnityEngine.UIElements;
 
 
 
@@ -24,10 +25,15 @@ public class PlayerDataManager : MonoBehaviour
     public PlayerData playerData;
 
     public bool isLaunched = false; // Flag to check if the game has been launched
+    public bool isFoundName = false; // Flag to check if player name is found
+    public bool isOnline = false; // Flag to check if online mode is active
+
+    public bool isNameSame = false; // Flag to check if playerData name is same as PlayFabManager player name
+
     public string PlayFabPlayerID; // PlayFab Player ID
     public string PlayFabPlayerName; // PlayFab Player Name
 
-    public bool isFoundName = false; // Flag to check if player name is found
+    
 
     public int currentLevel = 1; // 🔥 Universal current level tracker
 
@@ -56,6 +62,7 @@ public class PlayerDataManager : MonoBehaviour
         {
             Destroy(gameObject); // Avoid duplicates
         }
+        //CheckForOnline();
     }
 
     void Start()
@@ -75,7 +82,7 @@ public class PlayerDataManager : MonoBehaviour
         }
         else
         {
-            CreateNewPlayer("Player", Guid.NewGuid().ToString());
+            CreateNewPlayer("Temp", Guid.NewGuid().ToString());
             SavePlayerData();
             
             Debug.Log("No save found. Default player created.");
@@ -86,11 +93,24 @@ public class PlayerDataManager : MonoBehaviour
         SavePlayerData();
         GetCurrentLevel(); // Initialize current level from player data
 
+        
+
     }
 
-    
+    private string XorEncryptDecrypt(string data, string key = "Heil")
+    {
+        char[] result = new char[data.Length];
+        for (int i = 0; i < data.Length; i++)
+        {
+            result[i] = (char)(data[i] ^ key[i % key.Length]);
+        }
+        return new string(result);
+    }
 
-    public void CreateNewPlayer(string name, string playerId)
+
+
+
+    /*public void CreateNewPlayer(string name, string playerId)
     {
         playerData = new PlayerData
         {
@@ -110,6 +130,30 @@ public class PlayerDataManager : MonoBehaviour
         };
 
         SendPlayerDataToPlayFab();
+    }*/
+
+    public void CreateNewPlayer(string name, string playerId)
+    {
+        playerData = new PlayerData
+        {
+            Name = name,
+            PlayerID = playerId,
+            PlayerBombAbilityCount = 20,
+            PlayerColorBombAbilityCount = 20,
+            PlayerExtraMoveAbilityCount = 20,
+            CurrentLevelId = 1,
+            Levels = new List<LevelInfo>()
+        {
+            new LevelInfo { LevelID = 1, Stars = 0, XP = 0, LevelLocked = 0 },
+            new LevelInfo { LevelID = 2, Stars = 0, XP = 0, LevelLocked = 1 },
+            new LevelInfo { LevelID = 3, Stars = 0, XP = 0, LevelLocked = 1 }
+        }
+        };
+
+        if (isOnline) // 🔥 Only send if online
+        {
+            SendPlayerDataToPlayFab();
+        }
     }
 
     public void GetCurrentLevel()
@@ -125,7 +169,7 @@ public class PlayerDataManager : MonoBehaviour
         }
     }
 
-    public void SavePlayerData()
+    /*public void SavePlayerData()
     {
         string json = JsonUtility.ToJson(playerData, true);
         File.WriteAllText(savePath, json);
@@ -135,7 +179,37 @@ public class PlayerDataManager : MonoBehaviour
 
     }
 
-    public void LoadPlayerData()
+    public void SavePlayerData()
+    {
+        string json = JsonUtility.ToJson(playerData, true);
+        File.WriteAllText(savePath, json);
+        Debug.Log("Player data saved locally: " + savePath);
+
+        if (isOnline) // 🔥 Only send to PlayFab if online
+        {
+            SendPlayerDataToPlayFab();
+        }
+    }*/
+
+    public void SavePlayerData()
+    {
+        string json = JsonUtility.ToJson(playerData, true);
+
+        // Encrypt before saving
+        string encryptedJson = XorEncryptDecrypt(json);
+        File.WriteAllText(savePath, encryptedJson);
+
+        Debug.Log("Player data saved (encrypted) locally: " + savePath);
+
+        if (isOnline)
+        {
+            SendPlayerDataToPlayFab();
+        }
+    }
+
+
+
+    /*public void LoadPlayerData()
     {
         if (File.Exists(savePath))
         {
@@ -147,12 +221,37 @@ public class PlayerDataManager : MonoBehaviour
         else
         {
             Debug.LogWarning("Save file not found, creating new player...");
-            CreateNewPlayer("Player", Guid.NewGuid().ToString());
+            CreateNewPlayer("Temp", Guid.NewGuid().ToString());
             SavePlayerData();
             GetCurrentLevel(); // Initialize current level after creating new player
 
         }
+    }*/
+
+    public void LoadPlayerData()
+    {
+        if (File.Exists(savePath))
+        {
+            string encryptedJson = File.ReadAllText(savePath);
+
+            // Decrypt before loading
+            string decryptedJson = XorEncryptDecrypt(encryptedJson);
+
+            playerData = JsonUtility.FromJson<PlayerData>(decryptedJson);
+            Debug.Log("Player data loaded (decrypted).");
+
+            GetCurrentLevel();
+            //isLaunched = true;
+        }
+        else
+        {
+            Debug.LogWarning("Save file not found, creating new player...");
+            CreateNewPlayer("Temp", Guid.NewGuid().ToString());
+            SavePlayerData();
+            GetCurrentLevel();
+        }
     }
+
 
 
     //if playerData name is not matched with PlayFabManager player name, then set PlayfabManager player name to playerData name
@@ -211,11 +310,21 @@ public class PlayerDataManager : MonoBehaviour
     }
 
     // Ability setters
-    public void SetName(string newName)
+    /*public void SetName(string newName)
     {
         playerData.Name = newName;
         SetUserName(newName);
+    }*/
+
+    public void SetName(string newName)
+    {
+        playerData.Name = newName;
+        if (isOnline) // 🔥 Only update PlayFab if online
+        {
+            SetUserName(newName);
+        }
     }
+
 
     public void SetPlayerID(string newPlayerID)
     {
@@ -292,7 +401,7 @@ public class PlayerDataManager : MonoBehaviour
 
         //GetUserName();
     }
-    void OnLoginSuccess(LoginResult result)
+    /*void OnLoginSuccess(LoginResult result)
     {
         Debug.Log("Successfully logged in as guest");
         // Handle successful login
@@ -300,11 +409,39 @@ public class PlayerDataManager : MonoBehaviour
         PlayFabPlayerID = result.PlayFabId;
         Invoke("CheckAndSetPlayerName", 2f); // Delay to ensure playerName is set after login
         isLaunched = true;
+        isOnline = true;
+    }*/
+
+    void OnLoginSuccess(LoginResult result)
+    {
+        Debug.Log("Successfully logged in as guest");
+
+        PlayFabPlayerID = result.PlayFabId;
+
+        Invoke("CheckAndSetPlayerName", 2f);
+        isLaunched = true;
+        isOnline = true;
+
+        // 🔥 When login succeeds, always sync local JSON data
+        LoadPlayerData();
+        SendPlayerDataToPlayFab();
+        CheckAndSetPlayerName();
+
+        //get player display name and set PlayFabPlayerName
+        var getRequest = new GetAccountInfoRequest();
+        PlayFabClientAPI.GetAccountInfo(getRequest, result =>
+        {
+            PlayFabPlayerName = result.AccountInfo.TitleInfo.DisplayName;
+            Debug.Log("Fetched PlayFab player name: " + PlayFabPlayerName);
+            CheckAndSetPlayerName(); // Ensure names are checked after fetching
+        }, OnError);
     }
+
     void OnError(PlayFabError error)
     {
         Debug.LogError("Error during PlayFab operation: " + error.GenerateErrorReport());
         // Handle error
+        isOnline = false;
     }
 
     
@@ -338,7 +475,7 @@ public class PlayerDataManager : MonoBehaviour
 
 
     // send player level data and PlayerExtraMoveAbilityCount, PlayerColorBombAbilityCount, PlayerBombAbilityCount to PlayFab
-    public void SendPlayerDataToPlayFab()
+    /*public void SendPlayerDataToPlayFab()
     {
         if (playerData == null)
         {
@@ -364,7 +501,41 @@ public class PlayerDataManager : MonoBehaviour
         };
 
         PlayFabClientAPI.UpdateUserData(request, OnUpdateUserDataSuccess, OnError);
+    }*/
+
+    public void SendPlayerDataToPlayFab()
+    {
+        if (!isOnline)
+        {
+            Debug.Log("Offline mode: Skipping PlayFab upload.");
+            return;
+        }
+
+        if (playerData == null)
+        {
+            Debug.LogError("Player data is null, cannot send to PlayFab.");
+            return;
+        }
+
+        string levelsJson = JsonUtility.ToJson(new LevelListWrapper { Levels = playerData.Levels }, true);
+
+        var request = new UpdateUserDataRequest
+        {
+            Data = new Dictionary<string, string>
+        {
+            { "PlayerName", playerData.Name },
+            { "PlayerID", playerData.PlayerID },
+            { "CurrentLevelId", playerData.CurrentLevelId.ToString() },
+            { "PlayerBombAbilityCount", playerData.PlayerBombAbilityCount.ToString() },
+            { "PlayerColorBombAbilityCount", playerData.PlayerColorBombAbilityCount.ToString() },
+            { "PlayerExtraMoveAbilityCount", playerData.PlayerExtraMoveAbilityCount.ToString() },
+            { "Levels", levelsJson }
+        }
+        };
+
+        PlayFabClientAPI.UpdateUserData(request, OnUpdateUserDataSuccess, OnError);
     }
+
 
     void OnUpdateUserDataSuccess(UpdateUserDataResult result)
     {
@@ -374,22 +545,52 @@ public class PlayerDataManager : MonoBehaviour
     //if playerData name is not matched with PlayFabManager player name, then set PlayfabManager player name to playerData name also isFoundName = false;
     public void CheckAndSetPlayerName()
     {
-        if (string.IsNullOrEmpty(PlayFabPlayerName))
+        if (isOnline)
         {
-            Debug.Log("Player name not found, setting default name.");
-            SetUserName(playerData.Name);
-            isFoundName = false; // Name not found
+            // 🔥 Online mode checks
+            if (string.IsNullOrEmpty(PlayFabPlayerName))
+            {
+                isFoundName = false;
+                Debug.Log("PlayFab player name is empty → isFoundName = false");
+            }
+            else if (string.IsNullOrEmpty(playerData.Name))
+            {
+                isFoundName = false;
+                Debug.Log("Local playerData name is empty → isFoundName = false");
+            }
+            else if (PlayFabPlayerName == playerData.Name)
+            {
+                isFoundName = true;
+                Debug.Log("Names match → isFoundName = true");
+            }
+            else
+            {
+                // Names differ → prioritize PlayFab name
+                playerData.Name = PlayFabPlayerName;
+                SavePlayerData(); // Save updated name locally
+                isFoundName = true;
+                Debug.Log($"Names differed. Local name updated to PlayFab name: {PlayFabPlayerName} → isFoundName = true");
+            }
         }
         else
         {
-            playerData.Name = PlayFabPlayerName;
-            isFoundName = true; // Name found
-            Debug.Log("Player name found: " + PlayFabPlayerName);
+            // 🔥 Offline mode checks
+            if (string.IsNullOrEmpty(playerData.Name) || playerData.Name == "Temp")
+            {
+                isFoundName = false;
+                Debug.Log("Offline: Local player name is empty or 'Temp' → isFoundName = false");
+            }
+            else
+            {
+                isFoundName = true;
+                Debug.Log("Offline: Local player name is valid → isFoundName = true");
+            }
         }
     }
 
 
-    public void SendLeaderboard(int TotalXP)
+
+    /*public void SendLeaderboard(int TotalXP)
     {
         var request = new UpdatePlayerStatisticsRequest
         {
@@ -404,13 +605,10 @@ public class PlayerDataManager : MonoBehaviour
         };
         PlayFabClientAPI.UpdatePlayerStatistics(request, OnLeaderboardUpdate, OnError);
     }
-
-    void OnLeaderboardUpdate(UpdatePlayerStatisticsResult result)
-    {
-        Debug.Log("Successfully updated leaderboard");
-    }
-
-    public void GetLeaderboard()
+    
+     
+     
+     public void GetLeaderboard()
     {
         var request = new GetLeaderboardRequest
         {
@@ -420,7 +618,54 @@ public class PlayerDataManager : MonoBehaviour
         };
         PlayFabClientAPI.GetLeaderboard(request, OnLeaderboardGet, OnError);
         //ShowNameOnLeaderboard();
+    }*/
+
+
+    public void SendLeaderboard(int TotalXP)
+    {
+        if (!isOnline)
+        {
+            Debug.Log("Offline mode: Skipping leaderboard update.");
+            return;
+        }
+
+        var request = new UpdatePlayerStatisticsRequest
+        {
+            Statistics = new List<StatisticUpdate>
+        {
+            new StatisticUpdate
+            {
+                StatisticName = "XP",
+                Value = TotalXP
+            }
+        }
+        };
+        PlayFabClientAPI.UpdatePlayerStatistics(request, OnLeaderboardUpdate, OnError);
     }
+
+    public void GetLeaderboard()
+    {
+        if (!isOnline)
+        {
+            Debug.Log("Offline mode: Leaderboard not available.");
+            return;
+        }
+
+        var request = new GetLeaderboardRequest
+        {
+            StatisticName = "XP",
+            StartPosition = 0,
+            MaxResultsCount = 10
+        };
+        PlayFabClientAPI.GetLeaderboard(request, OnLeaderboardGet, OnError);
+    }
+
+    void OnLeaderboardUpdate(UpdatePlayerStatisticsResult result)
+    {
+        Debug.Log("Successfully updated leaderboard");
+    }
+
+    
 
     public void OnLeaderboardGet(GetLeaderboardResult result)
     {
@@ -439,6 +684,29 @@ public class PlayerDataManager : MonoBehaviour
         }
 
     }
+
+    void CheckForOnline()
+    {
+        PlayFabClientAPI.GetTitleData(
+            new GetTitleDataRequest(),
+            OnSuccess,
+            OnError
+        );
+        
+    }
+
+    
+
+    void OnSuccess(GetTitleDataResult result)
+    {
+        isOnline = true;
+        Debug.Log("Online mode active. Syncing local data to PlayFab...");
+
+        // 🔥 Sync latest local data to PlayFab
+        LoadPlayerData();  // Make sure JSON is loaded
+        SendPlayerDataToPlayFab();
+    }
+
 
 
     #endregion
