@@ -368,7 +368,7 @@ public class GridManager : MonoBehaviour
         }
 
         // Load the selected level index from PlayerPrefs (default to 0)
-        currentLevelIndex = PlayerPrefs.GetInt(SelectedLevelIndexKey, 0);
+        //currentLevelIndex = PlayerPrefs.GetInt(SelectedLevelIndexKey, 0);
 
         // Clamp the index to ensure it's valid
         if (currentLevelIndex < 0 || currentLevelIndex >= levelDatas.Length)
