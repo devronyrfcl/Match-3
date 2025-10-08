@@ -199,10 +199,14 @@ public class GridManager : MonoBehaviour
             timeTargetUI.SetActive(true);
             currentMoves = 100000000;
         }
-        else
+        else if(levelData.isMovesLevel && levelData.isTimedLevel)
         {
             moveTargetUI.SetActive(true);
             timeTargetUI.SetActive(true);
+        }
+        else
+        {
+            Debug.Log("error getting levelData bools");
         }
 
 
