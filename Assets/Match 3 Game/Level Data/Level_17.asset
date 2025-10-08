@@ -18,8 +18,8 @@ MonoBehaviour:
   SpecialPiecesAmount: 2
   movesCount: 50
   target1Piece: 5
-  target2Piece: 3
-  target1Count: 5
+  target2Piece: 2
+  target1Count: 6
   target2Count: 6
   timeLimit: 120
   isTimedLevel: 1

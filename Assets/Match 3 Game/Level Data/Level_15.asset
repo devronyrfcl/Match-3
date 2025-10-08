@@ -19,8 +19,8 @@ MonoBehaviour:
   movesCount: 50
   target1Piece: 5
   target2Piece: 3
-  target1Count: 5
-  target2Count: 6
+  target1Count: 9
+  target2Count: 9
   timeLimit: 120
   isTimedLevel: 1
   isMovesLevel: 0
