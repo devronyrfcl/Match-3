@@ -17,9 +17,9 @@ MonoBehaviour:
   GridSeed: 40
   SpecialPiecesAmount: 2
   movesCount: 100
-  target1Piece: 2
+  target1Piece: 3
   target2Piece: 4
-  target1Count: 5
+  target1Count: 6
   target2Count: 6
   timeLimit: 60
   isTimedLevel: 0
