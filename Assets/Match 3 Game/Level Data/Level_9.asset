@@ -14,12 +14,12 @@ MonoBehaviour:
   m_EditorClassIdentifier: 
   gridWidth: 6
   gridHeight: 8
-  GridSeed: 5
+  GridSeed: 160
   SpecialPiecesAmount: 2
   movesCount: 100
-  target1Piece: 5
+  target1Piece: 2
   target2Piece: 3
-  target1Count: 5
+  target1Count: 6
   target2Count: 6
   timeLimit: 600
   isTimedLevel: 0
