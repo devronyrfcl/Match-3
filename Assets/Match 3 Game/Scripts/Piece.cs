@@ -31,6 +31,7 @@ public class Piece : MonoBehaviour
     //public float swipeTime = 0.3f; // Duration for the tween animation
 
 
+
     public PieceType pieceType; // Type of the piece
 
     
@@ -68,7 +69,11 @@ public class Piece : MonoBehaviour
 
     //Paricle Effect
     public GameObject matchedParticle;
-    
+
+    public GameObject bombParticle1;
+    public GameObject bombParticle2;
+    public GameObject bombParticle3;
+
 
 
     public void SetPosition(int x, int y)
@@ -136,6 +141,23 @@ public class Piece : MonoBehaviour
             if (hit.collider != null && hit.collider.gameObject == gameObject)
             {
                 Bomb(X, Y); // Call the Bomb method with the current piece's position
+
+                AudioManager.Instance.PlaySFX("Bomb");
+                //spawn random bomb particle effect at this position
+                int randomEffect = Random.Range(1, 4);
+                if (randomEffect == 1)
+                {
+                    Instantiate(bombParticle1, transform.position, Quaternion.identity);
+                }
+                else if (randomEffect == 2)
+                {
+                    Instantiate(bombParticle2, transform.position, Quaternion.identity);
+                }
+                else if (randomEffect == 3)
+                {
+                    Instantiate(bombParticle3, transform.position, Quaternion.identity);
+                }
+
             }
         }
 
@@ -916,6 +938,9 @@ public class Piece : MonoBehaviour
                     {
                         piece.isMatched = true;
                         MarkAsMatched(piece);
+
+                        
+
                         //Debug.Log("Bomb triggered at (" + targetX + ", " + targetY + ")");
                     }
                 }

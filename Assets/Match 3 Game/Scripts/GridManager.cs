@@ -77,6 +77,10 @@ public class GridManager : MonoBehaviour
     private int currentTarget2;
 
     public GameObject GameOverPanel;
+    public TMP_Text gameOverTitleText; // Text to display game over title
+    public GameObject Shine1;
+    public GameObject Shine2;
+
     public TMP_Text gameOverText; // Text to display game over message
     public TMP_Text level_Count;
     public GameObject itemWarningPanel;
@@ -368,7 +372,7 @@ public class GridManager : MonoBehaviour
         }
 
         // Load the selected level index from PlayerPrefs (default to 0)
-        //currentLevelIndex = PlayerPrefs.GetInt(SelectedLevelIndexKey, 0);
+        currentLevelIndex = PlayerPrefs.GetInt(SelectedLevelIndexKey, 0);
 
         // Clamp the index to ensure it's valid
         if (currentLevelIndex < 0 || currentLevelIndex >= levelDatas.Length)
@@ -459,10 +463,26 @@ public class GridManager : MonoBehaviour
         //wait for 1 second
         yield return new WaitForSeconds(1f);
 
+        if (currentTarget1Count <= 0 && currentTarget2Count <= 0)
+        {
+            gameOverTitleText.text = "Congratulations!";
+            Shine1.SetActive(true);
+            Shine2.SetActive(false);
+            //AudioManager.Instance.PlaySFX("GameWin");
+        }
+        else
+        {
+            gameOverTitleText.text = "Game Over!";
+            Shine1.SetActive(false);
+            Shine2.SetActive(true);
+            //AudioManager.Instance.PlaySFX("GameLose");
+        }
+
         //gameOverText will be = level + currentLevelIndex + 1
         gameOverText.text = "Level :" + (currentLevelIndex + 1);
         level_Count.text = (currentLevelIndex + 1).ToString(); // Update level count text
-
+        //gameOverTitleText will be = Contratulations if currentTarget1Count and currentTarget2Count are 0
+        
         // Handle game over logic here
         // For example, show a game over screen or reset the game
         Debug.Log("Game Over! You can implement your game over logic here.");
@@ -508,11 +528,11 @@ public class GridManager : MonoBehaviour
                 XP = Mathf.FloorToInt((currentTime / (float)levelData.timeLimit) * 10);
                 if(levelData.isTimedLevel)
                 {
-                    XP = Mathf.FloorToInt((currentTime / (float)levelData.timeLimit) * 10);
+                    XP = 20;//Mathf.FloorToInt((currentTime / (float)levelData.timeLimit) * 10);
 
                 } else if(levelData.isMovesLevel)
                 {
-                    XP = Mathf.FloorToInt((currentMoves / (float)levelData.timeLimit) * 10);
+                    XP = 20;//Mathf.FloorToInt((currentMoves / (float)levelData.timeLimit) * 10);
                 }
                 else
                 {
@@ -527,12 +547,12 @@ public class GridManager : MonoBehaviour
                 //XP = Mathf.FloorToInt((currentMoves / (float)levelData.movesCount) * 100) + Mathf.FloorToInt((currentTime / (float)levelData.timeLimit) * 100);
                 if (levelData.isTimedLevel)
                 {
-                    XP = Mathf.FloorToInt((currentTime / (float)levelData.timeLimit) * 5);
+                    XP = 10;//Mathf.FloorToInt((currentTime / (float)levelData.timeLimit) * 5);
 
                 }
                 else if (levelData.isMovesLevel)
                 {
-                    XP = Mathf.FloorToInt((currentMoves / (float)levelData.timeLimit) * 5);
+                    XP = 10;//Mathf.FloorToInt((currentMoves / (float)levelData.timeLimit) * 5);
                 }
                 else
                 {
@@ -547,12 +567,12 @@ public class GridManager : MonoBehaviour
                 //XP = Mathf.FloorToInt((currentMoves / (float)levelData.movesCount) * 100) + Mathf.FloorToInt((currentTime / (float)levelData.timeLimit) * 100);
                 if (levelData.isTimedLevel)
                 {
-                    XP = Mathf.FloorToInt((currentTime / (float)levelData.timeLimit) * 2);
+                    XP = 5;//Mathf.FloorToInt((currentTime / (float)levelData.timeLimit) * 2);
 
                 }
                 else if (levelData.isMovesLevel)
                 {
-                    XP = Mathf.FloorToInt((currentMoves / (float)levelData.timeLimit) * 2);
+                    XP = 5;//Mathf.FloorToInt((currentMoves / (float)levelData.timeLimit) * 2);
                 }
                 else
                 {
@@ -626,11 +646,13 @@ public class GridManager : MonoBehaviour
     IEnumerator EmojiLoading()
     {
         RectTransform emojiRect = EmojisImage.GetComponent<RectTransform>();
-
+        //AudioManager.Instance.PlaySFX("GameStart");
         canControl = false; // Disable player controls during loading
         // Move EmojisImage into view (Y: -1250 to 2500)
         yield return emojiRect.DOAnchorPosY(2500f, 1f).SetEase(Ease.InOutQuad).WaitForCompletion();
         canControl = true; // Re-enable player controls after loading
+
+        
     }
 
     IEnumerator EmojiLoading_2()

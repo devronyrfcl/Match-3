@@ -189,7 +189,7 @@ public class StageManager : MonoBehaviour
 
 
         // ✅ Move EmojisImage into view (Y: 2150 → -1777)
-        yield return emojiRect.DOAnchorPosY(-1777f, 1f).SetEase(Ease.InOutQuad).WaitForCompletion();
+        yield return emojiRect.DOAnchorPosY(-1250f, 1f).SetEase(Ease.InOutQuad).WaitForCompletion();
 
         // ✅ Wait 1 second
         yield return new WaitForSeconds(1f);

@@ -35,6 +35,34 @@ public class Spin : MonoBehaviour
     {
         UpdateSpinText();
         ResetRewardUI();
+
+        //if no spins saved, set to default spin count = 5
+        LoadSpinCount();
+
+    }
+
+    //Load spin count from PlayerPrefs
+    void LoadSpinCount()
+    {
+        if (PlayerPrefs.HasKey("SpinCount"))
+        {
+            spinCount = PlayerPrefs.GetInt("SpinCount");
+        }
+        else
+        {
+            spinCount = 3; // default value
+            SaveSpinCount();
+        }
+        UpdateSpinText();
+        checkSpinCountForAds();
+    }
+
+
+    //savve spin count to PlayerPrefs   
+    void SaveSpinCount()
+    {
+        PlayerPrefs.SetInt("SpinCount", spinCount);
+        PlayerPrefs.Save();
     }
 
     public void StartSpin()
@@ -217,6 +245,7 @@ public class Spin : MonoBehaviour
         extraMoveImage.SetActive(false);
         spinNowBtn.SetActive(true);
         PlayerDataManager.Instance.SavePlayerData(); // Save player data after rewards are given
+        SaveSpinCount();
     }
 
 }

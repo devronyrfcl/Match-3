@@ -690,22 +690,24 @@ MonoBehaviour:
   m_EditorClassIdentifier: 
   X: 0
   Y: 0
-  firstTouchPosition: {x: 0, y: 0}
-  finalTouchPosition: {x: 0, y: 0}
   otherPiece: {fileID: 0}
-  swipeAngle: 0
   pieceType: 6
   IsSpecialBombPiece: 0
   IsSpecialRowPiece: 0
   IsSpecialColoumnPiece: 0
   IsSpecialColorPiece: 0
-  gridManager: {fileID: 0}
+  preventSwipeBack: 0
   isMatched: 0
   stickToGrid: 1
   ColoumnPiece: {fileID: 0}
   RowPiece: {fileID: 0}
   BombPiece: {fileID: 0}
   ColorPiece: {fileID: 7079316263224728815, guid: 3eb04ab5e1f3d044e96821fbe4079ec4, type: 3}
+  pieceAnimator: {fileID: 0}
+  matchedParticle: {fileID: 0}
+  bombParticle1: {fileID: 8367907410985086596, guid: 0b493b97a8e419d46903c1b023460740, type: 3}
+  bombParticle2: {fileID: 4062496106243499295, guid: 304da8401b8ea6849b9f5f96f0f6eb57, type: 3}
+  bombParticle3: {fileID: 6520436353736122353, guid: 117624082503aad42847c41c2da7e8da, type: 3}
 --- !u!58 &7068620627162160305
 CircleCollider2D:
   m_ObjectHideFlags: 0
