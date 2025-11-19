@@ -3,6 +3,9 @@ using TMPro;
 using UnityEngine;
 using UnityEngine.Events;
 using DG.Tweening;
+//google admob
+using GoogleMobileAds.Api;
+
 
 public class Spin : MonoBehaviour
 {
@@ -31,6 +34,10 @@ public class Spin : MonoBehaviour
     public GameObject extraMoveImage;
     public TextMeshProUGUI extraMoveText;
 
+    public string rewardedAdUnitId = "ca-app-pub-3940256099942544/5224354917"; // test ad unit id
+
+    private RewardedAd rewardedAd;
+
     void Start()
     {
         UpdateSpinText();
@@ -39,7 +46,64 @@ public class Spin : MonoBehaviour
         //if no spins saved, set to default spin count = 5
         LoadSpinCount();
 
+        LoadRewardedAd();
+
     }
+
+    //function to load rewarded video ads
+    void LoadRewardedAd()
+    {
+        var adRequest = new AdRequest();
+
+        RewardedAd.Load(rewardedAdUnitId, adRequest, (RewardedAd ad, LoadAdError error) =>
+        {
+            if (error != null)
+            {
+                Debug.LogError("Failed to load rewarded ad: " + error);
+                rewardedAd = null;
+                return;
+            }
+
+            rewardedAd = ad;
+            Debug.Log("Rewarded ad loaded successfully");
+
+            // Register callbacks
+            rewardedAd.OnAdFullScreenContentClosed += () =>
+            {
+                Debug.Log("Ad closed. Reloading new ad...");
+                LoadRewardedAd(); // Load next ad
+            };
+
+            rewardedAd.OnAdFullScreenContentFailed += (AdError err) =>
+            {
+                Debug.LogError("Ad failed to show: " + err);
+            };
+
+            rewardedAd.OnAdPaid += (AdValue value) =>
+            {
+                Debug.Log("Rewarded Ad revenue: " + value.Value);
+            };
+        });
+    }
+
+    public void ShowRewardedAd()
+    {
+        if (rewardedAd != null)
+        {
+            rewardedAd.Show((Reward reward) =>
+            {
+                Debug.Log("Reward earned from ad: " + reward.Amount);
+                AddBonusSpin();  // ⭐ Give the player +1 spin
+            });
+        }
+        else
+        {
+            Debug.LogWarning("Rewarded ad not ready. Reloading...");
+            LoadRewardedAd();
+        }
+    }
+
+
 
     //Load spin count from PlayerPrefs
     void LoadSpinCount()

@@ -368,4 +368,14 @@ public class StageManager : MonoBehaviour
         PlayerDataManager.Instance.SavePlayerData();
         RefreashData();
     }
+
+    //public exit function
+    public void OnClickExitButton()
+    {
+        Debug.Log("Exit button clicked. Quitting application...");
+        //quit application for android and ios
+        Application.Quit();
+
+    }
+
 }
