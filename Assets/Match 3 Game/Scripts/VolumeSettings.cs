@@ -11,9 +11,14 @@ public class VolumeSettings : MonoBehaviour
     private const string MusicVolumeKey = "musicVolume";
     private const string SfxVolumeKey = "sfxVolume";
 
+    public GameObject MusicOnButton;
+    public GameObject MusicOffButton;
+    public GameObject SFXOnButton;
+    public GameObject SFXOffButton;
+
     private void Start()
     {
-        
+
 
         if (PlayerPrefs.HasKey(MusicVolumeKey))
         {
@@ -23,6 +28,10 @@ public class VolumeSettings : MonoBehaviour
         {
             SetDefaultVolumes();
         }
+
+        ButttonsConditions();
+
+
     }
 
     public void SetMusicVolume()
@@ -30,6 +39,7 @@ public class VolumeSettings : MonoBehaviour
         float volume = musicSlider.value;
         audioMixer.SetFloat("music", Mathf.Log10(volume) * 20);
         PlayerPrefs.SetFloat(MusicVolumeKey, volume);
+        ButttonsConditions();
     }
 
     public void SetsfxVolume()
@@ -37,6 +47,7 @@ public class VolumeSettings : MonoBehaviour
         float volume = sfxSlider.value;
         audioMixer.SetFloat("sfx", Mathf.Log10(volume) * 20);
         PlayerPrefs.SetFloat(SfxVolumeKey, volume);
+        ButttonsConditions();
     }
 
     private void LoadVolume()
@@ -53,4 +64,61 @@ public class VolumeSettings : MonoBehaviour
         SetMusicVolume();
         SetsfxVolume();
     }
+
+    public void OnClickMusicOff()
+    {
+        MusicOffButton.SetActive(false);
+        MusicOnButton.SetActive(true);
+        musicSlider.value = 1f;
+        SetMusicVolume();
+    }
+    public void OnClickMusicOn()
+    {
+        MusicOnButton.SetActive(false);
+        MusicOffButton.SetActive(true);
+        musicSlider.value = 0f;
+        SetMusicVolume();
+    }
+    public void OnClickSFXOff()
+    {
+        SFXOffButton.SetActive(false);
+        SFXOnButton.SetActive(true);
+        sfxSlider.value = 1f;
+        SetsfxVolume();
+    }
+
+    public void OnClickSFXOn()
+    {
+        SFXOnButton.SetActive(false);
+        SFXOffButton.SetActive(true);
+        sfxSlider.value = 0f;
+        SetsfxVolume();
+
+    }
+
+    void ButttonsConditions()
+    {
+        if (sfxSlider.value == 0.001f)
+        {
+            SFXOnButton.SetActive(false);
+            SFXOffButton.SetActive(true);
+        }
+        else
+        {
+            SFXOffButton.SetActive(false);
+            SFXOnButton.SetActive(true);
+        }
+
+        if (musicSlider.value == 0.001f)
+        {
+            MusicOnButton.SetActive(false);
+            MusicOffButton.SetActive(true);
+        }
+        else
+        {
+            MusicOffButton.SetActive(false);
+            MusicOnButton.SetActive(true);
+        }
+    }
+
 }

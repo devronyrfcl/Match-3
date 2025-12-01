@@ -33,11 +33,15 @@ public class PlayerDataManager : MonoBehaviour
     public string PlayFabPlayerID; // PlayFab Player ID
     public string PlayFabPlayerName; // PlayFab Player Name
 
-    
+    private StageManager stageManager;
+
+
 
     public int currentLevel = 1; // 🔥 Universal current level tracker
 
     public static PlayerDataManager Instance { get; private set; }
+
+    
 
     public int TotalXP
     {
@@ -63,6 +67,9 @@ public class PlayerDataManager : MonoBehaviour
             Destroy(gameObject); // Avoid duplicates
         }
         //CheckForOnline();
+
+        stageManager = FindObjectOfType<StageManager>();
+
     }
 
     void Start()
@@ -88,6 +95,7 @@ public class PlayerDataManager : MonoBehaviour
             Debug.Log("No save found. Default player created.");
         }
 
+        stageManager = FindObjectOfType<StageManager>();
 
 
         SavePlayerData();
@@ -325,6 +333,16 @@ public class PlayerDataManager : MonoBehaviour
         }
     }
 
+    //On Name Update debug log the new name
+    void OnUpdateUserNameSuccess(UpdateUserTitleDisplayNameResult result)
+    {
+        PlayFabPlayerName = result.DisplayName;
+        Debug.Log("User name updated to: " + PlayFabPlayerName);
+
+        stageManager.UserNameUpdated();
+    }
+
+
 
     public void SetPlayerID(string newPlayerID)
     {
@@ -466,12 +484,12 @@ public class PlayerDataManager : MonoBehaviour
     }
 
 
-    void OnUpdateUserNameSuccess(UpdateUserTitleDisplayNameResult result)
+    /*void OnUpdateUserNameSuccess(UpdateUserTitleDisplayNameResult result)
     {
         PlayFabPlayerName = result.DisplayName;
         Debug.Log("User name updated to: " + PlayFabPlayerName);
         
-    }
+    }*/
 
 
     // send player level data and PlayerExtraMoveAbilityCount, PlayerColorBombAbilityCount, PlayerBombAbilityCount to PlayFab
@@ -727,6 +745,24 @@ public class PlayerDataManager : MonoBehaviour
         }
     }*/
 
+    
 
+    public void SendBombAbility(int bombCount)
+    {
+        playerData.PlayerBombAbilityCount = bombCount;
+        Debug.Log($"Bomb Ability Count updated: {bombCount}");
+    }
+
+    public void SendColorBombAbility(int colorBombCount)
+    {
+        playerData.PlayerColorBombAbilityCount = colorBombCount;
+        Debug.Log($"Color Bomb Ability Count updated: {colorBombCount}");
+    }
+
+    public void SendExtraMoveAbility(int extraMoveCount)
+    {
+        playerData.PlayerExtraMoveAbilityCount = extraMoveCount;
+        Debug.Log($"Extra Move Ability Count updated: {extraMoveCount}");
+    }
 
 }

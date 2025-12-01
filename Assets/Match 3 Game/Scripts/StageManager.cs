@@ -7,6 +7,8 @@ using UnityEngine.SceneManagement; // ✅ Needed for scene loading
 using UnityEngine.UI; // ✅ Needed for UI components
 using PlayFab;
 using PlayFab.ClientModels;
+using GoogleMobileAds.Api;
+
 
 public class StageManager : MonoBehaviour
 {
@@ -38,6 +40,13 @@ public class StageManager : MonoBehaviour
     public int totalXP;
     public TMP_InputField userNameInput; // Reference to the input field for username
 
+    public GameObject UserNameUpdatedPanel; // Panel to show when username is updated
+
+    public GameObject ColorBombGetFromAdsPanel; // Panel to show when color bomb is rewarded from ads
+    public GameObject BombGetFromAdsPanel;
+    public GameObject ExtraMovesGetFromAdsPanel;
+
+
 
 
     private PlayerData playerData;
@@ -47,6 +56,10 @@ public class StageManager : MonoBehaviour
     private const string SelectedLevelIndexKey = "SelectedLevelIndex";
 
     private int selectedLevelIndex = 0; // 0-based, for the clicked button only
+
+    public string rewardedAdUnitId = "ca-app-pub-3940256099942544/5224354917"; // test ad unit id
+
+    private RewardedAd rewardedAd;
 
 
 
@@ -60,6 +73,102 @@ public class StageManager : MonoBehaviour
 
         Application.targetFrameRate = 60;
 
+        LoadRewardedAd();
+    }
+
+    void LoadRewardedAd()
+    {
+        var adRequest = new AdRequest();
+
+        RewardedAd.Load(rewardedAdUnitId, adRequest, (RewardedAd ad, LoadAdError error) =>
+        {
+            if (error != null)
+            {
+                Debug.LogError("Failed to load rewarded ad: " + error);
+                rewardedAd = null;
+                return;
+            }
+
+            rewardedAd = ad;
+            Debug.Log("Rewarded ad loaded successfully");
+
+            // Register callbacks
+            rewardedAd.OnAdFullScreenContentClosed += () =>
+            {
+                Debug.Log("Ad closed. Reloading new ad...");
+                LoadRewardedAd(); // Load next ad
+            };
+
+            rewardedAd.OnAdFullScreenContentFailed += (AdError err) =>
+            {
+                Debug.LogError("Ad failed to show: " + err);
+            };
+
+            rewardedAd.OnAdPaid += (AdValue value) =>
+            {
+                Debug.Log("Rewarded Ad revenue: " + value.Value);
+            };
+        });
+    }
+
+    public void ShowRewardedAd_Clown()
+    {
+        if (rewardedAd != null)
+        {
+            rewardedAd.Show((Reward reward) =>
+            {
+                Debug.Log("Reward earned from ad: " + reward.Amount);
+                //add clown ability count by 1
+                PlayerDataManager.Instance.SendColorBombAbility(1);
+                ColorBombGetFromAdsPanel.SetActive(true); // Show the panel
+
+            });
+        }
+        else
+        {
+            Debug.LogWarning("Rewarded ad not ready. Reloading...");
+            LoadRewardedAd();
+        }
+    }
+
+    public void ShowRewardedAd_Bomb()
+    {
+        if (rewardedAd != null)
+        {
+            rewardedAd.Show((Reward reward) =>
+            {
+                Debug.Log("Reward earned from ad: " + reward.Amount);
+                //add clown ability count by 1
+                PlayerDataManager.Instance.SendBombAbility(1);
+                BombGetFromAdsPanel.SetActive(true); // Show the panel
+
+            });
+        }
+        else
+        {
+            Debug.LogWarning("Rewarded ad not ready. Reloading...");
+            LoadRewardedAd();
+        }
+    }
+
+    public void ShowRewardedAd_Moves()
+    {
+        if (rewardedAd != null)
+        {
+            rewardedAd.Show((Reward reward) =>
+            {
+                Debug.Log("Reward earned from ad: " + reward.Amount);
+                //add clown ability count by 1
+                PlayerDataManager.Instance.SendExtraMoveAbility(1);
+                ExtraMovesGetFromAdsPanel.SetActive(true); // Show the panel
+
+            });
+        }
+        else
+        {
+            Debug.LogWarning("Rewarded ad not ready. Reloading...");
+            LoadRewardedAd();
+        }
     }
 
     private string XorEncryptDecrypt(string data, string key = "Heil")
@@ -377,5 +486,12 @@ public class StageManager : MonoBehaviour
         Application.Quit();
 
     }
+
+    public void UserNameUpdated()
+    {
+        UserNameUpdatedPanel.SetActive(true);
+    }
+
+    //public function to show rewarded ad
 
 }
