@@ -150,6 +150,7 @@ public class PlayerDataManager : MonoBehaviour
             PlayerColorBombAbilityCount = 20,
             PlayerExtraMoveAbilityCount = 20,
             CurrentLevelId = 1,
+            EnergyCount = 5,
             Levels = new List<LevelInfo>()
         {
             new LevelInfo { LevelID = 1, Stars = 0, XP = 0, LevelLocked = 0 },
@@ -547,6 +548,7 @@ public class PlayerDataManager : MonoBehaviour
             { "PlayerBombAbilityCount", playerData.PlayerBombAbilityCount.ToString() },
             { "PlayerColorBombAbilityCount", playerData.PlayerColorBombAbilityCount.ToString() },
             { "PlayerExtraMoveAbilityCount", playerData.PlayerExtraMoveAbilityCount.ToString() },
+            { "PlayerEnergyCount", playerData.EnergyCount.ToString() },
             { "Levels", levelsJson }
         }
         };
@@ -764,5 +766,51 @@ public class PlayerDataManager : MonoBehaviour
         playerData.PlayerExtraMoveAbilityCount = extraMoveCount;
         Debug.Log($"Extra Move Ability Count updated: {extraMoveCount}");
     }
+
+    public void SetEnergyLevel(int energyCount)
+    {
+        playerData.EnergyCount = energyCount;
+        Debug.Log($"Energy Count updated: {energyCount}");
+        //Send to PlayFab if online
+        if (isOnline)
+        {
+            SendPlayerDataToPlayFab();
+        }
+
+        //save to local json
+        SavePlayerData();
+    }
+
+    public void AddEnergy(int amount)
+    {
+        playerData.EnergyCount += amount;
+        Debug.Log($"Added {amount} energy. Total Energy: {playerData.EnergyCount}");
+        // Send to PlayFab if online
+        if (isOnline)
+        {
+            SendPlayerDataToPlayFab();
+        }
+        // Save to local JSON
+        SavePlayerData();
+    }
+
+    public void RemoveEnergy(int amount)
+    {
+        playerData.EnergyCount -= amount;
+        Debug.Log($"Removed {amount} energy. Total Energy: {playerData.EnergyCount}");
+        // Send to PlayFab if online
+        if (isOnline)
+        {
+            SendPlayerDataToPlayFab();
+        }
+        // Save to local JSON
+        SavePlayerData();
+    }
+
+    public int GetEnergyCount()
+    {
+        return playerData.EnergyCount;
+    }
+
 
 }

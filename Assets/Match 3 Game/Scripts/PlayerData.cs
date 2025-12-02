@@ -16,6 +16,8 @@ public class PlayerData
 
     public int CurrentLevelId; // 🔥 NEW universal current level tracker
 
+    public int EnergyCount;
+
     public List<LevelInfo> Levels = new List<LevelInfo>();
 }
 

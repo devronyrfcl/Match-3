@@ -46,6 +46,8 @@ public class StageManager : MonoBehaviour
     public GameObject BombGetFromAdsPanel;
     public GameObject ExtraMovesGetFromAdsPanel;
 
+    public TMP_Text CurrentEnergyText; // Text to show current energy
+    public GameObject NoEnergyLeftPanel; // Panel to show when no energy left
 
 
 
@@ -76,100 +78,7 @@ public class StageManager : MonoBehaviour
         LoadRewardedAd();
     }
 
-    void LoadRewardedAd()
-    {
-        var adRequest = new AdRequest();
-
-        RewardedAd.Load(rewardedAdUnitId, adRequest, (RewardedAd ad, LoadAdError error) =>
-        {
-            if (error != null)
-            {
-                Debug.LogError("Failed to load rewarded ad: " + error);
-                rewardedAd = null;
-                return;
-            }
-
-            rewardedAd = ad;
-            Debug.Log("Rewarded ad loaded successfully");
-
-            // Register callbacks
-            rewardedAd.OnAdFullScreenContentClosed += () =>
-            {
-                Debug.Log("Ad closed. Reloading new ad...");
-                LoadRewardedAd(); // Load next ad
-            };
-
-            rewardedAd.OnAdFullScreenContentFailed += (AdError err) =>
-            {
-                Debug.LogError("Ad failed to show: " + err);
-            };
-
-            rewardedAd.OnAdPaid += (AdValue value) =>
-            {
-                Debug.Log("Rewarded Ad revenue: " + value.Value);
-            };
-        });
-    }
-
-    public void ShowRewardedAd_Clown()
-    {
-        if (rewardedAd != null)
-        {
-            rewardedAd.Show((Reward reward) =>
-            {
-                Debug.Log("Reward earned from ad: " + reward.Amount);
-                //add clown ability count by 1
-                PlayerDataManager.Instance.SendColorBombAbility(1);
-                ColorBombGetFromAdsPanel.SetActive(true); // Show the panel
-
-            });
-        }
-        else
-        {
-            Debug.LogWarning("Rewarded ad not ready. Reloading...");
-            LoadRewardedAd();
-        }
-    }
-
-    public void ShowRewardedAd_Bomb()
-    {
-        if (rewardedAd != null)
-        {
-            rewardedAd.Show((Reward reward) =>
-            {
-                Debug.Log("Reward earned from ad: " + reward.Amount);
-                //add clown ability count by 1
-                PlayerDataManager.Instance.SendBombAbility(1);
-                BombGetFromAdsPanel.SetActive(true); // Show the panel
-
-            });
-        }
-        else
-        {
-            Debug.LogWarning("Rewarded ad not ready. Reloading...");
-            LoadRewardedAd();
-        }
-    }
-
-    public void ShowRewardedAd_Moves()
-    {
-        if (rewardedAd != null)
-        {
-            rewardedAd.Show((Reward reward) =>
-            {
-                Debug.Log("Reward earned from ad: " + reward.Amount);
-                //add clown ability count by 1
-                PlayerDataManager.Instance.SendExtraMoveAbility(1);
-                ExtraMovesGetFromAdsPanel.SetActive(true); // Show the panel
-
-            });
-        }
-        else
-        {
-            Debug.LogWarning("Rewarded ad not ready. Reloading...");
-            LoadRewardedAd();
-        }
-    }
+    
 
     private string XorEncryptDecrypt(string data, string key = "Heil")
     {
@@ -190,6 +99,8 @@ public class StageManager : MonoBehaviour
     }
     private void LoadPlayerData()
     {
+        
+        
         if (File.Exists(SavePath))
         {
             //string json = File.ReadAllText(SavePath);
@@ -311,7 +222,7 @@ public class StageManager : MonoBehaviour
         StartCoroutine(SelectLevelCoroutine(clickedButton));
     }
 
-    private IEnumerator SelectLevelCoroutine(LevelButtonManager clickedButton)
+    /*private IEnumerator SelectLevelCoroutine(LevelButtonManager clickedButton)
     {
         // Run Emoji animation first
         yield return StartCoroutine(EmojiLoading());
@@ -342,6 +253,64 @@ public class StageManager : MonoBehaviour
         }
 
         // ✅ Level is unlocked → save and load scene
+        selectedLevelIndex = clickedIndex;
+        PlayerPrefs.SetInt(SelectedLevelIndexKey, clickedButton.levelId - 1);
+        PlayerPrefs.Save();
+
+        Debug.Log($"StageManager: Selected level saved as {clickedButton.levelId - 1}");
+
+        SceneManager.LoadScene("MainGame");
+
+        // Deduct 1 energy when level is selected
+    }*/
+
+
+    private IEnumerator SelectLevelCoroutine(LevelButtonManager clickedButton)
+    {
+        // Run Emoji animation first
+        yield return StartCoroutine(EmojiLoading());
+
+        int clickedIndex = -1;
+
+        // Find index of clicked button
+        for (int i = 0; i < levelButtons.Length; i++)
+        {
+            if (levelButtons[i] == clickedButton)
+            {
+                clickedIndex = i;
+                break;
+            }
+        }
+
+        if (clickedIndex == -1)
+            yield break; // safety check
+
+        // Check if the level is locked
+        LevelInfo levelInfo = playerData.Levels.Find(l => l.LevelID == clickedButton.levelId);
+        bool isLocked = levelInfo != null && levelInfo.LevelLocked == 1;
+
+        if (isLocked)
+        {
+            OnLockedLevelClicked(clickedButton.levelId); // call separate function
+            yield break;
+        }
+
+        // ✅ Check if player has enough energy
+        int currentEnergy = PlayerDataManager.Instance.GetEnergyCount();
+        if (currentEnergy <= 0)
+        {
+            Debug.Log("Not enough energy to play this level!");
+            NoEnergyLeftPanel.SetActive(true); // Show no energy panel
+            yield break; // Exit without loading the level
+        }
+
+        // ✅ Deduct energy before loading the level
+        PlayerDataManager.Instance.RemoveEnergy(1);
+
+        // Update the energy display
+        CurrentEnergyText.text = PlayerDataManager.Instance.GetEnergyCount().ToString();
+
+        // ✅ Level is unlocked & energy deducted → save and load scene
         selectedLevelIndex = clickedIndex;
         PlayerPrefs.SetInt(SelectedLevelIndexKey, clickedButton.levelId - 1);
         PlayerPrefs.Save();
@@ -381,6 +350,9 @@ public class StageManager : MonoBehaviour
         TotalXP.text = $"{totalXP}";
         TotalStar.text = $"{totalStars}";
         Name.text = playerData.Name; // Display player name
+
+        //show current vibes
+        CurrentEnergyText.text = PlayerDataManager.Instance.GetEnergyCount().ToString();
 
 
         //show ability counts
@@ -492,6 +464,99 @@ public class StageManager : MonoBehaviour
         UserNameUpdatedPanel.SetActive(true);
     }
 
-    //public function to show rewarded ad
+    void LoadRewardedAd()
+    {
+        var adRequest = new AdRequest();
+
+        RewardedAd.Load(rewardedAdUnitId, adRequest, (RewardedAd ad, LoadAdError error) =>
+        {
+            if (error != null)
+            {
+                Debug.LogError("Failed to load rewarded ad: " + error);
+                rewardedAd = null;
+                return;
+            }
+
+            rewardedAd = ad;
+            Debug.Log("Rewarded ad loaded successfully");
+
+            // Register callbacks
+            rewardedAd.OnAdFullScreenContentClosed += () =>
+            {
+                Debug.Log("Ad closed. Reloading new ad...");
+                LoadRewardedAd(); // Load next ad
+            };
+
+            rewardedAd.OnAdFullScreenContentFailed += (AdError err) =>
+            {
+                Debug.LogError("Ad failed to show: " + err);
+            };
+
+            rewardedAd.OnAdPaid += (AdValue value) =>
+            {
+                Debug.Log("Rewarded Ad revenue: " + value.Value);
+            };
+        });
+    }
+
+    public void ShowRewardedAd_Clown()
+    {
+        if (rewardedAd != null)
+        {
+            rewardedAd.Show((Reward reward) =>
+            {
+                Debug.Log("Reward earned from ad: " + reward.Amount);
+                //add clown ability count by 1
+                PlayerDataManager.Instance.SendColorBombAbility(1);
+                ColorBombGetFromAdsPanel.SetActive(true); // Show the panel
+
+            });
+        }
+        else
+        {
+            Debug.LogWarning("Rewarded ad not ready. Reloading...");
+            LoadRewardedAd();
+        }
+    }
+
+    public void ShowRewardedAd_Bomb()
+    {
+        if (rewardedAd != null)
+        {
+            rewardedAd.Show((Reward reward) =>
+            {
+                Debug.Log("Reward earned from ad: " + reward.Amount);
+                //add clown ability count by 1
+                PlayerDataManager.Instance.SendBombAbility(1);
+                BombGetFromAdsPanel.SetActive(true); // Show the panel
+
+            });
+        }
+        else
+        {
+            Debug.LogWarning("Rewarded ad not ready. Reloading...");
+            LoadRewardedAd();
+        }
+    }
+
+    public void ShowRewardedAd_Moves()
+    {
+        if (rewardedAd != null)
+        {
+            rewardedAd.Show((Reward reward) =>
+            {
+                Debug.Log("Reward earned from ad: " + reward.Amount);
+                //add clown ability count by 1
+                PlayerDataManager.Instance.SendExtraMoveAbility(1);
+                ExtraMovesGetFromAdsPanel.SetActive(true); // Show the panel
+
+            });
+        }
+        else
+        {
+            Debug.LogWarning("Rewarded ad not ready. Reloading...");
+            LoadRewardedAd();
+        }
+    }
 
 }
