@@ -41,7 +41,10 @@ public class PlayerDataManager : MonoBehaviour
 
     public static PlayerDataManager Instance { get; private set; }
 
-    
+    private const int ENERGY_REGEN_MINUTES = 5; // Time to regenerate 1 energy
+    private Coroutine energyRegenCoroutine;
+
+
 
     public int TotalXP
     {
@@ -101,7 +104,11 @@ public class PlayerDataManager : MonoBehaviour
         SavePlayerData();
         GetCurrentLevel(); // Initialize current level from player data
 
-        
+        // ✅ NEW: Calculate offline energy regeneration
+        CalculateOfflineEnergyRegen();
+
+        // ✅ NEW: Start continuous energy regeneration coroutine
+        energyRegenCoroutine = StartCoroutine(EnergyRegenCoroutine());
 
     }
 
@@ -797,13 +804,16 @@ public class PlayerDataManager : MonoBehaviour
     public void RemoveEnergy(int amount)
     {
         playerData.EnergyCount -= amount;
+
+        // ✅ Update timestamp when energy is spent
+        playerData.LastEnergyUpdateTime = GetCurrentUnixTime();
+
         Debug.Log($"Removed {amount} energy. Total Energy: {playerData.EnergyCount}");
-        // Send to PlayFab if online
+
         if (isOnline)
         {
             SendPlayerDataToPlayFab();
         }
-        // Save to local JSON
         SavePlayerData();
     }
 
@@ -811,6 +821,163 @@ public class PlayerDataManager : MonoBehaviour
     {
         return playerData.EnergyCount;
     }
+
+
+    /// <summary>
+    /// Calculates how much energy should be regenerated based on offline time
+    /// </summary>
+    private void CalculateOfflineEnergyRegen()
+    {
+        if (playerData.EnergyCount >= playerData.MaxEnergy)
+        {
+            Debug.Log("Energy is already full. No regeneration needed.");
+            return;
+        }
+
+        long currentTime = GetCurrentUnixTime();
+        long lastUpdateTime = playerData.LastEnergyUpdateTime;
+
+        // First time setup
+        if (lastUpdateTime == 0)
+        {
+            playerData.LastEnergyUpdateTime = currentTime;
+            SavePlayerData();
+            return;
+        }
+
+        long timeDifference = currentTime - lastUpdateTime;
+        int minutesPassed = (int)(timeDifference / 60);
+
+        if (minutesPassed >= ENERGY_REGEN_MINUTES)
+        {
+            int energyToAdd = minutesPassed / ENERGY_REGEN_MINUTES;
+            int newEnergy = Mathf.Min(playerData.EnergyCount + energyToAdd, playerData.MaxEnergy);
+
+            int actualEnergyAdded = newEnergy - playerData.EnergyCount;
+
+            if (actualEnergyAdded > 0)
+            {
+                playerData.EnergyCount = newEnergy;
+
+                // Update timestamp to account for regenerated energy
+                long timeUsedForRegen = actualEnergyAdded * ENERGY_REGEN_MINUTES * 60;
+                playerData.LastEnergyUpdateTime = lastUpdateTime + timeUsedForRegen;
+
+                Debug.Log($"Offline energy regeneration: +{actualEnergyAdded} energy. Total: {playerData.EnergyCount}");
+                SavePlayerData();
+
+                if (isOnline)
+                {
+                    SendPlayerDataToPlayFab();
+                }
+            }
+        }
+    }
+
+    /// <summary>
+    /// Continuous energy regeneration while game is open
+    /// </summary>
+    private IEnumerator EnergyRegenCoroutine()
+    {
+        while (true)
+        {
+            yield return new WaitForSeconds(60f); // Check every minute
+
+            if (playerData.EnergyCount >= playerData.MaxEnergy)
+            {
+                continue; // Already at max, no need to regenerate
+            }
+
+            long currentTime = GetCurrentUnixTime();
+            long timeDifference = currentTime - playerData.LastEnergyUpdateTime;
+            int minutesPassed = (int)(timeDifference / 60);
+
+            if (minutesPassed >= ENERGY_REGEN_MINUTES)
+            {
+                int energyToAdd = minutesPassed / ENERGY_REGEN_MINUTES;
+                int newEnergy = Mathf.Min(playerData.EnergyCount + energyToAdd, playerData.MaxEnergy);
+
+                int actualEnergyAdded = newEnergy - playerData.EnergyCount;
+
+                if (actualEnergyAdded > 0)
+                {
+                    playerData.EnergyCount = newEnergy;
+
+                    // Update timestamp
+                    long timeUsedForRegen = actualEnergyAdded * ENERGY_REGEN_MINUTES * 60;
+                    playerData.LastEnergyUpdateTime += timeUsedForRegen;
+
+                    Debug.Log($"Energy regenerated: +{actualEnergyAdded}. Total: {playerData.EnergyCount}");
+                    SavePlayerData();
+
+                    if (isOnline)
+                    {
+                        SendPlayerDataToPlayFab();
+                    }
+
+                    // ✅ Update UI if StageManager exists
+                    if (stageManager != null && stageManager.CurrentEnergyText != null)
+                    {
+                        stageManager.CurrentEnergyText.text = playerData.EnergyCount.ToString();
+                    }
+                }
+            }
+        }
+    }
+
+    /// <summary>
+    /// Gets time remaining until next energy regeneration (in seconds)
+    /// </summary>
+    public int GetTimeUntilNextEnergy()
+    {
+        if (playerData.EnergyCount >= playerData.MaxEnergy)
+            return 0;
+
+        long currentTime = GetCurrentUnixTime();
+        long timeDifference = currentTime - playerData.LastEnergyUpdateTime;
+        int secondsPassed = (int)timeDifference;
+
+        int secondsPerEnergy = ENERGY_REGEN_MINUTES * 60;
+        int secondsUntilNext = secondsPerEnergy - (secondsPassed % secondsPerEnergy);
+
+        return secondsUntilNext;
+    }
+
+    /// <summary>
+    /// Format time remaining as MM:SS
+    /// </summary>
+    public string GetFormattedTimeUntilNextEnergy()
+    {
+        int seconds = GetTimeUntilNextEnergy();
+        int minutes = seconds / 60;
+        int secs = seconds % 60;
+        return $"{minutes:00}:{secs:00}";
+    }
+
+    private long GetCurrentUnixTime()
+    {
+        return DateTimeOffset.UtcNow.ToUnixTimeSeconds();
+    }
+
+    private void OnDestroy()
+    {
+        // Stop coroutine when game closes
+        if (energyRegenCoroutine != null)
+        {
+            StopCoroutine(energyRegenCoroutine);
+        }
+    }
+
+
+    public void SkipEnergyGenerateTime()
+    {
+
+        // Fast forward last energy update time by 5 minutes
+        playerData.LastEnergyUpdateTime -= ENERGY_REGEN_MINUTES * 60;
+        SavePlayerData();
+    }
+
+
 
 
 }

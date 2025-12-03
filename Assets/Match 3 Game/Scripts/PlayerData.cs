@@ -19,6 +19,10 @@ public class PlayerData
     public int EnergyCount;
 
     public List<LevelInfo> Levels = new List<LevelInfo>();
+
+    // ✅ NEW FIELDS
+    public long LastEnergyUpdateTime; // Unix timestamp for energy regeneration
+    public int MaxEnergy = 10; // Maximum energy cap
 }
 
 [Serializable]

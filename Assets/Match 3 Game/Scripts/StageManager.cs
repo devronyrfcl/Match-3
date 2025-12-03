@@ -268,7 +268,7 @@ public class StageManager : MonoBehaviour
     private IEnumerator SelectLevelCoroutine(LevelButtonManager clickedButton)
     {
         // Run Emoji animation first
-        yield return StartCoroutine(EmojiLoading());
+        
 
         int clickedIndex = -1;
 
@@ -303,6 +303,8 @@ public class StageManager : MonoBehaviour
             NoEnergyLeftPanel.SetActive(true); // Show no energy panel
             yield break; // Exit without loading the level
         }
+
+        yield return StartCoroutine(EmojiLoading());
 
         // ✅ Deduct energy before loading the level
         PlayerDataManager.Instance.RemoveEnergy(1);
@@ -549,6 +551,27 @@ public class StageManager : MonoBehaviour
                 //add clown ability count by 1
                 PlayerDataManager.Instance.SendExtraMoveAbility(1);
                 ExtraMovesGetFromAdsPanel.SetActive(true); // Show the panel
+
+            });
+        }
+        else
+        {
+            Debug.LogWarning("Rewarded ad not ready. Reloading...");
+            LoadRewardedAd();
+        }
+    }
+
+    public void ShowRewardedAd_SkipEnergyGenerateTime()
+    {
+        if (rewardedAd != null)
+        {
+            rewardedAd.Show((Reward reward) =>
+            {
+                Debug.Log("Reward earned from ad: " + reward.Amount);
+                //add clown ability count by 1
+                PlayerDataManager.Instance.SkipEnergyGenerateTime();
+
+
 
             });
         }
