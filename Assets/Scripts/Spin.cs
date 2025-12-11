@@ -1,11 +1,11 @@
-﻿using System.Collections;
+﻿using System;
+using System.Collections;
 using TMPro;
 using UnityEngine;
 using UnityEngine.Events;
 using DG.Tweening;
-//google admob
 using GoogleMobileAds.Api;
-
+using UnityEngine.UI;
 
 public class Spin : MonoBehaviour
 {
@@ -21,6 +21,11 @@ public class Spin : MonoBehaviour
     [Header("Spin Limit")]
     public int spinCount = 5;
     public TextMeshProUGUI spinLeftText;
+
+    [Header("Bonus Count System")]
+    public int bonusCount = 3; // Current available bonus ads
+    public TextMeshProUGUI bonusCountText; // Text to show count or depleted message
+    public Button watchAdButton; // Reference to watch ad button component
 
     private bool isSpinning = false;
     private float finalAngle;
@@ -38,19 +43,24 @@ public class Spin : MonoBehaviour
 
     private RewardedAd rewardedAd;
 
+    // ✅ PlayerPrefs Keys
+    private const string BONUS_COUNT_KEY = "BonusCount";
+    private const string LAST_BONUS_DATE_KEY = "LastBonusDate";
+
     void Start()
     {
         UpdateSpinText();
         ResetRewardUI();
 
-        //if no spins saved, set to default spin count = 5
         LoadSpinCount();
+        LoadBonusCount(); // ✅ Load bonus count
+        CheckAndResetDailyBonus(); // ✅ Check for daily reset
+        UpdateBonusCountUI(); // ✅ Update UI
 
         LoadRewardedAd();
-
     }
 
-    //function to load rewarded video ads
+    #region "Ad Loading"
     void LoadRewardedAd()
     {
         var adRequest = new AdRequest();
@@ -67,11 +77,10 @@ public class Spin : MonoBehaviour
             rewardedAd = ad;
             Debug.Log("Rewarded ad loaded successfully");
 
-            // Register callbacks
             rewardedAd.OnAdFullScreenContentClosed += () =>
             {
                 Debug.Log("Ad closed. Reloading new ad...");
-                LoadRewardedAd(); // Load next ad
+                LoadRewardedAd();
             };
 
             rewardedAd.OnAdFullScreenContentFailed += (AdError err) =>
@@ -88,12 +97,24 @@ public class Spin : MonoBehaviour
 
     public void ShowRewardedAd()
     {
+        // ✅ Check if bonus count is available
+        if (bonusCount <= 0)
+        {
+            Debug.LogWarning("No bonus ads left today!");
+            return;
+        }
+
         if (rewardedAd != null)
         {
             rewardedAd.Show((Reward reward) =>
             {
                 Debug.Log("Reward earned from ad: " + reward.Amount);
-                AddBonusSpin();  // ⭐ Give the player +1 spin
+
+                // ✅ Deduct bonus count
+                UseBonusCount();
+
+                // ⭐ Give the player +1 spin
+                AddBonusSpin();
             });
         }
         else
@@ -102,10 +123,124 @@ public class Spin : MonoBehaviour
             LoadRewardedAd();
         }
     }
+    #endregion
 
+    #region "Bonus Count System"
 
+    /// <summary>
+    /// Load bonus count from PlayerPrefs
+    /// </summary>
+    void LoadBonusCount()
+    {
+        if (PlayerPrefs.HasKey(BONUS_COUNT_KEY))
+        {
+            bonusCount = PlayerPrefs.GetInt(BONUS_COUNT_KEY);
+        }
+        else
+        {
+            bonusCount = 3; // Default value
+            SaveBonusCount();
+        }
+        Debug.Log($"Loaded Bonus Count: {bonusCount}");
+    }
 
-    //Load spin count from PlayerPrefs
+    /// <summary>
+    /// Save bonus count to PlayerPrefs
+    /// </summary>
+    void SaveBonusCount()
+    {
+        PlayerPrefs.SetInt(BONUS_COUNT_KEY, bonusCount);
+        PlayerPrefs.Save();
+        Debug.Log($"Saved Bonus Count: {bonusCount}");
+    }
+
+    /// <summary>
+    /// Check if a new day has started and add 1 bonus
+    /// </summary>
+    void CheckAndResetDailyBonus()
+    {
+        string today = DateTime.UtcNow.ToString("yyyy-MM-dd");
+        string lastDate = PlayerPrefs.GetString(LAST_BONUS_DATE_KEY, "");
+
+        if (string.IsNullOrEmpty(lastDate) || lastDate != today)
+        {
+            // ✅ New day detected - add 1 bonus (up to max 3)
+            if (bonusCount < 3)
+            {
+                bonusCount++;
+                Debug.Log($"Daily Bonus Added! New count: {bonusCount}");
+            }
+            else
+            {
+                Debug.Log("Bonus count already at max (3)");
+            }
+
+            // Update last bonus date
+            PlayerPrefs.SetString(LAST_BONUS_DATE_KEY, today);
+            SaveBonusCount();
+        }
+        else
+        {
+            Debug.Log($"Daily bonus already generated today. Current count: {bonusCount}");
+        }
+    }
+
+    /// <summary>
+    /// Use one bonus count when watching ad
+    /// </summary>
+    void UseBonusCount()
+    {
+        if (bonusCount > 0)
+        {
+            bonusCount--;
+            SaveBonusCount();
+            UpdateBonusCountUI();
+            Debug.Log($"Bonus Count Used! Remaining: {bonusCount}");
+        }
+    }
+
+    /// <summary>
+    /// Update bonus count UI elements
+    /// </summary>
+    void UpdateBonusCountUI()
+    {
+        if (bonusCountText != null)
+        {
+            if (spinCount <= 0)
+            {
+                // ✅ Show bonus count or depleted message when spin count is 0
+                if (bonusCount <= 0)
+                {
+                    bonusCountText.text = "No ads bonus left! Come back tomorrow.";
+                    spinNowBtn.SetActive(false);
+                }
+                else
+                {
+                    //bonusCountText.text = $"{bonusCount}";
+                    bonusCountText.text = "Bonus: " + $"{bonusCount}";
+                }
+                bonusCountText.gameObject.SetActive(true);
+            }
+            else
+            {
+                // ✅ Hide text when spin count is 1 or more
+                bonusCountText.text = "";
+                bonusCountText.gameObject.SetActive(false);
+            }
+        }
+
+        // Make watch ad button non-interactable when no bonuses left
+        if (watchAdButton != null)
+        {
+            watchAdButton.interactable = (bonusCount > 0);
+            Debug.Log($"Watch Ad Button Interactable: {bonusCount > 0}");
+        }
+    }
+
+    #endregion
+
+    #region "Spin System"
+
     void LoadSpinCount()
     {
         if (PlayerPrefs.HasKey("SpinCount"))
@@ -121,8 +256,6 @@ public class Spin : MonoBehaviour
         checkSpinCountForAds();
     }
 
-
-    //savve spin count to PlayerPrefs   
     void SaveSpinCount()
     {
         PlayerPrefs.SetInt("SpinCount", spinCount);
@@ -133,7 +266,6 @@ public class Spin : MonoBehaviour
     {
         if (isSpinning) return; // 🔒 block spam clicks
 
-        
         if (spinCount > 0)
         {
             spinCount--;
@@ -142,7 +274,7 @@ public class Spin : MonoBehaviour
             isSpinning = true;
             spinNowBtn.SetActive(false);
 
-            float randomAngle = Random.Range(0f, 360f);
+            float randomAngle = UnityEngine.Random.Range(0f, 360f);
             float totalAngle = (360f * spinRounds) + randomAngle;
 
             spinObject.transform.DOKill();
@@ -178,15 +310,41 @@ public class Spin : MonoBehaviour
         }
     }
 
+    void checkSpinCountForAds()
+    {
+        if (spinCount <= 0)
+        {
+            if (spinNowBtn != null) spinNowBtn.SetActive(false);
+            if (watchAdBtn != null) watchAdBtn.SetActive(true);
+        }
+        else
+        {
+            if (spinNowBtn != null) spinNowBtn.SetActive(true);
+            if (watchAdBtn != null) watchAdBtn.SetActive(false);
+        }
+
+        // ✅ Also update bonus count UI when checking spin state
+        UpdateBonusCountUI();
+    }
+
+    public void AddBonusSpin()
+    {
+        spinCount += 1;
+        UpdateSpinText();
+        SaveSpinCount(); // ✅ Save immediately
+        if (spinLeftText != null) spinLeftText.gameObject.SetActive(true);
+        checkSpinCountForAds();
+    }
+
+    #endregion
+
+    #region "Spin Results"
+
     private void HandleResult(float angle)
     {
-        ResetRewardUI(); // hide old rewards
-        winPanel.SetActive(true); // show win panel for every result
+        ResetRewardUI();
+        winPanel.SetActive(true);
 
-        // normalize angle (0 - 360)
-        //angle = (angle + 360f) % 360f;
-
-        // shift everything by 22.5 degrees
         angle = (angle + 22.5f) % 360f;
 
         if (angle >= 0 && angle < 45) Result_1();
@@ -204,28 +362,25 @@ public class Spin : MonoBehaviour
         Debug.Log("Won Color Bomb x2!");
         colorBombImage.SetActive(true);
         colorBombText.text = "2";
-        PlayerDataManager.Instance.AddColorBombAbility(2); // Add 2 color bombs to player data
+        PlayerDataManager.Instance.AddColorBombAbility(2);
     }
+
     void Result_2()
     {
         Debug.Log("Won Moves x2!");
         extraMoveImage.SetActive(true);
         extraMoveText.text = "2";
-        PlayerDataManager.Instance.AddExtraMoveAbility(2); // Add 2 extra moves to player data
-
+        PlayerDataManager.Instance.AddExtraMoveAbility(2);
     }
+
     void Result_3()
     {
-        /*Debug.Log("Won Moves x1");
-        extraMoveImage.SetActive(true);
-        extraMoveText.text = "1";
-        PlayerDataManager.Instance.AddExtraMoveAbility(1); // Add 1 extra move to player data*/
-
-        Debug.Log("won Bomb x1");
+        Debug.Log("Won Bomb x1");
         bombImage.SetActive(true);
         bombText.text = "1";
-        PlayerDataManager.Instance.AddBombAbility(1); // Add 1 bomb to player data
+        PlayerDataManager.Instance.AddBombAbility(1);
     }
+
     void Result_4()
     {
         Debug.Log("Won Bomb and Color Bomb");
@@ -233,63 +388,40 @@ public class Spin : MonoBehaviour
         bombText.text = "2";
         colorBombImage.SetActive(true);
         colorBombText.text = "2";
-        PlayerDataManager.Instance.AddBombAbility(2); // Add 1 bomb to player data
-        PlayerDataManager.Instance.AddColorBombAbility(2); // Add 1 color bomb to player data
+        PlayerDataManager.Instance.AddBombAbility(2);
+        PlayerDataManager.Instance.AddColorBombAbility(2);
     }
+
     void Result_5()
     {
-        Debug.Log("Won Extra Move 2");
+        Debug.Log("Won Extra Move x5");
         extraMoveImage.SetActive(true);
-        extraMoveText.text = "2";
-        PlayerDataManager.Instance.AddExtraMoveAbility(5); // Add 5 extra moves to player data
+        extraMoveText.text = "5";
+        PlayerDataManager.Instance.AddExtraMoveAbility(5);
     }
+
     void Result_6()
     {
         Debug.Log("Won Color Bomb x1");
         colorBombImage.SetActive(true);
         colorBombText.text = "1";
-        PlayerDataManager.Instance.AddColorBombAbility(1); // Add 1 color bomb to player data
+        PlayerDataManager.Instance.AddColorBombAbility(1);
     }
+
     void Result_7()
     {
         Debug.Log("Won Bomb x1");
-        extraMoveImage.SetActive(true);
-        extraMoveText.text = "1";
-        PlayerDataManager.Instance.AddBombAbility(1); // Add 1 bomb to player data
+        bombImage.SetActive(true);
+        bombText.text = "1";
+        PlayerDataManager.Instance.AddBombAbility(1);
     }
+
     void Result_8()
     {
-        /*Debug.Log("Extra Moves x1");
-        extraMoveImage.SetActive(true);
-        extraMoveText.text = "1";
-        PlayerDataManager.Instance.AddExtraMoveAbility(1); // Add 1 bomb to player data*/
-
         Debug.Log("Won Bomb x2!");
         bombImage.SetActive(true);
         bombText.text = "2";
-        PlayerDataManager.Instance.AddBombAbility(2); // Add 2 bombs to player data
-    }
-
-    public void AddBonusSpin()
-    {
-        spinCount += 1;
-        UpdateSpinText();
-        if (spinLeftText != null) spinLeftText.gameObject.SetActive(true);
-        checkSpinCountForAds();
-    }
-
-    void checkSpinCountForAds()
-    {
-        if (spinCount <= 0)
-        {
-            if (spinNowBtn != null) spinNowBtn.SetActive(false);
-            if (watchAdBtn != null) watchAdBtn.SetActive(true);
-        }
-        else
-        {
-            if (spinNowBtn != null) spinNowBtn.SetActive(true);
-            if (watchAdBtn != null) watchAdBtn.SetActive(false);
-        }
+        PlayerDataManager.Instance.AddBombAbility(2);
     }
 
     void ResetRewardUI()
@@ -300,7 +432,6 @@ public class Spin : MonoBehaviour
         extraMoveImage.SetActive(false);
     }
 
-    
     public void CloseWinPanel()
     {
         winPanel.SetActive(false);
@@ -308,8 +439,9 @@ public class Spin : MonoBehaviour
         colorBombImage.SetActive(false);
         extraMoveImage.SetActive(false);
         spinNowBtn.SetActive(true);
-        PlayerDataManager.Instance.SavePlayerData(); // Save player data after rewards are given
+        PlayerDataManager.Instance.SavePlayerData();
         SaveSpinCount();
     }
 
+    #endregion
 }

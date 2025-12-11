@@ -1214,9 +1214,10 @@ public class GridManager : MonoBehaviour
     //play random sfx sound(Pop_1, Pop_2, Pop_3, Pop_4) from AudioManager
     public void PlayRandomSFX()
     {
-        int randomIndex = Random.Range(1, 5); // Random index between 1 and 4
+        /*int randomIndex = Random.Range(1, 5); // Random index between 1 and 4
         string sfxName = "Pop_" + randomIndex;
-        AudioManager.Instance.PlaySFX(sfxName);
+        AudioManager.Instance.PlaySFX(sfxName);*/
+        AudioManager.Instance.PlaySFX("Pop_Main");
     }
 
 

@@ -452,6 +452,7 @@ public class StageManager : MonoBehaviour
         PlayerDataManager.Instance.SetName(userName);
         PlayerDataManager.Instance.SavePlayerData();
         RefreashData();
+        UserNameUpdated();
     }
 
     //public exit function
