@@ -723,14 +723,14 @@ public class Piece : MonoBehaviour
         {
             gridManager.SpawnParticleEffect(X, Y);
 
-            
+            gridManager.GameOverLogic();
 
             //FindMatches(); // Call the method to find matches at the start
             Destroy(piece.gameObject);
             gridManager.PlayRandomSFX();
         });
 
-        gridManager.GameOverLogic();
+        
     }
 
 

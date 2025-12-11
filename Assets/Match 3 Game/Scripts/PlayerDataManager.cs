@@ -41,7 +41,7 @@ public class PlayerDataManager : MonoBehaviour
 
     public static PlayerDataManager Instance { get; private set; }
 
-    private const int ENERGY_REGEN_MINUTES = 5; // Time to regenerate 1 energy
+    private const int ENERGY_REGEN_MINUTES = 59; // Time to regenerate 1 energy
     private Coroutine energyRegenCoroutine;
 
 

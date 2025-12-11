@@ -49,6 +49,8 @@ public class StageManager : MonoBehaviour
     public TMP_Text CurrentEnergyText; // Text to show current energy
     public GameObject NoEnergyLeftPanel; // Panel to show when no energy left
 
+    public EnergyTimerUI energyTimerUI; // Reference to the EnergyTimerUI script
+
 
 
     private PlayerData playerData;
@@ -307,7 +309,7 @@ public class StageManager : MonoBehaviour
         yield return StartCoroutine(EmojiLoading());
 
         // ✅ Deduct energy before loading the level
-        PlayerDataManager.Instance.RemoveEnergy(1);
+        //PlayerDataManager.Instance.RemoveEnergy(1);
 
         // Update the energy display
         CurrentEnergyText.text = PlayerDataManager.Instance.GetEnergyCount().ToString();
@@ -570,6 +572,8 @@ public class StageManager : MonoBehaviour
                 Debug.Log("Reward earned from ad: " + reward.Amount);
                 //add clown ability count by 1
                 PlayerDataManager.Instance.SkipEnergyGenerateTime();
+                NoEnergyLeftPanel.SetActive(false); // Hide the no energy panel
+                energyTimerUI.UpdateUI();
 
 
 

@@ -7,6 +7,8 @@ using UnityEngine;
 using UnityEngine.UI;
 using System.IO;
 using UnityEngine.SceneManagement;
+//For 
+
 
 
 [System.Serializable]
@@ -264,13 +266,13 @@ public class GridManager : MonoBehaviour
             OnTimeUp();
         }
 
-        GameOverLogic();
+        //GameOverLogic();
 
 
-        if(isGameOver)
+        /*if(isGameOver)
         {
             GameOverHelper();
-        }
+        }*/
 
         //if i click on any bomb then call bomb on that piece. use mouse position raycast to get the piece
         /*if (Input.GetMouseButtonDown(0) && canControl)
@@ -299,28 +301,7 @@ public class GridManager : MonoBehaviour
 
     public void GameOverLogic()
     {
-        /*//if currentTime is less than or equal to 0, then call a function name GameOver()
-        if (currentTime <= 0)
-        {
-            //GameOver();
-            StartCoroutine(GameOver());
-            Debug.Log("Game Over! Time is up.");
-            // You can call a GameOver function here if needed
-        }
-
-        if (currentMoves <= 0)
-        {
-            StartCoroutine(GameOver());
-            Debug.Log("Game Over! No moves left.");
-            // You can call a GameOver function here if needed
-        }
-
-        if (currentTarget1Count <= 0 && currentTarget2Count <= 0)
-        {
-            // You can call a function to handle level completion here
-            Debug.Log("Level Completed!");
-            StartCoroutine(GameOver());
-        }*/
+        
 
 
         //optimised version of above code   
@@ -336,6 +317,21 @@ public class GridManager : MonoBehaviour
             Debug.Log("Level Completed!");
             isGameOver = true;
         }
+
+        if (isGameOver)
+        {
+            GameOverHelper();
+            StartCoroutine(TurnOfisGameOver());
+            
+        }
+    }
+
+    //wait for few sec befor isGameOver = false
+    private IEnumerator TurnOfisGameOver()
+    {
+        //wait for 1 sec
+        yield return new WaitForSeconds(0.2f);
+        isGameOver = false;
     }
 
 
@@ -476,6 +472,7 @@ public class GridManager : MonoBehaviour
             Shine1.SetActive(false);
             Shine2.SetActive(true);
             //AudioManager.Instance.PlaySFX("GameLose");
+            PlayerDataManager.Instance.RemoveEnergy(1);
         }
 
         //gameOverText will be = level + currentLevelIndex + 1
