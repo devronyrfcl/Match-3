@@ -31,6 +31,7 @@ public class GridManager : MonoBehaviour
 
 
     public int currentLevelIndex = 0;
+    public int levelIndexFromJson;
     private const string SelectedLevelIndexKey = "SelectedLevelIndex";
 
 
@@ -160,6 +161,9 @@ public class GridManager : MonoBehaviour
         currentMoves = levelData.movesCount;
         currentTarget1 = levelData.target1Count;
         currentTarget2 = levelData.target2Count;
+
+        //get levelIndexFromJson
+
 
 
 
@@ -616,6 +620,9 @@ public class GridManager : MonoBehaviour
         PlayerDataManager.Instance.SendXP(levelId, xp);
 
         PlayerDataManager.Instance.SetAllData(currentLevelIndex + 2, 0, 0, 0);// Set the next level data to 0 stars and 0 XP, and unlock it
+
+
+
         PlayerDataManager.Instance.SetCurrentLevel(currentLevelIndex + 2);
 
         //PlayerDataManager.Instance.SetLevelLocked(currentLevelIndex + 2, 0); // Unlock the next level (currentLevelIndex + 2 because levels are 1-based in PlayerDataManager)
