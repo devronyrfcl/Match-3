@@ -924,7 +924,12 @@ public class Piece : MonoBehaviour
 
     void Bomb(int x, int y)
     {
+        
+        vibrateDevice(); // Vibrate the device when bomb is triggered
+        
         // Clear surrounding pieces in a 3x3 area
+        
+        
         for (int i = -1; i <= 1; i++)
         {
             for (int j = -1; j <= 1; j++)
@@ -1210,6 +1215,14 @@ public class Piece : MonoBehaviour
     {
         yield return new WaitForSeconds(0.1f); // Small delay to ensure the swap has completed
         preventSwipeBack = false; // Allow swipe back again
+    }
+
+
+    void vibrateDevice(float duration = 0.1f)
+    {
+        #if UNITY_IOS || UNITY_ANDROID
+        Handheld.Vibrate();
+        #endif
     }
 
 }

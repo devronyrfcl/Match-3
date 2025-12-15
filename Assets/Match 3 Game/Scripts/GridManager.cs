@@ -314,12 +314,14 @@ public class GridManager : MonoBehaviour
             // Game over condition: Time or moves are up, but targets are not met
             isGameOver = true;
             Debug.Log("Game Over! Time is up or no moves left.");
+            
         }
         else if (currentTarget1Count <= 0 && currentTarget2Count <= 0)
         {
             // Level completed condition: All targets met
             Debug.Log("Level Completed!");
             isGameOver = true;
+            PlayerDataManager.Instance.SetCurrentLevel(currentLevelIndex + 2);
         }
 
         if (isGameOver)
@@ -619,11 +621,12 @@ public class GridManager : MonoBehaviour
         PlayerDataManager.Instance.SetLevelStars(levelId, stars, xp);
         PlayerDataManager.Instance.SendXP(levelId, xp);
 
-        PlayerDataManager.Instance.SetAllData(currentLevelIndex + 2, 0, 0, 0);// Set the next level data to 0 stars and 0 XP, and unlock it
+        //PlayerDataManager.Instance.SetAllData(currentLevelIndex + 2, 0, 0, 0);// Set the next level data to 0 stars and 0 XP, and unlock it
 
+        PlayerDataManager.Instance.SetLevelLocked(currentLevelIndex + 2, 0); // Unlock the next level (currentLevelIndex + 2 because levels are 1-based in PlayerDataManager)
+        PlayerDataManager.Instance.SetLevelStars(currentLevelIndex + 2, 0, 0); // Set the next level stars and XP to 0
 
-
-        PlayerDataManager.Instance.SetCurrentLevel(currentLevelIndex + 2);
+        //PlayerDataManager.Instance.SetCurrentLevel(currentLevelIndex + 2);
 
         //PlayerDataManager.Instance.SetLevelLocked(currentLevelIndex + 2, 0); // Unlock the next level (currentLevelIndex + 2 because levels are 1-based in PlayerDataManager)
 
