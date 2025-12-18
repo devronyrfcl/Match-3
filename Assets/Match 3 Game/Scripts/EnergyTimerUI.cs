@@ -57,4 +57,16 @@ public class EnergyTimerUI : MonoBehaviour
             yield return new WaitForSeconds(1f); // Update every second
         }
     }
+
+
+    public void SkipEnergyGenerateTime()
+    {
+        // Call the method to watch ad and reward energy
+        PlayerDataManager.Instance.SkipEnergyGenerateTime();
+
+
+    }
+
+
+
 }

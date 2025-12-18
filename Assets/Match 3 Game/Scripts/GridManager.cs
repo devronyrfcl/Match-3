@@ -69,6 +69,9 @@ public class GridManager : MonoBehaviour
     public float holdDuration = 0.5f;  // Hold time before scaling back
     private Sequence currentSequence; // Track current tween sequence
 
+    public Button RestartButton;
+    public Button NextLevelButton;
+
 
     /*private int bombAmount;
     private int colorAmount;
@@ -197,13 +200,13 @@ public class GridManager : MonoBehaviour
 
         LoadPlayerAbilities();
 
-        if(levelData.isMovesLevel)
+        if (levelData.isMovesLevel)
         {
             moveTargetUI.SetActive(true);
             timeTargetUI.SetActive(false);
             currentTime = Mathf.Infinity; // Set time to infinity for moves-based levels
         }
-        else if(levelData.isTimedLevel)
+        else if (levelData.isTimedLevel)
         {
             moveTargetUI.SetActive(false);
             timeTargetUI.SetActive(true);
@@ -215,7 +218,8 @@ public class GridManager : MonoBehaviour
             timeTargetUI.SetActive(true);
         }
 
-
+        NextLevelButton.gameObject.SetActive(false); // Hide Next Level button initially
+        RestartButton.gameObject.SetActive(false);
 
     }
 
@@ -249,7 +253,7 @@ public class GridManager : MonoBehaviour
         if (target2CountText != null)
             target2CountText.text = currentTarget2Count.ToString();
 
-        
+
 
 
     }
@@ -301,11 +305,43 @@ public class GridManager : MonoBehaviour
 
     }
 
-    
+
+    public void GoToNextLevel()
+    {
+        // Unlock the next level
+        PlayerDataManager.Instance.SetAllData(currentLevelIndex + 2, 0, 0, 0);
+
+        // Set the current level to the next level
+        //PlayerDataManager.Instance.SetCurrentLevel(currentLevelIndex + 2);
+
+        // Get the previous current level from PlayerData
+        PlayerData playerData = PlayerDataManager.Instance.playerData;
+        int previousCurrentLevel = playerData.CurrentLevelId;
+
+        // Only update current level if the new level is higher
+        if (currentLevelIndex + 2 >= previousCurrentLevel)
+        {
+            PlayerDataManager.Instance.SetCurrentLevel(currentLevelIndex + 2);
+        }
+
+        // Update the selected level index in PlayerPrefs
+        int nextLevelIndex = currentLevelIndex + 1;
+        PlayerPrefs.SetInt(SelectedLevelIndexKey, nextLevelIndex);
+        PlayerPrefs.Save(); // Save PlayerPrefs
+
+        // Reload the current scene to load the new level
+        SceneManager.LoadScene(SceneManager.GetActiveScene().name);
+    }
+
+    public void RestartCurrentLevel()
+    {
+        // Reload the current scene to restart the level
+        SceneManager.LoadScene(SceneManager.GetActiveScene().name);
+    }
 
     public void GameOverLogic()
     {
-        
+
 
 
         //optimised version of above code   
@@ -314,21 +350,19 @@ public class GridManager : MonoBehaviour
             // Game over condition: Time or moves are up, but targets are not met
             isGameOver = true;
             Debug.Log("Game Over! Time is up or no moves left.");
-            
         }
         else if (currentTarget1Count <= 0 && currentTarget2Count <= 0)
         {
             // Level completed condition: All targets met
             Debug.Log("Level Completed!");
             isGameOver = true;
-            PlayerDataManager.Instance.SetCurrentLevel(currentLevelIndex + 2);
         }
 
         if (isGameOver)
         {
             GameOverHelper();
             StartCoroutine(TurnOfisGameOver());
-            
+
         }
     }
 
@@ -346,7 +380,7 @@ public class GridManager : MonoBehaviour
     {
         UpdateTimeText();
 
-        
+
 
         //pieces objects will be the spawned pieces in the game
         pieces = new Piece[levelData.gridWidth * levelData.gridHeight];
@@ -389,7 +423,7 @@ public class GridManager : MonoBehaviour
         // Recreate the grid with the new LevelData
         CreateGrid();
 
-        
+
 
     }
 
@@ -470,22 +504,24 @@ public class GridManager : MonoBehaviour
             gameOverTitleText.text = "Congratulations!";
             Shine1.SetActive(true);
             Shine2.SetActive(false);
-            //AudioManager.Instance.PlaySFX("GameWin");
+            AudioManager.Instance.PlaySFX("GameWin");
+            NextLevelButton.gameObject.SetActive(true);
         }
         else
         {
             gameOverTitleText.text = "Game Over!";
             Shine1.SetActive(false);
             Shine2.SetActive(true);
-            //AudioManager.Instance.PlaySFX("GameLose");
+            AudioManager.Instance.PlaySFX("GameLose");
             PlayerDataManager.Instance.RemoveEnergy(1);
+            RestartButton.gameObject.SetActive(true);
         }
 
         //gameOverText will be = level + currentLevelIndex + 1
         gameOverText.text = "Level :" + (currentLevelIndex + 1);
         level_Count.text = (currentLevelIndex + 1).ToString(); // Update level count text
-        //gameOverTitleText will be = Contratulations if currentTarget1Count and currentTarget2Count are 0
-        
+                                                               //gameOverTitleText will be = Contratulations if currentTarget1Count and currentTarget2Count are 0
+
         // Handle game over logic here
         // For example, show a game over screen or reset the game
         Debug.Log("Game Over! You can implement your game over logic here.");
@@ -501,10 +537,10 @@ public class GridManager : MonoBehaviour
         //delay CalculateStarAndShow() for 0.5 seconds
         Invoke("CalculateStarAndShow", 0.5f);
 
-        
+
 
         SaveNewAbilityCounts(Ability_bombCurrentAmount, Ability_colorBombCurrentAmount, Ability_extraMovesCurrentAmount);
-        
+
     }
 
     public void CalculateStarAndShow()
@@ -529,11 +565,12 @@ public class GridManager : MonoBehaviour
                 //XP = Mathf.FloorToInt((currentMoves / (float)levelData.movesCount) * 100) + Mathf.FloorToInt((currentTime / (float)levelData.timeLimit) * 100);
                 //if levelData.isTimedLevel is true then XP will be left time x 10
                 XP = Mathf.FloorToInt((currentTime / (float)levelData.timeLimit) * 10);
-                if(levelData.isTimedLevel)
+                if (levelData.isTimedLevel)
                 {
                     XP = 20;//Mathf.FloorToInt((currentTime / (float)levelData.timeLimit) * 10);
 
-                } else if(levelData.isMovesLevel)
+                }
+                else if (levelData.isMovesLevel)
                 {
                     XP = 20;//Mathf.FloorToInt((currentMoves / (float)levelData.timeLimit) * 10);
                 }
@@ -610,7 +647,7 @@ public class GridManager : MonoBehaviour
 
         //send star and xp data to PlayerDataManager
         SendStarXpDataToPlayerDataManager(currentLevelIndex + 1, 0, stars, XP);
-        
+
         //PlayerDataManager.Instance.SendLeaderboardScore(stars, XP); // Send the score to the leaderboard
 
     }
@@ -621,24 +658,31 @@ public class GridManager : MonoBehaviour
         PlayerDataManager.Instance.SetLevelStars(levelId, stars, xp);
         PlayerDataManager.Instance.SendXP(levelId, xp);
 
-        //PlayerDataManager.Instance.SetAllData(currentLevelIndex + 2, 0, 0, 0);// Set the next level data to 0 stars and 0 XP, and unlock it
+        PlayerDataManager.Instance.SetAllData(currentLevelIndex + 2, 0, 0, 0);// Set the next level data to 0 stars and 0 XP, and unlock it
 
-        PlayerDataManager.Instance.SetLevelLocked(currentLevelIndex + 2, 0); // Unlock the next level (currentLevelIndex + 2 because levels are 1-based in PlayerDataManager)
-        PlayerDataManager.Instance.SetLevelStars(currentLevelIndex + 2, 0, 0); // Set the next level stars and XP to 0
 
-        //PlayerDataManager.Instance.SetCurrentLevel(currentLevelIndex + 2);
 
+        //PlayerDataManager.Instance.SetCurrentLevel(currentLevelIndex + 2);// Set the current level to the next level
+        // Get the previous current level from PlayerData
+        PlayerData playerData = PlayerDataManager.Instance.playerData;
+        int previousCurrentLevel = playerData.CurrentLevelId;
+
+        // Only update current level if the new level is higher
+        if (currentLevelIndex + 2 >= previousCurrentLevel)
+        {
+            PlayerDataManager.Instance.SetCurrentLevel(currentLevelIndex + 2);
+        }
         //PlayerDataManager.Instance.SetLevelLocked(currentLevelIndex + 2, 0); // Unlock the next level (currentLevelIndex + 2 because levels are 1-based in PlayerDataManager)
 
 
         PlayerDataManager.Instance.SavePlayerData(); // Save the updated player data to the JSON file
 
-        
+
 
     }
-    
 
-    
+
+
 
     public void BackToMainMenu()
     {
@@ -646,7 +690,7 @@ public class GridManager : MonoBehaviour
         StartCoroutine(EmojiLoading_2());
 
         PlayerDataManager.Instance.GetCurrentLevel(); // Initialize current level after creating new player
-        
+
     }
 
 
@@ -659,14 +703,14 @@ public class GridManager : MonoBehaviour
         yield return emojiRect.DOAnchorPosY(2500f, 1f).SetEase(Ease.InOutQuad).WaitForCompletion();
         canControl = true; // Re-enable player controls after loading
 
-        
+
     }
 
     IEnumerator EmojiLoading_2()
     {
         RectTransform emojiRect = EmojisImage.GetComponent<RectTransform>();
         // Move EmojisImage into view (Y: 2500 to -1250)
-        
+
         yield return emojiRect.DOAnchorPosY(-1250f, 1f).SetEase(Ease.InOutQuad).WaitForCompletion();
 
 
@@ -677,6 +721,9 @@ public class GridManager : MonoBehaviour
     {
         StartCoroutine(EmojiLoading_2());
         StartCoroutine(ExitScene());
+        //vibe or energy will lose 1 on exit to main menu
+        PlayerDataManager.Instance.RemoveEnergy(1);
+
     }
 
     IEnumerator ExitScene()
@@ -758,7 +805,7 @@ public class GridManager : MonoBehaviour
 
     private IEnumerator RefillGridCoroutine()
     {
-        
+
 
         yield return new WaitForSeconds(0.2f);
 
@@ -995,11 +1042,58 @@ public class GridManager : MonoBehaviour
         //Diduct extra moves ability count by 1
         DeductAbility_ExtraMoves(1);
 
-        
+
 
 
     }
 
+
+    //resuffele grid function
+
+    public void OnReshuffleButtonClick()
+    {
+        // Reshuffle the grid pieces
+        List<Piece> allPieces = new List<Piece>();
+        // Collect all pieces from the grid
+        for (int x = 0; x < levelData.gridWidth; x++)
+        {
+            for (int y = 0; y < levelData.gridHeight; y++)
+            {
+                if (grid[x, y] != null)
+                {
+                    Piece pieceScript = grid[x, y].GetComponent<Piece>();
+                    allPieces.Add(pieceScript);
+                }
+            }
+        }
+        // Shuffle the list of pieces
+        for (int i = 0; i < allPieces.Count; i++)
+        {
+            Piece temp = allPieces[i];
+            int randomIndex = Random.Range(0, allPieces.Count);
+            allPieces[i] = allPieces[randomIndex];
+            allPieces[randomIndex] = temp;
+        }
+        // Reassign pieces back to the grid
+        int index = 0;
+        for (int x = 0; x < levelData.gridWidth; x++)
+        {
+            for (int y = 0; y < levelData.gridHeight; y++)
+            {
+                if (grid[x, y] != null)
+                {
+                    Piece pieceScript = allPieces[index];
+                    pieceScript.SetPosition(x, y);
+                    grid[x, y] = pieceScript.gameObject;
+                    index++;
+                }
+            }
+        }
+        // Deduct reshuffle ability count by 1
+        //DeductAbility_ColorBomb(1);
+        // Update UI after reshuffle
+        UpdateUI();
+    }
 
 
     #endregion
@@ -1020,7 +1114,7 @@ public class GridManager : MonoBehaviour
         timeText.text = string.Format("{0:00}:{1:00}", min, sec);
     }
 
-    
+
 
     public void DeductTarget1(int amount = 1)
     {
@@ -1028,7 +1122,7 @@ public class GridManager : MonoBehaviour
         if (currentTarget1 < 0)
         {
             currentTarget1 = 0;
-            
+
         }
         UpdateUI();
     }
@@ -1039,7 +1133,7 @@ public class GridManager : MonoBehaviour
         if (currentTarget2 < 0)
         {
             currentTarget2 = 0;
-            
+
         }
         UpdateUI();
     }
@@ -1050,12 +1144,12 @@ public class GridManager : MonoBehaviour
         if (currentMoves < 0)
         {
             currentMoves = 0;
-            
+
         }
         UpdateUI();
     }
 
-    
+
 
     private void OnTimeUp()
     {

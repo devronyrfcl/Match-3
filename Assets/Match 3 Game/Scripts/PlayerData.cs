@@ -22,7 +22,7 @@ public class PlayerData
 
     // ✅ NEW FIELDS
     public long LastEnergyUpdateTime; // Unix timestamp for energy regeneration
-    public int MaxEnergy = 10; // Maximum energy cap
+    public int MaxEnergy = 5; // Maximum energy cap
 }
 
 [Serializable]
