@@ -1152,7 +1152,7 @@ public class GridManager : MonoBehaviour
         //Shuffle ability logic
         if (Ability_shuffleCurrentAmount > 0)
         {
-            DeductAbility_Shuffle(0);
+            DeductAbility_Shuffle(1);
         }
         else
         {
