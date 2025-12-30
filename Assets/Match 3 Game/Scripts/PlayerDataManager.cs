@@ -156,6 +156,7 @@ public class PlayerDataManager : MonoBehaviour
             PlayerBombAbilityCount = 20,
             PlayerColorBombAbilityCount = 20,
             PlayerExtraMoveAbilityCount = 20,
+            PlayerShuffleAbilityCount = 3,
             CurrentLevelId = 1,
             EnergyCount = 5,
             Levels = new List<LevelInfo>()
@@ -372,6 +373,12 @@ public class PlayerDataManager : MonoBehaviour
         playerData.PlayerExtraMoveAbilityCount = count;
     }
 
+    //set shuffle ability count
+    public void SetPlayerShuffleAbilityCount(int count)
+    {
+        playerData.PlayerShuffleAbilityCount = count;
+    }
+
     public void SetAllData(int levelId, int lockedValue, int stars, int xp)
     {
         SetLevelLocked(levelId, lockedValue);
@@ -411,6 +418,13 @@ public class PlayerDataManager : MonoBehaviour
         //Debug.Log($"Added {count} Extra Moves. Total: {playerData.PlayerExtraMoveAbilityCount}");
     }
 
+    //add shuffle ability
+    public void AddShuffleAbility(int count)
+    {
+        playerData.PlayerShuffleAbilityCount += count;
+        //Debug.Log($"Added {count} Shuffles. Total: {playerData.PlayerShuffleAbilityCount}");
+    }
+
 
     #endregion
 
@@ -444,7 +458,7 @@ public class PlayerDataManager : MonoBehaviour
 
         PlayFabPlayerID = result.PlayFabId;
 
-        Invoke("CheckAndSetPlayerName", 2f);
+        //Invoke("CheckAndSetPlayerName", 2f);
         isLaunched = true;
         isOnline = true;
 
@@ -555,6 +569,7 @@ public class PlayerDataManager : MonoBehaviour
             { "PlayerBombAbilityCount", playerData.PlayerBombAbilityCount.ToString() },
             { "PlayerColorBombAbilityCount", playerData.PlayerColorBombAbilityCount.ToString() },
             { "PlayerExtraMoveAbilityCount", playerData.PlayerExtraMoveAbilityCount.ToString() },
+            { "PlayerShuffleAbilityCount", playerData.PlayerShuffleAbilityCount.ToString() },
             { "PlayerEnergyCount", playerData.EnergyCount.ToString() },
             { "Levels", levelsJson }
         }
@@ -773,6 +788,8 @@ public class PlayerDataManager : MonoBehaviour
         playerData.PlayerExtraMoveAbilityCount = extraMoveCount;
         Debug.Log($"Extra Move Ability Count updated: {extraMoveCount}");
     }
+
+
 
     public void SetEnergyLevel(int energyCount)
     {

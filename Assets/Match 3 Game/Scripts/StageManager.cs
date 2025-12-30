@@ -26,6 +26,7 @@ public class StageManager : MonoBehaviour
     public TMP_Text bombAbilityCount;
     public TMP_Text colorBombAbilityCount;
     public TMP_Text extraMoveAbilityCount;
+    public TMP_Text ShuffleAbilityCount;
 
     public GameObject namePanel; // Reference to the name panel GameObject
 
@@ -363,6 +364,7 @@ public class StageManager : MonoBehaviour
         bombAbilityCount.text = playerData.PlayerBombAbilityCount.ToString();
         colorBombAbilityCount.text = playerData.PlayerColorBombAbilityCount.ToString();
         extraMoveAbilityCount.text = playerData.PlayerExtraMoveAbilityCount.ToString();
+        ShuffleAbilityCount.text = playerData.PlayerShuffleAbilityCount.ToString();
     }
 
 

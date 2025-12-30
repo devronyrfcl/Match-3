@@ -57,12 +57,14 @@ public class GridManager : MonoBehaviour
     public TextMeshProUGUI Ability_bombCountText;
     public TextMeshProUGUI Ability_ColorBombCountText;
     public TextMeshProUGUI Ability_extraMovesCountText;
+    public TextMeshProUGUI Ability_shuffleCountText;
     /*public int Ability_bombStartAmount;
     public int Ability_colorBombStartAmount;
     public int Ability_extraMovesStartAmount;*/
     public int Ability_bombCurrentAmount;
     public int Ability_colorBombCurrentAmount;
     public int Ability_extraMovesCurrentAmount;
+    public int Ability_shuffleCurrentAmount;
     public SpriteData[] sprites; // Each sprite has its own target scale
     public Image targetImage; // Target Image component
     public float scaleDuration = 0.3f; // How fast it scales
@@ -247,6 +249,7 @@ public class GridManager : MonoBehaviour
         Ability_bombCountText.text = Ability_bombCurrentAmount.ToString();
         Ability_ColorBombCountText.text = Ability_colorBombCurrentAmount.ToString();
         Ability_extraMovesCountText.text = Ability_extraMovesCurrentAmount.ToString();
+        Ability_shuffleCountText.text = Ability_shuffleCurrentAmount.ToString();
 
         if (target1CountText != null)
             target1CountText.text = currentTarget1Count.ToString();
@@ -466,6 +469,7 @@ public class GridManager : MonoBehaviour
             Ability_bombCurrentAmount = playerData.PlayerBombAbilityCount;
             Ability_colorBombCurrentAmount = playerData.PlayerColorBombAbilityCount;
             Ability_extraMovesCurrentAmount = playerData.PlayerExtraMoveAbilityCount;
+            Ability_shuffleCurrentAmount = playerData.PlayerShuffleAbilityCount;
 
             UpdateUI();
             Debug.Log("Player abilities loaded (decrypted).");
@@ -478,11 +482,12 @@ public class GridManager : MonoBehaviour
 
 
     // Method to save new ability counts and update the UI. just change the values of ability counts.
-    void SaveNewAbilityCounts(int bombCount, int colorBombCount, int extraMovesCount)
+    void SaveNewAbilityCounts(int bombCount, int colorBombCount, int extraMovesCount, int shuffleCount)
     {
         PlayerDataManager.Instance.SetPlayerBombAbilityCount(bombCount);
         PlayerDataManager.Instance.SetPlayerColorBombAbilityCount(colorBombCount);
         PlayerDataManager.Instance.SetPlayerExtraMoveAbilityCount(extraMovesCount);
+        PlayerDataManager.Instance.SetPlayerShuffleAbilityCount(shuffleCount);
         PlayerDataManager.Instance.SavePlayerData(); // Save the updated player data to the JSON file
 
     }
@@ -539,7 +544,7 @@ public class GridManager : MonoBehaviour
 
 
 
-        SaveNewAbilityCounts(Ability_bombCurrentAmount, Ability_colorBombCurrentAmount, Ability_extraMovesCurrentAmount);
+        SaveNewAbilityCounts(Ability_bombCurrentAmount, Ability_colorBombCurrentAmount, Ability_extraMovesCurrentAmount, Ability_shuffleCurrentAmount);
 
     }
 
@@ -1052,6 +1057,10 @@ public class GridManager : MonoBehaviour
 
     public void OnReshuffleButtonClick()
     {
+        
+        
+        
+        
         // Reshuffle the grid pieces
         List<Piece> allPieces = new List<Piece>();
         // Collect all pieces from the grid
@@ -1094,6 +1103,8 @@ public class GridManager : MonoBehaviour
         // Update UI after reshuffle
         UpdateUI();
     }
+
+
 
 
     #endregion

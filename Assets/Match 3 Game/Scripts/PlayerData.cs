@@ -13,6 +13,7 @@ public class PlayerData
     public int PlayerBombAbilityCount;
     public int PlayerColorBombAbilityCount;
     public int PlayerExtraMoveAbilityCount;
+    public int PlayerShuffleAbilityCount;
 
     public int CurrentLevelId; // 🔥 NEW universal current level tracker
 

@@ -38,6 +38,10 @@ public class Spin : MonoBehaviour
     public TextMeshProUGUI colorBombText;
     public GameObject extraMoveImage;
     public TextMeshProUGUI extraMoveText;
+    public GameObject vibeImage;
+    public TextMeshProUGUI vibeText;
+    public GameObject ShuffleImage;
+    public TextMeshProUGUI ShuffleText;
 
     public string rewardedAdUnitId = "ca-app-pub-3940256099942544/5224354917"; // test ad unit id
 
@@ -359,13 +363,21 @@ public class Spin : MonoBehaviour
 
     void Result_1()
     {
-        Debug.Log("Won Color Bomb x2!");
+        Debug.Log("Won Color Bomb x1!");
         colorBombImage.SetActive(true);
-        colorBombText.text = "2";
-        PlayerDataManager.Instance.AddColorBombAbility(2);
+        colorBombText.text = "1";
+        PlayerDataManager.Instance.AddColorBombAbility(1);
     }
 
     void Result_2()
+    {
+        Debug.Log("Won Moves x1!");
+        extraMoveImage.SetActive(true);
+        extraMoveText.text = "1";
+        PlayerDataManager.Instance.AddExtraMoveAbility(1);
+    }
+
+    void Result_3()
     {
         Debug.Log("Won Moves x2!");
         extraMoveImage.SetActive(true);
@@ -373,55 +385,60 @@ public class Spin : MonoBehaviour
         PlayerDataManager.Instance.AddExtraMoveAbility(2);
     }
 
-    void Result_3()
-    {
-        Debug.Log("Won Bomb x1");
-        bombImage.SetActive(true);
-        bombText.text = "1";
-        PlayerDataManager.Instance.AddBombAbility(1);
-    }
-
     void Result_4()
     {
-        Debug.Log("Won Bomb and Color Bomb");
+        /*Debug.Log("Won Bomb and Color Bomb");
         bombImage.SetActive(true);
         bombText.text = "2";
         colorBombImage.SetActive(true);
         colorBombText.text = "2";
         PlayerDataManager.Instance.AddBombAbility(2);
-        PlayerDataManager.Instance.AddColorBombAbility(2);
-    }
-
-    void Result_5()
-    {
-        Debug.Log("Won Extra Move x5");
-        extraMoveImage.SetActive(true);
-        extraMoveText.text = "5";
-        PlayerDataManager.Instance.AddExtraMoveAbility(5);
-    }
-
-    void Result_6()
-    {
-        Debug.Log("Won Color Bomb x1");
-        colorBombImage.SetActive(true);
-        colorBombText.text = "1";
-        PlayerDataManager.Instance.AddColorBombAbility(1);
-    }
-
-    void Result_7()
-    {
+        PlayerDataManager.Instance.AddColorBombAbility(2);*/
         Debug.Log("Won Bomb x1");
         bombImage.SetActive(true);
         bombText.text = "1";
         PlayerDataManager.Instance.AddBombAbility(1);
     }
 
+    void Result_5()
+    {
+        Debug.Log("Won Color Bomb x1!");
+        colorBombImage.SetActive(true);
+        colorBombText.text = "1";
+        PlayerDataManager.Instance.AddColorBombAbility(1);
+    }
+
+    void Result_6()
+    {
+        /*Debug.Log("Won Color Bomb x1");
+        colorBombImage.SetActive(true);
+        colorBombText.text = "1";
+        PlayerDataManager.Instance.AddColorBombAbility(1);*/
+        Debug.Log("Won Vibe x1");
+        vibeImage.SetActive(true);
+        vibeText.text = "1";
+        PlayerDataManager.Instance.AddEnergy(1);
+    }
+
+    void Result_7()
+    {
+        Debug.Log("Won Moves x1!");
+        extraMoveImage.SetActive(true);
+        extraMoveText.text = "1";
+        PlayerDataManager.Instance.AddExtraMoveAbility(1);
+    }
+
     void Result_8()
     {
-        Debug.Log("Won Bomb x2!");
+        /*Debug.Log("Won Bomb x2!");
         bombImage.SetActive(true);
         bombText.text = "2";
-        PlayerDataManager.Instance.AddBombAbility(2);
+        PlayerDataManager.Instance.AddBombAbility(2);*/
+        Debug.Log("Won Shuffle x1");
+        ShuffleImage.SetActive(true);
+        ShuffleText.text = "1";
+        PlayerDataManager.Instance.AddShuffleAbility(1);
+
     }
 
     void ResetRewardUI()
