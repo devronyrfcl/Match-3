@@ -14,7 +14,7 @@ MonoBehaviour:
   m_EditorClassIdentifier: 
   gridWidth: 6
   gridHeight: 8
-  GridSeed: 20
+  GridSeed: 21
   SpecialPiecesAmount: 2
   movesCount: 100
   target1Piece: 5

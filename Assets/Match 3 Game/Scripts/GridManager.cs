@@ -43,6 +43,9 @@ public class GridManager : MonoBehaviour
     public bool canControl = true;
     public bool isGameOver = false;
 
+    private bool isRefilling = false; // Track if grid is currently refilling
+    private bool hasPendingMatches = false; // Track if matches were found during refill
+
 
 
 
@@ -805,16 +808,22 @@ public class GridManager : MonoBehaviour
 
     public void UpdateGrid()
     {
-        StartCoroutine(RefillGridCoroutine());
+        if (!isRefilling)
+        {
+            canControl = false; // Disable control at the start
+            StartCoroutine(RefillGridCoroutine());
+        }
     }
+
 
     private IEnumerator RefillGridCoroutine()
     {
-
+        isRefilling = true;
+        canControl = false;
 
         yield return new WaitForSeconds(0.2f);
 
-        // pieces fall down to fill empty spaces
+        // Pieces fall down to fill empty spaces
         for (int x = 0; x < levelData.gridWidth; x++)
         {
             int fallDelayIndex = 0;
@@ -872,7 +881,7 @@ public class GridManager : MonoBehaviour
                     int randomIndex = Random.Range(0, piecePrefabs.Length);
                     GameObject newPiece = Instantiate(
                         piecePrefabs[randomIndex],
-                        new Vector2(x, levelData.gridHeight + 1f), // Spawn above grid
+                        new Vector2(x, levelData.gridHeight + 1f),
                         Quaternion.identity
                     );
                     Piece pieceScript = newPiece.GetComponent<Piece>();
@@ -892,7 +901,7 @@ public class GridManager : MonoBehaviour
             }
         }
 
-        // Wait for all animations to finish before re-enabling grid sticking
+        // Wait for all animations to finish
         yield return new WaitForSeconds(0.5f);
 
         // Re-enable stickToGrid for all pieces
@@ -903,25 +912,80 @@ public class GridManager : MonoBehaviour
                 if (grid[x, y] != null)
                 {
                     Piece pieceScript = grid[x, y].GetComponent<Piece>();
-                    pieceScript.stickToGrid = true;
+                    if (pieceScript != null)
+                    {
+                        pieceScript.stickToGrid = true;
+                        pieceScript.isMatched = false; // Reset match state for checking
+                    }
                 }
             }
         }
 
-        //Debug.Log("Refill complete.");
+        yield return new WaitForSeconds(0.1f);
 
-        yield return new WaitForSeconds(0.1f); // Optional delay before next refill
-        // Call FindMatches of piece after refill is complete
-        foreach (var piece in pieces)
+        // Check for matches after refill
+        hasPendingMatches = false;
+        
+        for (int x = 0; x < levelData.gridWidth; x++)
         {
-            if (piece != null)
+            for (int y = 0; y < levelData.gridHeight; y++)
             {
-                piece.FindMatches(); // Call FindMatches on each piece
+                if (grid[x, y] != null)
+                {
+                    Piece piece = grid[x, y].GetComponent<Piece>();
+                    if (piece != null && !piece.isMatched)
+                    {
+                        piece.CheckForMatchesWithoutAction();
+                    }
+                }
             }
         }
 
-        canControl = true;
+        yield return new WaitForSeconds(0.2f);
+
+        // If matches found, execute them and refill again
+        if (hasPendingMatches)
+        {
+            Debug.Log("Cascade match found! Executing...");
+            
+            // Execute all matched pieces
+            for (int x = 0; x < levelData.gridWidth; x++)
+            {
+                for (int y = 0; y < levelData.gridHeight; y++)
+                {
+                    if (grid[x, y] != null)
+                    {
+                        Piece piece = grid[x, y].GetComponent<Piece>();
+                        if (piece != null && piece.isMatched)
+                        {
+                            piece.ExecuteMatch();
+                        }
+                    }
+                }
+            }
+            
+            // Wait for destruction animations
+            yield return new WaitForSeconds(0.5f);
+            
+            // Reset and refill again
+            isRefilling = false;
+            UpdateGrid();
+        }
+        else
+        {
+            // No matches found, safe to enable control
+            isRefilling = false;
+            canControl = true;
+            Debug.Log("Grid settled - control enabled");
+        }
     }
+
+    // Add this helper method to check if any matches exist:
+    public void SetHasPendingMatches(bool value)
+    {
+        hasPendingMatches = value;
+    }
+
 
     private bool IsBlocked(int x, int y)
     {
@@ -1053,14 +1117,51 @@ public class GridManager : MonoBehaviour
     }
 
 
-    //resuffele grid function
-
     public void OnReshuffleButtonClick()
     {
         
         
+        //first loading image Y position will come to 2500.
+        StartCoroutine(ReshuffleWithEmojiLoading());
+    }
+
+    IEnumerator ReshuffleWithEmojiLoading()
+    {
+        //first loading image Y position will come to 2500.
+        RectTransform emojiRect = EmojisImage.GetComponent<RectTransform>();
+        
+        canControl = false; // Disable player controls during loading
+        // Move EmojisImage out of view (Y: 2500 to -1250
+        yield return emojiRect.DOAnchorPosY(-1250f, 1f).SetEase(Ease.InOutQuad).WaitForCompletion();
+        Reshuffle();
+        
+        waitforseconds: yield return new WaitForSeconds(0.5f);
+
+        // Move EmojisImage into view (Y: -1250 to 2500)
+        yield return emojiRect.DOAnchorPosY(2500f, 1f).SetEase(Ease.InOutQuad).WaitForCompletion();
+        canControl = true; // Re-enable player controls after loading
+        
+    }
+
+
+
+    public void Reshuffle()
+    {
         
         
+        //Shuffle ability logic
+        if (Ability_shuffleCurrentAmount > 0)
+        {
+            DeductAbility_Shuffle(0);
+        }
+        else
+        {
+            ItemWarningPanel();
+            return; // Exit if no reshuffle ability left
+        }
+        
+        AudioManager.Instance.PlaySFX("GameStart");
+
         // Reshuffle the grid pieces
         List<Piece> allPieces = new List<Piece>();
         // Collect all pieces from the grid
@@ -1243,6 +1344,18 @@ public class GridManager : MonoBehaviour
         if (Ability_extraMovesCurrentAmount < 0)
         {
             Ability_extraMovesCurrentAmount = 0;
+            ItemWarningPanel();
+        }
+        UpdateUI();
+    }
+
+    //shuffle ability methods
+    public void DeductAbility_Shuffle(int amount = 1)
+    {
+        Ability_shuffleCurrentAmount -= amount;
+        if (Ability_shuffleCurrentAmount < 0)
+        {
+            Ability_shuffleCurrentAmount = 0;
             ItemWarningPanel();
         }
         UpdateUI();

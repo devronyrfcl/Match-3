@@ -430,23 +430,21 @@ public class Piece : MonoBehaviour
     }
 
 
-    public void FindMatches()
+    public void CheckForMatchesWithoutAction()
     {
-        //Debug.Log("Finding matches for piece at (" + X + "," + Y + ") with type " + pieceType);
-
-        if (gridManager == null || gridManager.grid == null) return;
+        if (gridManager == null || gridManager.grid == null || isMatched) return;
 
         List<Piece> horizontalMatches = new List<Piece>();
         List<Piece> verticalMatches = new List<Piece>();
 
-        // 🔹 Horizontal Match Check
+        // Horizontal Match Check
         horizontalMatches.Add(this);
 
         // Check Left
         for (int i = 1; X - i >= 0; i++)
         {
             Piece next = gridManager.grid[X - i, Y]?.GetComponent<Piece>();
-            if (next != null && next.pieceType == pieceType)
+            if (next != null && next.pieceType == pieceType && !next.isMatched)
                 horizontalMatches.Add(next);
             else
                 break;
@@ -456,84 +454,20 @@ public class Piece : MonoBehaviour
         for (int i = 1; X + i < levelData.gridWidth; i++)
         {
             Piece next = gridManager.grid[X + i, Y]?.GetComponent<Piece>();
-            if (next != null && next.pieceType == pieceType)
+            if (next != null && next.pieceType == pieceType && !next.isMatched)
                 horizontalMatches.Add(next);
             else
                 break;
         }
 
-        if (horizontalMatches.Count >= 3)
-        {
-            foreach (var piece in horizontalMatches)
-            {
-                if (piece != null && !piece.isMatched)
-                {
-                    piece.isMatched = true;
-
-                    // 🔹 Special piece trigger check
-                    if (piece.IsSpecialBombPiece || piece.IsSpecialRowPiece ||
-                        piece.IsSpecialColoumnPiece || piece.IsSpecialColorPiece)
-                    {
-                        if (piece.IsSpecialBombPiece) piece.Bomb(X, Y);
-                        if (piece.IsSpecialRowPiece) piece.ClearRow(X);
-                        if (piece.IsSpecialColoumnPiece) piece.ClearColoumn(originalY);
-                        
-                    }
-
-                    MarkAsMatched(piece);
-
-                    
-                }
-            }
-            TriggerGridUpdate();
-            gridManager.DeductMove(); // Deduct a move from the UI manager
-        }
-
-        //if horizontalMatches count 4 or more , then call Bomb(int x, int y)
-        if (horizontalMatches.Count >= 4)
-        {
-            //spawn coloumn piece
-            GameObject spawnedPieceGameObject = Instantiate(RowPiece, transform.position, Quaternion.identity);
-            spawnedPieceGameObject.transform.SetParent(gridManager.transform); // Set the parent to the grid manager
-
-
-            gridManager.RegisterNewPiece(spawnedPieceGameObject, X, Y); //*/
-
-            //just call MarkAsMatched using proper logic
-
-
-        }
-
-        //if horizontalMatches count 5 or more , then call ClearRow
-        if (horizontalMatches.Count >= 5)
-        {
-            GameObject spawnedPieceGameObject = Instantiate(RowPiece, transform.position, Quaternion.identity);
-            spawnedPieceGameObject.transform.SetParent(gridManager.transform); // Set the parent to the grid manager
-
-
-            gridManager.RegisterNewPiece(spawnedPieceGameObject, X, Y);
-        }
-
-        //if horizontalMatches count 6 or more , then call ClearColour
-        if (horizontalMatches.Count >= 6 || verticalMatches.Count >= 6)
-        {
-            GameObject spawnedPieceGameObject = Instantiate(ColorPiece, transform.position, Quaternion.identity);
-            spawnedPieceGameObject.transform.SetParent(gridManager.transform); // Set the parent to the grid manager
-
-
-            gridManager.RegisterNewPiece(spawnedPieceGameObject, X, Y);
-        }
-
-
-
-        // 🔹 Vertical Match Check
+        // Vertical Match Check
         verticalMatches.Add(this);
 
         // Check Down
         for (int i = 1; Y - i >= 0; i++)
         {
             Piece next = gridManager.grid[X, Y - i]?.GetComponent<Piece>();
-            if (next != null && next.pieceType == pieceType)
+            if (next != null && next.pieceType == pieceType && !next.isMatched)
                 verticalMatches.Add(next);
             else
                 break;
@@ -543,108 +477,188 @@ public class Piece : MonoBehaviour
         for (int i = 1; Y + i < levelData.gridHeight; i++)
         {
             Piece next = gridManager.grid[X, Y + i]?.GetComponent<Piece>();
-            if (next != null && next.pieceType == pieceType)
+            if (next != null && next.pieceType == pieceType && !next.isMatched)
                 verticalMatches.Add(next);
             else
                 break;
         }
 
+        // Mark pieces as matched if 3+ found
+        if (horizontalMatches.Count >= 3)
+        {
+            foreach (var piece in horizontalMatches)
+            {
+                if (piece != null && !piece.isMatched)
+                {
+                    piece.isMatched = true;
+                    gridManager.SetHasPendingMatches(true);
+                }
+            }
+        }
+
         if (verticalMatches.Count >= 3)
         {
-            //take refernce int value of this piece coloumn and row
-            int X = this.X;
-            int Y = this.Y;
-
-
             foreach (var piece in verticalMatches)
             {
                 if (piece != null && !piece.isMatched)
                 {
                     piece.isMatched = true;
-
-                    // 🔹 Special piece trigger check
-                    if (piece.IsSpecialBombPiece || piece.IsSpecialRowPiece ||
-                        piece.IsSpecialColoumnPiece || piece.IsSpecialColorPiece)
-                    {
-                        /*if (piece.IsSpecialBombPiece) piece.Bomb(piece.X, piece.Y);
-                        if (piece.IsSpecialRowPiece) piece.ClearRow(piece.Y);
-                        if (piece.IsSpecialColoumnPiece) piece.ClearColoumn(piece.X);*/
-
-                        if (piece.IsSpecialBombPiece)
-                        {
-                            piece.Bomb(X, Y);
-                        }
-                        if (piece.IsSpecialRowPiece)
-                        {
-                            piece.ClearRow(Y);
-                            gridManager.SpawnHorizontalClear(Y);
-
-
-                        }
-                        if (piece.IsSpecialColoumnPiece)
-                        {
-                            piece.ClearColoumn(X);
-                            gridManager.SpawnVerticalClear(X);
-
-                        }
-                    }
-
-                    MarkAsMatched(piece);
-                    
+                    gridManager.SetHasPendingMatches(true);
                 }
             }
-            TriggerGridUpdate();
-            gridManager.DeductMove(); // Deduct a move from the UI manager
         }
-
-        else
-        {
-            Debug.Log("No matches found.");
-            isMatched = false; // Reset the matched state if no matches found
-            StartCoroutine(SwipeBackAfterDelay()); // Reset the other piece if already matched
-
-
-
-        }
-        //if verticalMatches count 4 or more , then call Bomb(int x, int y)
-        if (verticalMatches.Count >= 4)
-        {
-            //call MarkAsMatched_2 using proper logic
-            GameObject spawnedPieceGameObject = Instantiate(ColoumnPiece, transform.position, Quaternion.identity);
-            spawnedPieceGameObject.transform.SetParent(gridManager.transform); // Set the parent to the grid manager
-
-
-            gridManager.RegisterNewPiece(spawnedPieceGameObject, X, Y);
-
-
-        }
-
-        //if verticalMatches count 4 or more , then call ClearColoumn
-        if (verticalMatches.Count >= 5)
-        {
-            GameObject spawnedPieceGameObject = Instantiate(ColoumnPiece, transform.position, Quaternion.identity);
-            spawnedPieceGameObject.transform.SetParent(gridManager.transform); // Set the parent to the grid manager
-
-
-            gridManager.RegisterNewPiece(spawnedPieceGameObject, X, Y);
-        }
-
-        //if horizontalMatches count 6 or more , then call ClearColour
-        if (horizontalMatches.Count >= 6 || verticalMatches.Count >= 6)
-        {
-            GameObject spawnedPieceGameObject = Instantiate(ColorPiece, transform.position, Quaternion.identity);
-            spawnedPieceGameObject.transform.SetParent(gridManager.transform); // Set the parent to the grid manager
-
-
-            gridManager.RegisterNewPiece(spawnedPieceGameObject, X, Y);
-        }
-
-        
-
-        
     }
 
+    // Method 2: Actually execute the match and destroy pieces
+    public void ExecuteMatch()
+    {
+        if (!isMatched || this == null) return;
 
+        List<Piece> horizontalMatches = new List<Piece>();
+        List<Piece> verticalMatches = new List<Piece>();
+
+        // Re-check horizontal matches
+        horizontalMatches.Add(this);
+        for (int i = 1; X - i >= 0; i++)
+        {
+            Piece next = gridManager.grid[X - i, Y]?.GetComponent<Piece>();
+            if (next != null && next.pieceType == pieceType && next.isMatched)
+                horizontalMatches.Add(next);
+            else
+                break;
+        }
+        for (int i = 1; X + i < levelData.gridWidth; i++)
+        {
+            Piece next = gridManager.grid[X + i, Y]?.GetComponent<Piece>();
+            if (next != null && next.pieceType == pieceType && next.isMatched)
+                horizontalMatches.Add(next);
+            else
+                break;
+        }
+
+        // Re-check vertical matches
+        verticalMatches.Add(this);
+        for (int i = 1; Y - i >= 0; i++)
+        {
+            Piece next = gridManager.grid[X, Y - i]?.GetComponent<Piece>();
+            if (next != null && next.pieceType == pieceType && next.isMatched)
+                verticalMatches.Add(next);
+            else
+                break;
+        }
+        for (int i = 1; Y + i < levelData.gridHeight; i++)
+        {
+            Piece next = gridManager.grid[X, Y + i]?.GetComponent<Piece>();
+            if (next != null && next.pieceType == pieceType && next.isMatched)
+                verticalMatches.Add(next);
+            else
+                break;
+        }
+
+        // Determine if special piece should spawn
+        bool shouldSpawnSpecial = false;
+        GameObject specialPieceToSpawn = null;
+
+        if (horizontalMatches.Count >= 6 || verticalMatches.Count >= 6)
+        {
+            shouldSpawnSpecial = true;
+            specialPieceToSpawn = ColorPiece;
+        }
+        else if (horizontalMatches.Count >= 5)
+        {
+            shouldSpawnSpecial = true;
+            specialPieceToSpawn = RowPiece;
+        }
+        else if (verticalMatches.Count >= 5)
+        {
+            shouldSpawnSpecial = true;
+            specialPieceToSpawn = ColoumnPiece;
+        }
+        else if (horizontalMatches.Count >= 4)
+        {
+            shouldSpawnSpecial = true;
+            specialPieceToSpawn = RowPiece;
+        }
+        else if (verticalMatches.Count >= 4)
+        {
+            shouldSpawnSpecial = true;
+            specialPieceToSpawn = ColoumnPiece;
+        }
+
+        // Destroy all matched pieces
+        HashSet<Piece> allMatches = new HashSet<Piece>();
+        if (horizontalMatches.Count >= 3)
+        {
+            foreach (var p in horizontalMatches) allMatches.Add(p);
+        }
+        if (verticalMatches.Count >= 3)
+        {
+            foreach (var p in verticalMatches) allMatches.Add(p);
+        }
+
+        bool isFirstPiece = true;
+        Vector2 spawnPosition = transform.position;
+
+        foreach (var piece in allMatches)
+        {
+            if (piece != null)
+            {
+                // Spawn special piece only once, at the first piece's position
+                if (isFirstPiece && shouldSpawnSpecial)
+                {
+                    spawnPosition = piece.transform.position;
+                    isFirstPiece = false;
+                }
+
+                MarkAsMatched(piece);
+            }
+        }
+
+        // Spawn the special piece after destroying
+        if (shouldSpawnSpecial && specialPieceToSpawn != null)
+        {
+            StartCoroutine(SpawnSpecialPieceDelayed(specialPieceToSpawn, spawnPosition));
+        }
+
+        // Deduct move only once per match action
+        if (allMatches.Count >= 3)
+        {
+            gridManager.DeductMove();
+        }
+    }
+
+    // Helper coroutine to spawn special piece after destruction
+    private IEnumerator SpawnSpecialPieceDelayed(GameObject specialPrefab, Vector2 position)
+    {
+        yield return new WaitForSeconds(0.35f);
+
+        GameObject spawnedPiece = Instantiate(specialPrefab, position, Quaternion.identity);
+        spawnedPiece.transform.SetParent(gridManager.transform);
+
+        int gridX = Mathf.RoundToInt(position.x);
+        int gridY = Mathf.RoundToInt(position.y);
+
+        gridManager.RegisterNewPiece(spawnedPiece, gridX, gridY);
+    }
+
+    // Modify your existing FindMatches() to use the new system:
+    public void FindMatches()
+    {
+        if (gridManager == null || gridManager.grid == null) return;
+
+        CheckForMatchesWithoutAction();
+
+        // Wait a bit then execute if matches found
+        if (isMatched)
+        {
+            Invoke(nameof(ExecuteMatch), 0.1f);
+        }
+        else
+        {
+            // No match found, allow swipe back if needed
+            StartCoroutine(SwipeBackAfterDelay());
+        }
+    }
 
 
     void MarkAsMatched(Piece piece)
@@ -1225,4 +1239,4 @@ public class Piece : MonoBehaviour
         #endif
     }
 
-}
+}  
