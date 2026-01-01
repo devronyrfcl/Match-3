@@ -16,7 +16,7 @@ MonoBehaviour:
   gridHeight: 8
   GridSeed: 220
   SpecialPiecesAmount: 2
-  movesCount: 50
+  movesCount: 35
   target1Piece: 3
   target2Piece: 4
   target1Count: 9
