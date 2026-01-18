@@ -52,6 +52,8 @@ public class StageManager : MonoBehaviour
 
     public EnergyTimerUI energyTimerUI; // Reference to the EnergyTimerUI script
 
+    public GameObject NoInternetConnectionPanel; // Panel to show when no internet connection
+
 
 
     private PlayerData playerData;
@@ -99,6 +101,20 @@ public class StageManager : MonoBehaviour
     private void Update()
     {
         GetCurrentLevelInt();
+
+        
+    }
+
+    void CheckForInternetConnection()
+    {
+        if (PlayerDataManager.Instance.isOnline == false)
+        {
+            ActiveNoInternetPanel();
+        }
+        else
+        {
+            NoInternetConnectionPanel.SetActive(false);
+        }
     }
     private void LoadPlayerData()
     {
@@ -214,8 +230,14 @@ public class StageManager : MonoBehaviour
         // ✅ Move EmojisImage into view (Y: 2150 → -1777)
         yield return emojiRect.DOAnchorPosY(-1250f, 1f).SetEase(Ease.InOutQuad).WaitForCompletion();
 
+        CheckForInternetConnection(); // ✅ Optionally add this to immediately show panel if still offline
+
         // ✅ Wait 1 second
         yield return new WaitForSeconds(1f);
+
+        
+
+
 
 
 
@@ -271,6 +293,7 @@ public class StageManager : MonoBehaviour
     private IEnumerator SelectLevelCoroutine(LevelButtonManager clickedButton)
     {
         // Run Emoji animation first
+
         
 
         int clickedIndex = -1;
@@ -400,6 +423,7 @@ public class StageManager : MonoBehaviour
     public void RefreashData()
     {
                // Reload player data and update buttons
+        CheckForInternetConnection();
         LoadPlayerData();
         PlayerDataManager.Instance.CheckAndSetPlayerName();
         ApplyDataToButtons();
@@ -508,6 +532,8 @@ public class StageManager : MonoBehaviour
 
     public void ShowRewardedAd_Clown()
     {
+        CheckForInternetConnection();
+
         if (rewardedAd != null)
         {
             rewardedAd.Show((Reward reward) =>
@@ -587,6 +613,19 @@ public class StageManager : MonoBehaviour
             Debug.LogWarning("Rewarded ad not ready. Reloading...");
             LoadRewardedAd();
         }
+    }
+
+    public void ActiveNoInternetPanel()
+    {
+               NoInternetConnectionPanel.SetActive(true);
+    }
+
+    public void RetryConnection()
+    {
+        NoInternetConnectionPanel.SetActive(false);
+        PlayerDataManager.Instance.CheckInternetConnection();
+
+        CheckForInternetConnection(); // ✅ Optionally add this to immediately show panel if still offline
     }
 
 }

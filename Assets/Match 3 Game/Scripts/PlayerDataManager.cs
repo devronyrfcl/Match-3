@@ -995,6 +995,21 @@ public class PlayerDataManager : MonoBehaviour
     }
 
 
-
+    public void CheckInternetConnection()
+    {
+        PlayFabClientAPI.GetTitleData(
+            new GetTitleDataRequest(),
+            result =>
+            {
+                isOnline = true;
+                Debug.Log("Internet connection verified.");
+            },
+            error =>
+            {
+                isOnline = false;
+                Debug.LogWarning("No internet connection.");
+            }
+        );
+    }
 
 }
