@@ -111,6 +111,11 @@ public class GridManager : MonoBehaviour
 
     public Canvas mainCanvas;
 
+    public GameObject NoInternetConnectionPanel;
+    public GameObject NoInternetPanelInside;
+
+
+
 
 
 
@@ -225,6 +230,10 @@ public class GridManager : MonoBehaviour
 
         NextLevelButton.gameObject.SetActive(false); // Hide Next Level button initially
         RestartButton.gameObject.SetActive(false);
+
+        // Initialize No Internet Connection Panel as inactive & inside panel size 0
+        NoInternetConnectionPanel.SetActive(false);
+        NoInternetPanelInside.transform.localScale = Vector3.zero;
 
     }
 
@@ -1211,6 +1220,35 @@ public class GridManager : MonoBehaviour
     #endregion
 
     #region "Game Management"
+
+    public void CheckForInternet()
+    {
+        if (!PlayerDataManager.Instance.isOnline)
+        {
+            NoInternetConnectionPanel.SetActive(true);
+
+            //NoInternetPanelInside will do tweening
+            
+            NoInternetPanelInside.transform.DOScale(Vector3.one, 0.5f).SetEase(Ease.OutBack); // Scale to normal size
+
+        }
+        else
+        {
+            
+            NoInternetPanelInside.transform.DOScale(Vector3.one, 0.5f).SetEase(Ease.OutBack).WaitForCompletion();
+            NoInternetConnectionPanel.SetActive(false);
+        }
+    }
+    public void ActiveNoInternetConnectionPanel()
+    {
+
+        NoInternetConnectionPanel.SetActive(true);
+
+        //NoInternetPanelInside will do tweening
+
+        NoInternetPanelInside.transform.DOScale(Vector3.one, 0.5f).SetEase(Ease.OutBack); // Scale to normal size
+
+    }
 
     private void StartTimer()
     {

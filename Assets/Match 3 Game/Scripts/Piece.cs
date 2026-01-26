@@ -277,6 +277,12 @@ public class Piece : MonoBehaviour
         /*if (finalTouchPosition == Vector2.zero || !gridManager.canControl)
             return;*/
 
+        if(!PlayerDataManager.Instance.isOnline)
+        {
+            gridManager.ActiveNoInternetConnectionPanel();
+            return;
+        }
+
         if (!gridManager.canControl)
         {
             finalTouchPosition = Vector2.zero; // 🔹 discard old swipe
@@ -401,6 +407,9 @@ public class Piece : MonoBehaviour
 
     private void OnMouseDown()
     {
+        
+        
+        
         firstTouchPosition = Camera.main.ScreenToWorldPoint(Input.mousePosition);
         //Debug.Log(firstTouchPosition);
 

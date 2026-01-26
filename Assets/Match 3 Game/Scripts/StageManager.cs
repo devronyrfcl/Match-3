@@ -81,6 +81,8 @@ public class StageManager : MonoBehaviour
         Application.targetFrameRate = 60;
 
         LoadRewardedAd();
+
+        namePanel.SetActive(false); // Hide name panel initially
     }
 
     
@@ -115,6 +117,12 @@ public class StageManager : MonoBehaviour
         {
             NoInternetConnectionPanel.SetActive(false);
         }
+    }
+
+    public void CheckForInternetConnectionForUIButton()
+    {
+        PlayerDataManager.Instance.ReconnectAndSyncPlayFab();
+        SceneManager.LoadScene("MainMenu");
     }
     private void LoadPlayerData()
     {
@@ -237,6 +245,22 @@ public class StageManager : MonoBehaviour
 
         
 
+        //if no internet then active no internet panel. if found internet then check for internet connection. 
+        if (PlayerDataManager.Instance.isOnline == false)
+        {
+            ActiveNoInternetPanel();
+        }
+        else
+        {
+            NoInternetConnectionPanel.SetActive(false);
+            //CheckAndShowNamePanel();
+            FetchPlayerDataFromPlayFab();
+        }
+
+
+
+
+        
 
 
 
@@ -294,7 +318,7 @@ public class StageManager : MonoBehaviour
     {
         // Run Emoji animation first
 
-        
+        PlayerDataManager.Instance.CheckInternetConnection();
 
         int clickedIndex = -1;
 
@@ -314,6 +338,13 @@ public class StageManager : MonoBehaviour
         // Check if the level is locked
         LevelInfo levelInfo = playerData.Levels.Find(l => l.LevelID == clickedButton.levelId);
         bool isLocked = levelInfo != null && levelInfo.LevelLocked == 1;
+
+        //if no internet then active no internet panel. if found internet then just continue
+        if(!PlayerDataManager.Instance.isOnline)
+        {
+            ActiveNoInternetPanel();
+            yield break; // Exit without loading the level
+        }
 
         if (isLocked)
         {
@@ -361,7 +392,7 @@ public class StageManager : MonoBehaviour
         // You can also show a UI message or popup here
     }
 
-    public void ShowTotalXPandTotalStars()
+    /*public void ShowTotalXPandTotalStars()
     {
         if (playerData == null)
         {
@@ -388,7 +419,112 @@ public class StageManager : MonoBehaviour
         colorBombAbilityCount.text = playerData.PlayerColorBombAbilityCount.ToString();
         extraMoveAbilityCount.text = playerData.PlayerExtraMoveAbilityCount.ToString();
         ShuffleAbilityCount.text = playerData.PlayerShuffleAbilityCount.ToString();
+    }*/
+
+    // This function remains the same - it just reads from playerData
+    public void ShowTotalXPandTotalStars()
+    {
+        if (playerData == null)
+        {
+            Debug.LogError("StageManager: No player data available.");
+            return;
+        }
+        totalXP = 0;
+        totalStars = 0;
+        foreach (LevelInfo level in playerData.Levels)
+        {
+            totalXP += level.XP;
+            totalStars += level.Stars;
+        }
+        TotalXP.text = $"{totalXP}";
+        TotalStar.text = $"{totalStars}";
+        Name.text = playerData.Name;
+        CurrentEnergyText.text = PlayerDataManager.Instance.GetEnergyCount().ToString();
+        bombAbilityCount.text = playerData.PlayerBombAbilityCount.ToString();
+        colorBombAbilityCount.text = playerData.PlayerColorBombAbilityCount.ToString();
+        extraMoveAbilityCount.text = playerData.PlayerExtraMoveAbilityCount.ToString();
+        ShuffleAbilityCount.text = playerData.PlayerShuffleAbilityCount.ToString();
     }
+
+    private void FetchPlayerDataFromPlayFab()
+    {
+        if (!PlayerDataManager.Instance.isOnline)
+        {
+            Debug.Log("Offline mode: Cannot fetch from PlayFab. Using local JSON.");
+            LoadPlayerData(); // Fallback to local JSON
+            return;
+        }
+
+        var request = new GetUserDataRequest();
+        PlayFabClientAPI.GetUserData(request, OnPlayFabDataReceived, OnPlayFabError);
+    }
+
+    private void OnPlayFabDataReceived(GetUserDataResult result)
+    {
+        Debug.Log("Player data fetched from PlayFab successfully.");
+
+        // Parse the data from PlayFab
+        if (result.Data != null)
+        {
+            // Initialize playerData if null
+            if (playerData == null)
+                playerData = new PlayerData();
+
+            // Get basic info
+            if (result.Data.ContainsKey("PlayerName"))
+                playerData.Name = result.Data["PlayerName"].Value;
+
+            if (result.Data.ContainsKey("PlayerID"))
+                playerData.PlayerID = result.Data["PlayerID"].Value;
+
+            if (result.Data.ContainsKey("CurrentLevelId"))
+                playerData.CurrentLevelId = int.Parse(result.Data["CurrentLevelId"].Value);
+
+            if (result.Data.ContainsKey("PlayerBombAbilityCount"))
+                playerData.PlayerBombAbilityCount = int.Parse(result.Data["PlayerBombAbilityCount"].Value);
+
+            if (result.Data.ContainsKey("PlayerColorBombAbilityCount"))
+                playerData.PlayerColorBombAbilityCount = int.Parse(result.Data["PlayerColorBombAbilityCount"].Value);
+
+            if (result.Data.ContainsKey("PlayerExtraMoveAbilityCount"))
+                playerData.PlayerExtraMoveAbilityCount = int.Parse(result.Data["PlayerExtraMoveAbilityCount"].Value);
+
+            if (result.Data.ContainsKey("PlayerShuffleAbilityCount"))
+                playerData.PlayerShuffleAbilityCount = int.Parse(result.Data["PlayerShuffleAbilityCount"].Value);
+
+            if (result.Data.ContainsKey("PlayerEnergyCount"))
+                playerData.EnergyCount = int.Parse(result.Data["PlayerEnergyCount"].Value);
+
+            // Parse Levels JSON
+            if (result.Data.ContainsKey("Levels"))
+            {
+                string levelsJson = result.Data["Levels"].Value;
+                LevelListWrapper wrapper = JsonUtility.FromJson<LevelListWrapper>(levelsJson);
+                playerData.Levels = wrapper.Levels;
+            }
+
+            // Now update UI with fetched data
+            ApplyDataToButtons();
+            ShowTotalXPandTotalStars();
+            CheckAndShowNamePanel();
+        }
+        else
+        {
+            Debug.LogWarning("No data found in PlayFab. Using local JSON as fallback.");
+            LoadPlayerData();
+        }
+    }
+
+    private void OnPlayFabError(PlayFabError error)
+    {
+        Debug.LogError("Error fetching PlayFab data: " + error.GenerateErrorReport());
+
+        // Fallback to local JSON
+        LoadPlayerData();
+        ApplyDataToButtons();
+        ShowTotalXPandTotalStars();
+    }
+
 
 
 
@@ -408,7 +544,9 @@ public class StageManager : MonoBehaviour
         //if player data name is null or empty then show name panel. also check 
         */
 
-        if(!PlayerDataManager.Instance.isFoundName)
+        Debug.Log("isFoundName: " + PlayerDataManager.Instance.isFoundName);
+
+        if (!PlayerDataManager.Instance.isFoundName)
         {
             namePanel.SetActive(true); // Show name panel if no name found
         }
@@ -420,7 +558,7 @@ public class StageManager : MonoBehaviour
     }
 
 
-    public void RefreashData()
+    /*public void RefreashData()
     {
                // Reload player data and update buttons
         CheckForInternetConnection();
@@ -430,6 +568,26 @@ public class StageManager : MonoBehaviour
         ShowTotalXPandTotalStars();
         CheckAndShowNamePanel(); // Ensure name panel visibility is updated
         
+    }*/
+
+    public void RefreashData()
+    {
+        CheckForInternetConnection();
+
+        // 🔥 Fetch from PlayFab if online
+        if (PlayerDataManager.Instance.isOnline)
+        {
+            FetchPlayerDataFromPlayFab();
+        }
+        else
+        {
+            LoadPlayerData();
+            ApplyDataToButtons();
+            ShowTotalXPandTotalStars();
+        }
+
+        PlayerDataManager.Instance.CheckAndSetPlayerName();
+        CheckAndShowNamePanel();
     }
 
     void GetCurrentLevelInt()
@@ -624,6 +782,9 @@ public class StageManager : MonoBehaviour
     {
         NoInternetConnectionPanel.SetActive(false);
         PlayerDataManager.Instance.CheckInternetConnection();
+
+        //login with guest
+        PlayerDataManager.Instance.LoginAsGuest();
 
         CheckForInternetConnection(); // ✅ Optionally add this to immediately show panel if still offline
     }

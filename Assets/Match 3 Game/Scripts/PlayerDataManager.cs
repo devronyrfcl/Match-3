@@ -44,6 +44,9 @@ public class PlayerDataManager : MonoBehaviour
     private const int ENERGY_REGEN_MINUTES = 59; // Time to regenerate 1 energy
     private Coroutine energyRegenCoroutine;
 
+    private Coroutine internetCheckCoroutine;
+    private const float INTERNET_CHECK_INTERVAL = 3f; // Check every 5 seconds
+
 
 
     public int TotalXP
@@ -72,6 +75,8 @@ public class PlayerDataManager : MonoBehaviour
         //CheckForOnline();
 
         stageManager = FindObjectOfType<StageManager>();
+
+        
 
     }
 
@@ -110,6 +115,9 @@ public class PlayerDataManager : MonoBehaviour
         // ✅ NEW: Start continuous energy regeneration coroutine
         energyRegenCoroutine = StartCoroutine(EnergyRegenCoroutine());
 
+        // ✅ NEW: Start internet connection check coroutine
+        internetCheckCoroutine = StartCoroutine(InternetCheckCoroutine());
+
     }
 
     private string XorEncryptDecrypt(string data, string key = "Heil")
@@ -123,7 +131,18 @@ public class PlayerDataManager : MonoBehaviour
     }
 
 
+    /// <summary>
+    /// Continuously checks internet connection every 5 seconds
+    /// </summary>
+    private IEnumerator InternetCheckCoroutine()
+    {
+        while (true)
+        {
+            yield return new WaitForSeconds(INTERNET_CHECK_INTERVAL);
 
+            CheckInternetConnection();
+        }
+    }
 
     /*public void CreateNewPlayer(string name, string playerId)
     {
@@ -430,7 +449,7 @@ public class PlayerDataManager : MonoBehaviour
 
 
     #region "PlayFab Integration"
-    void LoginAsGuest()
+    public void LoginAsGuest()
     {
         var request = new LoginWithCustomIDRequest
         {
@@ -467,6 +486,8 @@ public class PlayerDataManager : MonoBehaviour
         SendPlayerDataToPlayFab();
         CheckAndSetPlayerName();
 
+        //CheckAndShowNamePanel();
+
         //get player display name and set PlayFabPlayerName
         var getRequest = new GetAccountInfoRequest();
         PlayFabClientAPI.GetAccountInfo(getRequest, result =>
@@ -476,6 +497,9 @@ public class PlayerDataManager : MonoBehaviour
             CheckAndSetPlayerName(); // Ensure names are checked after fetching
         }, OnError);
     }
+
+
+    
 
     void OnError(PlayFabError error)
     {
@@ -587,45 +611,31 @@ public class PlayerDataManager : MonoBehaviour
     //if playerData name is not matched with PlayFabManager player name, then set PlayfabManager player name to playerData name also isFoundName = false;
     public void CheckAndSetPlayerName()
     {
-        if (isOnline)
+        // 🔥 Online-only feature - ignore offline mode entirely
+        if (!isOnline)
         {
-            // 🔥 Online mode checks
-            if (string.IsNullOrEmpty(PlayFabPlayerName))
-            {
-                isFoundName = false;
-                Debug.Log("PlayFab player name is empty → isFoundName = false");
-            }
-            else if (string.IsNullOrEmpty(playerData.Name))
-            {
-                isFoundName = false;
-                Debug.Log("Local playerData name is empty → isFoundName = false");
-            }
-            else if (PlayFabPlayerName == playerData.Name)
-            {
-                isFoundName = true;
-                Debug.Log("Names match → isFoundName = true");
-            }
-            else
-            {
-                // Names differ → prioritize PlayFab name
-                playerData.Name = PlayFabPlayerName;
-                SavePlayerData(); // Save updated name locally
-                isFoundName = true;
-                Debug.Log($"Names differed. Local name updated to PlayFab name: {PlayFabPlayerName} → isFoundName = true");
-            }
+            isFoundName = false;
+            Debug.Log("Offline mode → isFoundName = false (PlayFab name check requires online connection)");
+            return;
+        }
+
+        // 🔥 Check only PlayFab name, ignore local JSON name
+        if (string.IsNullOrEmpty(PlayFabPlayerName))
+        {
+            isFoundName = false;
+            Debug.Log("PlayFab player name is empty or null → isFoundName = false");
         }
         else
         {
-            // 🔥 Offline mode checks
-            if (string.IsNullOrEmpty(playerData.Name) || playerData.Name == "Temp")
+            isFoundName = true;
+            Debug.Log($"PlayFab name found: '{PlayFabPlayerName}' → isFoundName = true");
+
+            // Optional: Update local JSON with PlayFab name for display purposes only
+            if (playerData.Name != PlayFabPlayerName)
             {
-                isFoundName = false;
-                Debug.Log("Offline: Local player name is empty or 'Temp' → isFoundName = false");
-            }
-            else
-            {
-                isFoundName = true;
-                Debug.Log("Offline: Local player name is valid → isFoundName = true");
+                playerData.Name = PlayFabPlayerName;
+                SavePlayerData();
+                Debug.Log($"Local name updated to match PlayFab: {PlayFabPlayerName}");
             }
         }
     }
@@ -1012,4 +1022,49 @@ public class PlayerDataManager : MonoBehaviour
         );
     }
 
+    /// <summary>
+    /// Reconnects to PlayFab, syncs all data, and refreshes connection state
+    /// Call this when internet connection is restored or when user manually retries
+    /// </summary>
+    public void ReconnectAndSyncPlayFab(System.Action onSuccess = null, System.Action onFailure = null)
+    {
+        //save path will be in android/data/com.companyname.match3game/files/playerdata.json
+        savePath = Path.Combine(Application.persistentDataPath, "playerdata.json");
+
+        //savePath = Path.Combine(Application.dataPath, "playerdata.json");
+
+        LoginAsGuest();
+
+        if (File.Exists(savePath))
+        {
+            LoadPlayerData();
+
+            Debug.Log("Existing player data loaded.");
+        }
+        else
+        {
+            CreateNewPlayer("Temp", Guid.NewGuid().ToString());
+            SavePlayerData();
+
+            Debug.Log("No save found. Default player created.");
+        }
+
+        stageManager = FindObjectOfType<StageManager>();
+
+
+        SavePlayerData();
+        GetCurrentLevel(); // Initialize current level from player data
+
+        // ✅ NEW: Calculate offline energy regeneration
+        CalculateOfflineEnergyRegen();
+
+        // ✅ NEW: Start continuous energy regeneration coroutine
+        energyRegenCoroutine = StartCoroutine(EnergyRegenCoroutine());
+
+        // ✅ NEW: Start internet connection check coroutine
+        internetCheckCoroutine = StartCoroutine(InternetCheckCoroutine());
+
+    }
+
+    
 }
